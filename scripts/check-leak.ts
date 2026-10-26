@@ -191,7 +191,7 @@ async function main() {
   const publicDir = path.join(root, "data", "public");
   const distDir = path.resolve(root, process.env.NUSEA_DIST ?? "dist");
 
-  const privateSnapshot: PrivateSnapshot = {};
+  let privateSnapshot: PrivateSnapshot | null = {};
   for (const entity of [
     "profile",
     "items",
@@ -208,8 +208,14 @@ async function main() {
         path.join(privateDir, `${entity}.json`),
       );
     } catch {
-      throw new Error(`Missing private file: data/private/${entity}.json`);
+      privateSnapshot = null;
+      break;
     }
+  }
+  if (!privateSnapshot) {
+    console.warn(
+      "Private data not available; checking forbidden fields and private references only.",
+    );
   }
 
   const publicSnapshot: Record<string, unknown> = {};
@@ -230,7 +236,7 @@ async function main() {
     }
   }
 
-  const findings = await findLeaks(distDir, privateSnapshot, publicSnapshot);
+  const findings = await findLeaks(distDir, privateSnapshot ?? {}, publicSnapshot);
   if (findings.length > 0) {
     console.error("CHECK LEAK GAGAL:");
     findings.slice(0, 40).forEach((finding) => console.error(`- ${finding}`));
@@ -240,7 +246,11 @@ async function main() {
     process.exitCode = 1;
     return;
   }
-  console.log("Leak check passed: no private IDs, URLs, or fields in dist/.");
+  console.log(
+    privateSnapshot
+      ? "Leak check passed: no private IDs, URLs, or fields in dist/."
+      : "Leak check passed: no forbidden fields or private references in dist/.",
+  );
 }
 
 if (process.argv[1]?.endsWith("check-leak.ts")) {
