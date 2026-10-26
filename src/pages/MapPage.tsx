@@ -15,6 +15,7 @@ export function MapPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:py-12">
       <SectionHeading
+        as="h1"
         numbered="03"
         kicker="Peta dunia"
         title="Sebaran riset di tiap level pipeline"

@@ -17,6 +17,7 @@ export function AboutPage() {
     return (
       <div className="mx-auto max-w-3xl px-4 py-16">
         <EmptyState
+          titleAs="h1"
           title="PROFIL BELUM TERSEDIA"
           body="Pemilik lab belum menandai profil publik."
         />
@@ -33,6 +34,7 @@ export function AboutPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:py-12">
       <SectionHeading
+        as="h1"
         numbered="04"
         kicker="Profil"
         title="Tentang Nuza Lab"

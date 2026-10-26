@@ -94,6 +94,40 @@ export class DataStore {
     return { backupPath, value: parsed };
   }
 
+  async writeItemsWithHistory(nextItems: ResearchItem[]): Promise<{
+    backupPath: string | null;
+    value: ResearchItem[];
+    entries: HistoryEntry[];
+  }> {
+    const previous = await this.read("items");
+    const previousById = new Map(previous.map((item) => [item.id, item]));
+    const history = await this.read("history");
+    const now = new Date().toISOString();
+    const entries = nextItems.flatMap((item) => {
+      const before = previousById.get(item.id);
+      if (!before || before.status === item.status) return [];
+      return [
+        historySchema.parse({
+          id: `history-${Date.now()}-${randomUUID().slice(0, 8)}`,
+          createdAt: now,
+          updatedAt: now,
+          visibility: "private",
+          itemId: item.id,
+          fromStatus: before.status,
+          toStatus: item.status,
+          changedAt: now,
+          note: "Status diubah dari form admin.",
+        }),
+      ];
+    });
+
+    const write = await this.write("items", nextItems);
+    if (entries.length > 0) {
+      await this.write("history", [...history, ...entries]);
+    }
+    return { backupPath: write.backupPath, value: write.value, entries };
+  }
+
   async transitionItemStatus(
     itemId: string,
     toStatus: ResearchStatus,

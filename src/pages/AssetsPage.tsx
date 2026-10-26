@@ -41,6 +41,7 @@ export function AssetsPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:py-12">
       <SectionHeading
+        as="h1"
         numbered="02"
         kicker="Inventory"
         title="Aset penelitian yang boleh dilihat publik"

@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { execFile } from "node:child_process";
+import { readdir, readFile, stat } from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -8,6 +9,7 @@ import express, { type NextFunction, type Request, type Response } from "express
 import { createServer as createViteServer } from "vite";
 import react from "@vitejs/plugin-react";
 import { ALL_STATUSES, type ResearchStatus } from "../shared/constants";
+import { itemSchema } from "../shared/schemas";
 import { accessGuard, isLoopbackAddress } from "./server/guard";
 import {
   DataStore,
@@ -40,7 +42,7 @@ async function run(command: string, args: string[], timeout = 180_000) {
       cwd: root,
       timeout,
       maxBuffer: 12 * 1024 * 1024,
-      env: { ...process.env, CI: "1" },
+      env: { ...process.env, CI: "1", NODE_ENV: "production" },
     });
     return { ok: true as const, stdout, stderr, code: 0 };
   } catch (error) {
@@ -86,6 +88,53 @@ app.get(
   }),
 );
 
+app.get(
+  "/api/backups",
+  asyncRoute(async (_req, res) => {
+    let names: string[] = [];
+    try {
+      names = await readdir(store.backupsDir);
+    } catch {
+      names = [];
+    }
+    const backups = await Promise.all(
+      names
+        .filter((name) => name.endsWith(".bak.json"))
+        .map(async (name) => {
+          const info = await stat(path.join(store.backupsDir, name));
+          return {
+            name,
+            size: info.size,
+            modifiedAt: info.mtime.toISOString(),
+          };
+        }),
+    );
+    backups.sort((a, b) => b.modifiedAt.localeCompare(a.modifiedAt));
+    res.json({ backups });
+  }),
+);
+
+app.get(
+  "/api/backups/:name",
+  asyncRoute(async (req, res) => {
+    const name = req.params.name;
+    if (
+      !name.endsWith(".bak.json") ||
+      path.basename(name) !== name ||
+      name.includes("..")
+    ) {
+      res.status(400).json({ error: "Nama backup tidak valid." });
+      return;
+    }
+    try {
+      const content = await readFile(path.join(store.backupsDir, name), "utf8");
+      res.type("application/json").send(content);
+    } catch {
+      res.status(404).json({ error: "Backup tidak ditemukan." });
+    }
+  }),
+);
+
 app.put(
   "/api/entities/:entity",
   asyncRoute(async (req, res) => {
@@ -100,6 +149,21 @@ app.put(
       return;
     }
     try {
+      if (entity === "items") {
+        const done = await store.writeItemsWithHistory(
+          itemSchema.array().parse(value),
+        );
+        res.json({
+          ok: true,
+          value: done.value,
+          backupPath: done.backupPath
+            ? path.relative(root, done.backupPath)
+            : null,
+          historyEntries: done.entries.length,
+          savedAt: new Date().toISOString(),
+        });
+        return;
+      }
       const result = await store.write(entity, value);
       res.json({
         ok: true,

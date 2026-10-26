@@ -13,6 +13,8 @@ export default {
         card: "var(--card)",
         muted: "var(--muted)",
         line: "var(--line)",
+        danger: "var(--danger)",
+        success: "var(--success)",
       },
       fontFamily: {
         pixel: ["'Press Start 2P'", "monospace"],

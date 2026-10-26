@@ -50,6 +50,27 @@ describe("transisi status", () => {
     expect(backups.length).toBeGreaterThanOrEqual(2);
   });
 
+  it("mencatat riwayat saat status diubah lewat penyimpanan massal", async () => {
+    const { root, store } = await tempStore();
+    const current = await store.read("items");
+
+    const changed = await store.writeItemsWithHistory([
+      { ...current[0], status: "submitted", progressPct: 55 },
+    ]);
+    expect(changed.entries).toHaveLength(1);
+    expect(changed.entries[0].fromStatus).toBe("draft");
+    expect(changed.entries[0].toStatus).toBe("submitted");
+
+    const unchanged = await store.writeItemsWithHistory(changed.value);
+    expect(unchanged.entries).toHaveLength(0);
+
+    const history = JSON.parse(
+      await readFile(path.join(root, "data", "private", "history.json"), "utf8"),
+    );
+    expect(history).toHaveLength(1);
+    expect(history[0].note).toBe("Status diubah dari form admin.");
+  });
+
   it("menolak status tak dikenal dan item tak ada tanpa menulis riwayat", async () => {
     const { root, store } = await tempStore();
 

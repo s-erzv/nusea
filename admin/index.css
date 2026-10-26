@@ -1,0 +1,571 @@
+body {
+  background-color: var(--paper);
+}
+
+.admin-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.admin-sidebar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  width: 252px;
+  height: 100vh;
+  flex: 0 0 252px;
+  flex-direction: column;
+  overflow-y: auto;
+  border-right: 3px solid var(--line);
+  background: var(--card);
+  padding: 14px 12px;
+}
+
+.admin-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 2px dashed var(--line);
+}
+
+.admin-brand-block {
+  display: flex;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid var(--line);
+  background: var(--yellow);
+  color: #14213d;
+  font-family: "Press Start 2P", monospace;
+  font-size: 16px;
+  box-shadow: 3px 3px 0 var(--shadow);
+}
+
+.admin-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-nav-title {
+  margin: 0 0 3px 6px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 6px;
+  line-height: 1.6;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.admin-nav-link {
+  display: flex;
+  min-height: 38px;
+  align-items: center;
+  gap: 8px;
+  border: 2px solid transparent;
+  background: transparent;
+  color: var(--ink);
+  padding: 4px 5px;
+  text-align: left;
+  font-size: 18px;
+  line-height: 1.1;
+  cursor: pointer;
+}
+
+.admin-nav-link:hover {
+  background: var(--paper);
+  border-color: var(--line);
+}
+
+.admin-nav-link[data-active="true"] {
+  border-color: var(--line);
+  background: var(--yellow);
+  color: #14213d;
+  box-shadow: 2px 2px 0 var(--shadow);
+}
+
+.admin-nav-mark {
+  display: flex;
+  width: 23px;
+  height: 23px;
+  flex: 0 0 23px;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Press Start 2P", monospace;
+  font-size: 7px;
+}
+
+.admin-nav-link[data-active="true"] .admin-nav-mark {
+  background: #14213d;
+  color: var(--yellow);
+}
+
+.admin-count {
+  display: inline-flex;
+  min-width: 22px;
+  min-height: 20px;
+  margin-left: auto;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  padding: 0 4px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 6px;
+  line-height: 1;
+}
+
+.admin-nav-link[data-active="true"] .admin-count {
+  background: var(--card);
+}
+
+.admin-sidebar-foot {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 2px dashed var(--line);
+}
+
+.admin-main {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.admin-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 3px solid var(--line);
+  background: var(--paper);
+  padding: 10px 18px;
+}
+
+.admin-local-badge {
+  display: inline-flex;
+  align-items: center;
+  border: 2px solid var(--line);
+  background: var(--yellow);
+  color: #14213d;
+  padding: 4px 6px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 6px;
+  line-height: 1.6;
+  text-transform: uppercase;
+}
+
+.admin-topbar-btn {
+  min-height: 36px;
+  padding: 4px 8px;
+  font-size: 7px;
+}
+
+.admin-content {
+  width: 100%;
+  max-width: 1440px;
+  flex: 1;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.admin-footer {
+  border-top: 2px dashed var(--line);
+  padding: 12px;
+  text-align: center;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.admin-token-screen {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.admin-token-card {
+  width: min(580px, 100%);
+  border: 3px solid var(--line);
+  background: var(--card);
+  padding: 24px;
+  box-shadow: 6px 6px 0 var(--shadow);
+}
+
+.admin-panel {
+  border: 3px solid var(--line);
+  background: var(--card);
+  box-shadow: 4px 4px 0 var(--shadow);
+}
+
+.admin-panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-bottom: 3px solid var(--line);
+  background: var(--paper);
+  padding: 7px 12px;
+}
+
+.admin-panel-head h2 {
+  margin: 0;
+}
+
+.admin-input {
+  min-height: 42px;
+  padding: 6px 8px;
+  font-family: "VT323", monospace;
+  font-size: 18px;
+  line-height: 1.2;
+  box-shadow: 2px 2px 0 var(--shadow);
+}
+
+.admin-input-xs {
+  min-height: 32px;
+  padding: 2px 5px;
+  font-size: 16px;
+}
+
+.admin-table-wrap {
+  overflow-x: auto;
+  border: 2px solid var(--line);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 17px;
+  line-height: 1.25;
+}
+
+.admin-table th {
+  border-bottom: 2px solid var(--line);
+  background: var(--paper);
+  padding: 7px 8px;
+  text-align: left;
+  vertical-align: bottom;
+  font-family: "Press Start 2P", monospace;
+  font-size: 6px;
+  line-height: 1.7;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.admin-table td {
+  border-bottom: 2px solid var(--line);
+  padding: 8px;
+  vertical-align: top;
+}
+
+.admin-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.admin-table tbody tr:hover {
+  background: var(--paper);
+}
+
+.admin-pill {
+  display: inline-flex;
+  align-items: center;
+  border: 2px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  padding: 2px 5px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 6px;
+  line-height: 1.6;
+  text-transform: uppercase;
+}
+
+.admin-pill[data-public="true"] {
+  background: var(--yellow);
+  color: #14213d;
+}
+
+.admin-pill[data-public="false"] {
+  background: var(--paper);
+  color: var(--muted);
+}
+
+.admin-mini-btn {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  padding: 2px 5px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 7px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.admin-mini-btn:hover:not(:disabled) {
+  background: var(--yellow);
+  color: #14213d;
+}
+
+.admin-mini-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.admin-mini-danger {
+  border-color: var(--danger);
+  background: var(--danger);
+  color: #ffffff;
+}
+
+.dark .admin-mini-danger {
+  color: #07152f;
+}
+
+.admin-mini-danger:hover:not(:disabled) {
+  background: var(--ink);
+  color: var(--card);
+  border-color: var(--ink);
+}
+
+.admin-tag {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  padding: 0 4px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.admin-warning {
+  display: block;
+  border: 2px solid var(--danger);
+  border-left-width: 7px;
+  background: var(--card);
+  padding: 7px 9px;
+  font-size: 17px;
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.admin-kanban-wrap {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.admin-kanban-col {
+  width: 290px;
+  min-width: 290px;
+  flex: 0 0 290px;
+  border: 3px solid var(--line);
+  background: var(--paper);
+  box-shadow: 3px 3px 0 var(--shadow);
+}
+
+.admin-kanban-col.is-over {
+  border-color: var(--orange);
+  box-shadow: inset 0 0 0 3px var(--orange);
+}
+
+.admin-kanban-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  border-bottom: 3px solid var(--line);
+  background: var(--card);
+  padding: 6px 8px;
+}
+
+.admin-kanban-head h2 {
+  margin: 0;
+}
+
+.admin-kanban-card {
+  border: 2px solid var(--line);
+  background: var(--card);
+  padding: 7px;
+  box-shadow: 2px 2px 0 var(--shadow);
+  cursor: grab;
+}
+
+.admin-kanban-card:active {
+  cursor: grabbing;
+}
+
+.admin-kanban-card.is-dragging {
+  opacity: 0.45;
+}
+
+.admin-grant-card,
+.admin-idea-card {
+  border: 3px solid var(--line);
+  background: var(--card);
+  padding: 14px;
+  box-shadow: 4px 4px 0 var(--shadow);
+}
+
+.admin-idea-card:nth-child(3n + 1) {
+  border-top-width: 6px;
+  border-top-color: var(--orange);
+}
+
+.admin-idea-score {
+  display: inline-flex;
+  border: 2px solid var(--line);
+  background: var(--yellow);
+  color: #14213d;
+  padding: 3px 6px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 8px;
+  line-height: 1.6;
+}
+
+.admin-pre {
+  max-height: 28rem;
+  overflow: auto;
+  border: 2px solid var(--line);
+  background: #07152f;
+  color: #eaf6ff;
+  padding: 9px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.admin-toast {
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  z-index: 100;
+  width: min(440px, calc(100vw - 28px));
+  border: 3px solid var(--line);
+  border-left-width: 9px;
+  background: var(--card);
+  color: var(--ink);
+  padding: 10px 12px;
+  box-shadow: 4px 4px 0 var(--shadow);
+  font-size: 17px;
+  line-height: 1.3;
+}
+
+.admin-toast[data-tone="error"] {
+  border-left-color: var(--danger);
+}
+
+.admin-toast[data-tone="ok"] {
+  border-left-color: var(--success);
+}
+
+.text-danger {
+  color: var(--danger);
+}
+
+@media (max-width: 1023px) {
+  .admin-shell {
+    display: block;
+  }
+
+  .admin-sidebar {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    border-right: 0;
+    border-bottom: 3px solid var(--line);
+    padding: 10px 12px;
+  }
+
+  .admin-brand {
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+  }
+
+  .admin-nav {
+    flex-direction: row;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .admin-nav-group {
+    flex-direction: row;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .admin-nav-title {
+    display: none;
+  }
+
+  .admin-nav-link {
+    min-height: 34px;
+    white-space: nowrap;
+  }
+
+  .admin-nav-mark {
+    width: 20px;
+    height: 20px;
+    flex-basis: 20px;
+    font-size: 6px;
+  }
+
+  .admin-sidebar-foot {
+    display: none;
+  }
+
+  .admin-topbar {
+    position: static;
+    padding: 8px 12px;
+  }
+
+  .admin-content {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 639px) {
+  .admin-nav-link {
+    font-size: 16px;
+    padding: 3px 4px;
+  }
+
+  .admin-count {
+    display: none;
+  }
+
+  .admin-topbar {
+    align-items: flex-start;
+  }
+
+  .admin-token-card {
+    padding: 16px;
+  }
+}
