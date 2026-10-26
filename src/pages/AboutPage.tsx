@@ -92,7 +92,7 @@ export function AboutPage() {
               </div>
               <div className="border-[3px] border-line bg-paper p-2">
                 <dd className="font-pixel text-[18px]">{assets.length}</dd>
-                <dt className="mt-1 text-[16px] text-muted">Assets</dt>
+                <dt className="mt-1 text-[16px] text-muted">Documents</dt>
               </div>
             </dl>
           </section>

@@ -30,16 +30,7 @@ const NAV: Array<{ group: string; items: NavItem[] }> = [
     items: [
       { tab: "items", label: "Research", mark: "R" },
       { tab: "kanban", label: "Pipeline", mark: "K" },
-      { tab: "assets", label: "Inventory", mark: "I" },
-      { tab: "sources", label: "Sources", mark: "S" },
-    ],
-  },
-  {
-    group: "Opportunities",
-    items: [
-      { tab: "grants", label: "Grants", mark: "G" },
-      { tab: "ideas", label: "Idea Bank", mark: "B" },
-      { tab: "tasks", label: "Tasks", mark: "T" },
+      { tab: "assets", label: "Documents", mark: "D" },
       { tab: "venues", label: "Venues", mark: "V" },
     ],
   },

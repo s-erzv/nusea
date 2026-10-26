@@ -79,7 +79,7 @@ export function MapPage() {
           Terminal states
         </h2>
         <p className="mt-2 max-w-2xl text-[18px] text-muted">
-          Terminal states sit outside the nine-stage pipeline. Paused or finished
+          Terminal states sit outside the pipeline. Paused or finished
           public work still appears here.
         </p>
         <div className="mt-4 grid gap-4 sm:grid-cols-3">

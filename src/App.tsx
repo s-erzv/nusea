@@ -37,10 +37,11 @@ export function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/research/:slug" element={<ResearchDetailPage />} />
-          <Route path="/database" element={<AssetsPage />} />
+          <Route path="/documents" element={<AssetsPage />} />
           <Route path="/pipeline" element={<MapPage />} />
           <Route path="/about" element={<AboutPage />} />
-          <Route path="/aset" element={<Navigate to="/database" replace />} />
+          <Route path="/database" element={<Navigate to="/documents" replace />} />
+          <Route path="/aset" element={<Navigate to="/documents" replace />} />
           <Route path="/peta" element={<Navigate to="/pipeline" replace />} />
           <Route path="/tentang" element={<Navigate to="/about" replace />} />
           <Route path="/riset/:slug" element={<LegacyResearchRedirect />} />

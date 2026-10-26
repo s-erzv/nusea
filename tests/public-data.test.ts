@@ -59,8 +59,12 @@ describe("allowlist data publik", () => {
 
   it("aset privat, localPath, itemIds, dan note tidak pernah keluar", () => {
     const snapshot = makePrivateSnapshot({
+      items: [
+        makeItem({ id: "item-public", visibility: "public" }),
+        makeItem({ id: "item-private", visibility: "private" }),
+      ],
       assets: [
-        makeAsset({ id: "asset-public" }),
+        makeAsset({ id: "asset-public", itemIds: ["item-public", "item-private"] }),
         makeAsset({
           id: "asset-private",
           visibility: "private",
@@ -72,11 +76,13 @@ describe("allowlist data publik", () => {
     const bundle = buildPublicData(snapshot);
 
     expect(bundle.assets).toHaveLength(1);
+    expect(bundle.assets[0].researchIds).toEqual(["item-public"]);
     expect(bundle.assets[0]).not.toHaveProperty("localPath");
     expect(bundle.assets[0]).not.toHaveProperty("itemIds");
     expect(bundle.assets[0]).not.toHaveProperty("note");
     expect(JSON.stringify(bundle)).not.toContain("assets-private/secret.pdf");
     expect(JSON.stringify(bundle)).not.toContain("drive.google.com/private-folder");
+    expect(JSON.stringify(bundle)).not.toContain("item-private");
   });
 
   it("hibah dan ide hanya keluar bila public, tanpa catatan edisi", () => {

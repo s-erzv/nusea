@@ -1,6 +1,6 @@
 # Nusea
 
-Public research portfolio and local back office for Sarah Fajriah Rahmah. The public site presents research, public assets, a research map, a database view, and a profile. The back office runs only on `127.0.0.1` for managing data, pipeline, grants, ideas, tasks, sources, venues, backups, and publishing.
+Public research portfolio and local back office for Sarah Fajriah Rahmah. The public site presents research, linked documents, a research map, and a profile. The back office runs only on `127.0.0.1` for managing research, documents, pipeline, venues, backups, and publishing.
 
 ## Stack
 
@@ -107,26 +107,22 @@ The public site only imports `data/public/` and `shared/`; `src/` must not impor
 
 ## Public pages
 
-- `/` — overview, featured research, database preview
-- `/database` — public asset and spreadsheet links
+- `/` — overview and featured research
+- `/documents` — published journal articles, papers, and public files
 - `/pipeline` — research pipeline and activity
 - `/about` — profile and contact
 - `/research/:slug` — research detail
 
-Only public assets appear in `/database`. Private spreadsheet links and local paths stay inside the back office.
+Only public documents appear in `/documents`. Private links and local paths stay inside the back office. The old `/database` URL redirects here.
 
 ## Back office
 
 Available tabs:
 
-- **Dashboard** — research, status, deadlines, and activity summary.
+- **Dashboard** — public research with its linked document buttons.
 - **Research** — CRUD for every research field, including stage notes and private checklists.
 - **Pipeline** — status kanban with history tracking.
-- **Inventory** — private/public assets, links, and link checks.
-- **Sources** — citation and verification log.
-- **Grants** — schemes, deadlines, and selection stages.
-- **Idea Bank** — idea scores and status.
-- **Tasks** — quick add and completion tracking.
+- **Documents** — private/public document links and link checks.
 - **Venues** — journals, conferences, and grant venues.
 - **Profile** — read mode followed by editing.
 - **Data** — JSON upload/download, CSV import/export, and backups.

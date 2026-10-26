@@ -21,7 +21,7 @@ function hostOf(url: string): string {
 }
 
 export function AssetsPage() {
-  useDocumentTitle("Database");
+  useDocumentTitle("Documents");
   const [kind, setKind] = useState<KindFilter>("all");
   const [tag, setTag] = useState("all");
   const [query, setQuery] = useState("");
@@ -69,14 +69,14 @@ export function AssetsPage() {
       <SectionHeading
         as="h1"
         numbered="02"
-        kicker="Database / Assets"
-        title="Public research database"
-        description="A flat index of public assets and source links. Spreadsheets, documents, datasets, and files live here when the lab owner marks them public."
+        kicker="Documents / Outputs"
+        title="Research documents"
+        description="Published journal articles, papers, and public files. Private research documents stay in the back office."
       />
 
       <dl className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
-          ["Assets", assets.length],
+          ["Documents", assets.length],
           ["Kinds", kindCount],
           ["Tags", tags.length],
           ["Primary", primaryCount],
@@ -100,7 +100,7 @@ export function AssetsPage() {
               htmlFor="asset-search"
               className="mb-1 block font-pixel text-[12px] uppercase leading-4"
             >
-              Search database
+              Search documents
             </label>
             <input
               id="asset-search"
@@ -118,7 +118,7 @@ export function AssetsPage() {
 
         <div className="mt-4">
           <span className="mb-2 block font-pixel text-[12px] uppercase leading-4">
-            Asset type
+            Document type
           </span>
           <div className="flex flex-wrap gap-2">
             <button
@@ -186,20 +186,20 @@ export function AssetsPage() {
       <div className="mt-5">
         {filtered.length === 0 ? (
           <EmptyState
-            title={assets.length === 0 ? "DATABASE IS EMPTY" : "NO ASSETS FOUND"}
+            title={assets.length === 0 ? "DOCUMENTS ARE EMPTY" : "NO DOCUMENTS FOUND"}
             body={
               assets.length === 0
-                ? "No public assets yet. Private files stay in the back office."
+                ? "No public documents yet. Private files stay in the back office."
                 : "Try another type, tag, or keyword."
             }
           />
         ) : (
           <>
             <div className="hidden overflow-x-auto border-[3px] border-line bg-card shadow-hard sm:block">
-              <table className="w-full min-w-[720px] border-collapse text-left">
+              <table className="w-full min-w-[820px] border-collapse text-left">
                 <thead>
                   <tr className="border-b-[3px] border-line bg-paper">
-                    {["Asset", "Type", "Tags", "Access", "Updated"].map((heading) => (
+                    {["Document", "Type", "Research", "Tags", "Access", "Updated"].map((heading) => (
                       <th
                         key={heading}
                         scope="col"
@@ -229,6 +229,11 @@ export function AssetsPage() {
                       <td className="px-3 py-3 align-top">
                         <span className="pixel-badge">{ASSET_KIND_LABELS[asset.kind]}</span>
                       </td>
+                      <td className="px-3 py-3 align-top text-[15px] text-muted">
+                        {asset.researchIds.length > 0
+                          ? `${asset.researchIds.length} linked`
+                          : "—"}
+                      </td>
                       <td className="px-3 py-3 align-top">
                         <div className="flex max-w-[220px] flex-wrap gap-1">
                           {asset.tags.length > 0 ? (
@@ -252,7 +257,7 @@ export function AssetsPage() {
                             target="_blank"
                             rel="noreferrer"
                             className="pixel-btn pixel-btn-small"
-                            aria-label={`Open asset: ${asset.label}`}
+                            aria-label={`Open document: ${asset.label}`}
                           >
                             OPEN
                           </a>
@@ -291,6 +296,11 @@ export function AssetsPage() {
                       </span>
                     ))}
                   </div>
+                  <p className="mt-2 text-[15px] text-muted">
+                    {asset.researchIds.length > 0
+                      ? `Linked to ${asset.researchIds.length} research`
+                      : "Not linked to research"}
+                  </p>
                   <div className="mt-auto pt-4">
                     {asset.url ? (
                       <>
@@ -299,9 +309,9 @@ export function AssetsPage() {
                           target="_blank"
                           rel="noreferrer"
                           className="pixel-btn w-full"
-                          aria-label={`Open asset: ${asset.label}`}
+                          aria-label={`Open document: ${asset.label}`}
                         >
-                          OPEN ASSET
+                          OPEN DOCUMENT
                         </a>
                         <p className="mt-2 break-all text-[15px] text-muted">
                           {hostOf(asset.url)}

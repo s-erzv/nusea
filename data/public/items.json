@@ -27,5 +27,61 @@
     "publicUrl": "https://ejournal.rizaniamedia.com/index.php/bisnistek/article/view/498",
     "progressPct": 100,
     "pinned": true
+  },
+  {
+    "id": "wallet-noncustodial-togaf",
+    "createdAt": "2026-10-20T08:00:00.000Z",
+    "updatedAt": "2026-10-26T00:00:00.000Z",
+    "title": "Arsitektur Dompet Web3 Nonkustodial dengan Nomor Telepon sebagai Pengenal (TOGAF ADM Fase A–E)",
+    "type": "paper_jurnal",
+    "status": "riset",
+    "abstract": "",
+    "keywords": [
+      "dompet Web3",
+      "nonkustodial",
+      "nomor telepon",
+      "TOGAF ADM"
+    ],
+    "authors": [
+      "Sarah Fajriah Rahmah"
+    ],
+    "advisors": [],
+    "venueId": "",
+    "submittedAt": "",
+    "decisionAt": "",
+    "publishedAt": "",
+    "doi": "",
+    "publicUrl": "",
+    "progressPct": 35,
+    "pinned": false
+  },
+  {
+    "id": "slr-identitas-nomor-telepon",
+    "createdAt": "2026-10-20T08:00:00.000Z",
+    "updatedAt": "2026-10-26T00:00:00.000Z",
+    "title": "Phone-Number-Based Identity Abstraction for Web3 Wallets: A Systematic Literature Review",
+    "type": "paper_jurnal",
+    "status": "scheduled",
+    "abstract": "",
+    "keywords": [
+      "PRISMA",
+      "identitas",
+      "nomor telepon",
+      "onboarding",
+      "dompet Web3"
+    ],
+    "authors": [
+      "Sarah Fajriah Rahmah",
+      "Annazma Ghazalba"
+    ],
+    "advisors": [],
+    "venueId": "",
+    "submittedAt": "",
+    "decisionAt": "",
+    "publishedAt": "",
+    "doi": "",
+    "publicUrl": "",
+    "progressPct": 90,
+    "pinned": false
   }
 ]

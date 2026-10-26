@@ -1,10 +1,12 @@
 import { Link, useParams } from "react-router-dom";
 import {
+  ASSET_KIND_LABELS,
   ITEM_TYPE_LABELS,
+  PIPELINE_STATUSES,
   STATUS_NUMBERS,
 } from "../../shared/constants";
 import { isPipelineStatus, isTerminalStatus } from "../../shared/status";
-import { items, venueById } from "../data";
+import { assets, items, venueById } from "../data";
 import { EmptyState } from "../components/EmptyState";
 import { StatusBadge } from "../components/StatusBadge";
 import { XPBar } from "../components/XPBar";
@@ -51,6 +53,7 @@ export function ResearchDetailPage() {
     { label: "Decision", value: item.decisionAt },
     { label: "Published", value: item.publishedAt },
   ].filter((entry) => entry.value);
+  const documents = assets.filter((asset) => asset.researchIds.includes(item.id));
 
   return (
     <article className="mx-auto max-w-5xl px-4 py-8 sm:py-12">
@@ -72,7 +75,7 @@ export function ResearchDetailPage() {
             </span>
           </div>
           <span className="font-pixel text-[12px] leading-4 text-muted">
-            {level ? `STAGE ${level} / 9` : isTerminalStatus(item.status) ? "ARCHIVED" : "—"}
+            {level ? `STAGE ${level} / ${PIPELINE_STATUSES.length}` : isTerminalStatus(item.status) ? "ARCHIVED" : "—"}
           </span>
         </div>
 
@@ -137,6 +140,33 @@ export function ResearchDetailPage() {
         </section>
 
         <div className="space-y-5">
+          {documents.length > 0 ? (
+            <section className="pixel-card p-5" aria-labelledby="documents-title">
+              <h2 id="documents-title" className="text-[15px]">
+                Documents
+              </h2>
+              <ul className="mt-3 space-y-3">
+                {documents.map((document) => (
+                  <li key={document.id}>
+                    <a
+                      className="pixel-btn w-full"
+                      href={document.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={`Open document: ${document.label}`}
+                    >
+                      {document.label.toUpperCase()}
+                    </a>
+                    <p className="mt-1 text-[16px] text-muted">
+                      {ASSET_KIND_LABELS[document.kind]}
+                      {document.isPrimary ? " · Primary" : ""}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
+
           <section className="pixel-card p-5" aria-labelledby="venue-title">
             <h2 id="venue-title" className="text-[15px]">
               Venue

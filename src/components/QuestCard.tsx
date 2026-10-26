@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import {
   ITEM_TYPE_LABELS,
+  PIPELINE_STATUSES,
   STATUS_NUMBERS,
 } from "../../shared/constants";
 import { isPipelineStatus } from "../../shared/status";
@@ -64,7 +65,7 @@ export function QuestCard({ item, venue, variant }: QuestCardProps) {
           ) : null}
         </div>
         <span className="font-pixel text-[12px] leading-4 text-muted">
-          {level ? `Stage ${level}/9` : "Archived"}
+          {level ? `Stage ${level}/${PIPELINE_STATUSES.length}` : "Archived"}
         </span>
       </div>
 

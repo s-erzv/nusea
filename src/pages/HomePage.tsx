@@ -144,7 +144,7 @@ export function HomePage() {
           <Scoreboard
             research={items.length}
             published={publishedItems.length}
-            assets={assets.length}
+            documents={assets.length}
             venues={venues.length}
           />
         </div>

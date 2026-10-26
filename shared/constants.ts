@@ -7,6 +7,7 @@ export const PIPELINE_STATUSES = [
   "under_review",
   "revisi",
   "accepted",
+  "scheduled",
   "published",
 ] as const;
 
@@ -26,10 +27,27 @@ export const STATUS_LABELS: Record<ResearchStatus, string> = {
   under_review: "Under Review",
   revisi: "Revision",
   accepted: "Accepted",
+  scheduled: "Scheduled",
   published: "Published",
   ditolak: "Rejected",
   ditarik: "Withdrawn",
   ditunda: "On Hold",
+};
+
+export const PUBLIC_STATUS_LABELS: Record<ResearchStatus, string> = {
+  ide: "Coming soon",
+  riset: "Coming soon",
+  draft: "Coming soon",
+  review_internal: "In review",
+  submitted: "Submitted",
+  under_review: "Under review",
+  revisi: "In revision",
+  accepted: "Accepted",
+  scheduled: "Scheduled",
+  published: "Published",
+  ditolak: "Archived",
+  ditarik: "Withdrawn",
+  ditunda: "On hold",
 };
 
 export const STATUS_NUMBERS: Record<PipelineStatus, number> = {
@@ -41,7 +59,8 @@ export const STATUS_NUMBERS: Record<PipelineStatus, number> = {
   under_review: 6,
   revisi: 7,
   accepted: 8,
-  published: 9,
+  scheduled: 9,
+  published: 10,
 };
 
 export const ITEM_TYPES = [

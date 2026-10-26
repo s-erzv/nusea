@@ -49,12 +49,17 @@ export interface PublicBundle {
  * the private store. Anything new stays private until added there.
  */
 export function buildPublicData(source: PrivateSnapshot): PublicBundle {
+  const items = source.items
+    .filter((item) => item.visibility === "public")
+    .map(toPublicItem);
+  const publicItemIds = new Set(items.map((item) => item.id));
+
   const bundle: PublicBundle = {
     profile: toPublicProfile(source.profile),
-    items: source.items.filter((item) => item.visibility === "public").map(toPublicItem),
+    items,
     assets: source.assets
       .filter((asset) => asset.visibility === "public")
-      .map(toPublicAsset),
+      .map((asset) => toPublicAsset(asset, publicItemIds)),
     venues: source.venues
       .filter((venue) => venue.visibility === "public")
       .map(toPublicVenue),

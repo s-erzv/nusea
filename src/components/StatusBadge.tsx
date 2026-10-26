@@ -1,5 +1,5 @@
 import {
-  STATUS_LABELS,
+  PUBLIC_STATUS_LABELS,
   STATUS_NUMBERS,
   type ResearchStatus,
 } from "../../shared/constants";
@@ -10,7 +10,7 @@ export function StatusBadge({ status }: { status: ResearchStatus }) {
     ? status === "ditolak" || status === "ditarik"
       ? "danger"
       : "muted"
-    : status === "published" || status === "accepted"
+    : status === "published" || status === "scheduled" || status === "accepted"
       ? "success"
       : "default";
   const number = isPipelineStatus(status) ? STATUS_NUMBERS[status] : null;
@@ -18,7 +18,7 @@ export function StatusBadge({ status }: { status: ResearchStatus }) {
   return (
     <span className="pixel-badge" data-tone={tone}>
       {number ? `${String(number).padStart(2, "0")} ` : ""}
-      {STATUS_LABELS[status]}
+      {PUBLIC_STATUS_LABELS[status]}
     </span>
   );
 }

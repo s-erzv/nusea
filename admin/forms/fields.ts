@@ -95,7 +95,7 @@ export function itemFields(data: AdminData, isNew: boolean): FieldDef[] {
 export function assetFields(data: AdminData, isNew: boolean): FieldDef[] {
   return [
     idField(isNew),
-    { key: "label", label: "Label", type: "text", wide: true },
+    { key: "label", label: "Document label", type: "text", wide: true },
     { key: "kind", label: "Type", type: "select", options: assetKindOptions },
     { key: "url", label: "URL", type: "url" },
     {
@@ -111,7 +111,7 @@ export function assetFields(data: AdminData, isNew: boolean): FieldDef[] {
       type: "checks",
       options: itemOptions(data).slice(1),
     },
-    { key: "isPrimary", label: "Primary asset", type: "checkbox" },
+    { key: "isPrimary", label: "Primary document", type: "checkbox" },
     { key: "note", label: "Private note", type: "textarea", rows: 3 },
     visibilityField,
   ];

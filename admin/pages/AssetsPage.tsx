@@ -74,18 +74,18 @@ export function AssetsPage({ data, saveEntity, notify }: AssetsPageProps) {
     setEditing(null);
     notify(
       isNew
-        ? "New asset saved."
-        : `Asset saved.${backup ? ` Backup: ${backup}` : ""}`,
+        ? "New document saved."
+        : `Document saved.${backup ? ` Backup: ${backup}` : ""}`,
     );
   }
 
   async function remove(asset: Asset) {
-    if (!window.confirm(`Delete asset "${asset.label}"?`)) return;
+    if (!window.confirm(`Delete document "${asset.label}"?`)) return;
     await saveEntity(
       "assets",
       data.assets.filter((entry) => entry.id !== asset.id),
     );
-    notify("Asset deleted.");
+    notify("Document deleted.");
   }
 
   async function checkLink(asset: Asset) {
@@ -112,12 +112,12 @@ export function AssetsPage({ data, saveEntity, notify }: AssetsPageProps) {
   return (
     <div>
       <PageHeader
-        kicker="CRUD / Inventory"
-        title="Asset inventory"
-        description="Store Sheets, Drive, Overleaf, Figma, and local asset links. Link checks only run when you press the button."
+        kicker="CRUD / Documents"
+        title="Document library"
+        description="Store Sheets, Drive, Overleaf, Figma, and local document links. Link checks only run when you press the button."
         actions={
           <button type="button" className="pixel-btn" onClick={startNew}>
-            + NEW ASSET
+            + NEW DOCUMENT
           </button>
         }
       />
@@ -126,7 +126,7 @@ export function AssetsPage({ data, saveEntity, notify }: AssetsPageProps) {
         <div className="mb-5">
           <SchemaEditor
             key={editing.id}
-            title={isNew ? "New asset" : `Edit: ${editing.label}`}
+            title={isNew ? "New document" : `Edit: ${editing.label}`}
             initial={editing}
             fields={assetFields(data, isNew)}
             schema={assetSchema}
@@ -136,7 +136,7 @@ export function AssetsPage({ data, saveEntity, notify }: AssetsPageProps) {
         </div>
       ) : null}
 
-      <Panel title={`Asset list (${filtered.length}/${data.assets.length})`}>
+      <Panel title={`Document list (${filtered.length}/${data.assets.length})`}>
         <div className="mb-4 grid gap-3 sm:grid-cols-3">
           <input
             type="search"
@@ -144,13 +144,13 @@ export function AssetsPage({ data, saveEntity, notify }: AssetsPageProps) {
             placeholder="Search label, URL, tag…"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            aria-label="Search assets"
+            aria-label="Search documents"
           />
           <select
             className="pixel-input admin-input"
             value={kindFilter}
             onChange={(event) => setKindFilter(event.target.value)}
-            aria-label="Filter by asset type"
+            aria-label="Filter by document type"
           >
             <option value="all">All types</option>
             {assetKindOptions.map((option) => (
@@ -163,7 +163,7 @@ export function AssetsPage({ data, saveEntity, notify }: AssetsPageProps) {
             className="pixel-input admin-input"
             value={visibilityFilter}
             onChange={(event) => setVisibilityFilter(event.target.value)}
-            aria-label="Filter by asset visibility"
+            aria-label="Filter by document visibility"
           >
             <option value="all">All visibility</option>
             {visibilityOptions.map((option) => (
@@ -175,7 +175,7 @@ export function AssetsPage({ data, saveEntity, notify }: AssetsPageProps) {
         </div>
 
         {filtered.length === 0 ? (
-          <AdminEmpty>No matching assets.</AdminEmpty>
+          <AdminEmpty>No matching documents.</AdminEmpty>
         ) : (
           <div className="admin-table-wrap">
             <table className="admin-table">

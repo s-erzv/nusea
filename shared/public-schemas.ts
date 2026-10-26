@@ -67,6 +67,7 @@ export const publicAssetSchema = z.object({
   kind: z.enum(ASSET_KINDS),
   label: z.string(),
   url: z.string(),
+  researchIds: z.array(z.string()),
   tags: z.array(z.string()),
   isPrimary: z.boolean(),
 });
@@ -157,7 +158,10 @@ export function toPublicItem(item: ResearchItem): PublicItem {
   });
 }
 
-export function toPublicAsset(asset: Asset): PublicAsset {
+export function toPublicAsset(
+  asset: Asset,
+  publicItemIds: ReadonlySet<string>,
+): PublicAsset {
   return publicAssetSchema.parse({
     id: asset.id,
     createdAt: asset.createdAt,
@@ -165,6 +169,7 @@ export function toPublicAsset(asset: Asset): PublicAsset {
     kind: asset.kind,
     label: asset.label,
     url: asset.url,
+    researchIds: asset.itemIds.filter((id) => publicItemIds.has(id)),
     tags: asset.tags,
     isPrimary: asset.isPrimary,
   });

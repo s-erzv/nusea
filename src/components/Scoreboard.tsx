@@ -1,19 +1,19 @@
 interface ScoreboardProps {
   research: number;
   published: number;
-  assets: number;
+  documents: number;
   venues: number;
 }
 
 const items = [
   { key: "research", label: "Public research", accent: "bg-paper" },
   { key: "published", label: "Published", accent: "bg-yellow" },
-  { key: "assets", label: "Public assets", accent: "bg-orange" },
+  { key: "documents", label: "Public documents", accent: "bg-orange" },
   { key: "venues", label: "Venues", accent: "bg-card" },
 ] as const;
 
-export function Scoreboard({ research, published, assets, venues }: ScoreboardProps) {
-  const values = { research, published, assets, venues };
+export function Scoreboard({ research, published, documents, venues }: ScoreboardProps) {
+  const values = { research, published, documents, venues };
   return (
     <section aria-labelledby="scoreboard-title">
       <h2 id="scoreboard-title" className="sr-only">

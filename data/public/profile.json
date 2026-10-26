@@ -1,19 +1,19 @@
 {
   "id": "profile",
   "createdAt": "2026-10-20T08:00:00.000Z",
-  "updatedAt": "2026-10-26T12:43:25.318Z",
+  "updatedAt": "2026-10-26T14:45:03.034Z",
   "name": "Sarah Fajriah Rahmah",
   "handle": "Nusea",
   "campus": "Universitas Islam Negeri Syarif Hidayatullah Jakarta",
-  "studyProgram": "Not set",
-  "tagline": "Independent research on digital identity, information systems, and Web3.",
+  "studyProgram": "Information Systems",
+  "tagline": "Information Systems Student",
   "bio": "Nusea is an independent research lab led by Sarah Fajriah Rahmah. Current work spans phone-number identity, non-custodial Web3 wallets, data governance, and information systems.",
   "avatar": "nusea-pixel",
   "email": "sarah.fajriah24@mhs.uinjkt.ac.id",
   "location": "Tangerang, Indonesia",
   "socials": {
-    "scholar": "",
+    "scholar": "https://scholar.google.com/citations?hl=en&user=I1LBRwwAAAAJ",
     "orcid": "",
-    "github": ""
+    "github": "https://github.com/s-erzv"
   }
 }

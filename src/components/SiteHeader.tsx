@@ -4,7 +4,7 @@ import { useTheme } from "../lib/useTheme";
 
 const links = [
   { to: "/", label: "Research", end: true },
-  { to: "/database", label: "Database" },
+  { to: "/documents", label: "Documents" },
   { to: "/pipeline", label: "Pipeline" },
   { to: "/about", label: "About" },
 ];

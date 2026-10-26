@@ -22,8 +22,8 @@ export function SiteFooter() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[18px]">
-          <Link to="/database" className="pixel-link">
-            Database
+          <Link to="/documents" className="pixel-link">
+            Documents
           </Link>
           <Link to="/about" className="pixel-link">
             About
