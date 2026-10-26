@@ -1,0 +1,32 @@
+[
+  {
+    "id": "venue-jurnal-bisnistek",
+    "createdAt": "2026-10-26T00:00:00.000Z",
+    "updatedAt": "2026-10-26T00:00:00.000Z",
+    "name": "Jurnal Ilmiah Bisnis Digital (Bisnistek)",
+    "kind": "jurnal",
+    "indexLevel": "tidak_terindeks",
+    "url": "https://ejournal.rizaniamedia.com/index.php/bisnistek",
+    "typicalReviewWeeks": 0
+  },
+  {
+    "id": "venue-khazanah-informatika",
+    "createdAt": "2026-10-20T08:00:00.000Z",
+    "updatedAt": "2026-10-20T08:00:00.000Z",
+    "name": "Khazanah Informatika",
+    "kind": "jurnal",
+    "indexLevel": "Sinta 2",
+    "url": "",
+    "typicalReviewWeeks": 12
+  },
+  {
+    "id": "venue-boptn",
+    "createdAt": "2026-10-20T08:00:00.000Z",
+    "updatedAt": "2026-10-20T08:00:00.000Z",
+    "name": "BOPTN",
+    "kind": "hibah",
+    "indexLevel": "tidak_terindeks",
+    "url": "",
+    "typicalReviewWeeks": 0
+  }
+]

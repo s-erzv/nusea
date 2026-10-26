@@ -1,0 +1,19 @@
+{
+  "id": "profile",
+  "createdAt": "2026-10-20T08:00:00.000Z",
+  "updatedAt": "2026-10-26T00:00:00.000Z",
+  "name": "Sarah Fajriah Rahmah",
+  "handle": "Nuza",
+  "campus": "Universitas Islam Negeri Syarif Hidayatullah Jakarta",
+  "studyProgram": "[Belum diisi]",
+  "tagline": "Lab riset pribadi untuk identitas, sistem informasi, dan Web3.",
+  "bio": "Profil ini masih perlu dilengkapi dari back office. Fokus riset: identitas berbasis nomor telepon, dompet Web3 nonkustodial, tata kelola data, dan sistem informasi.",
+  "avatar": "nuza-pixel",
+  "email": "sarah.fajriah24@mhs.uinjkt.ac.id",
+  "location": "Tangerang, Indonesia",
+  "socials": {
+    "scholar": "",
+    "orcid": "",
+    "github": ""
+  }
+}

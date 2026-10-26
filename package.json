@@ -1,0 +1,46 @@
+{
+  "name": "nuza-lab",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "pnpm run typecheck && vite build && pnpm run check:leak",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p admin/tsconfig.json",
+    "lint": "eslint . --max-warnings=0",
+    "test": "vitest run",
+    "publish:data": "tsx scripts/publish-data.ts",
+    "check:leak": "tsx scripts/check-leak.ts",
+    "admin": "tsx admin/server.ts",
+    "preview": "vite preview --host 127.0.0.1"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "fuse.js": "^7.1.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-router-dom": "^7.1.5",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.19.0",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.10.5",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.19.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.18",
+    "globals": "^15.14.0",
+    "postcss": "^8.5.1",
+    "tailwindcss": "^3.4.17",
+    "tsx": "^4.19.2",
+    "typescript": "~5.7.2",
+    "typescript-eslint": "^8.22.0",
+    "vite": "^6.1.0",
+    "vitest": "^3.0.5"
+  },
+  "packageManager": "pnpm@10.34.3"
+}

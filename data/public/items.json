@@ -1,0 +1,31 @@
+[
+  {
+    "id": "platform-governance-sertifikasi",
+    "createdAt": "2026-10-26T00:00:00.000Z",
+    "updatedAt": "2026-10-26T00:00:00.000Z",
+    "title": "Strategi Platform Governance dan Sertifikasi dalam Membangun User Trust Aset Digital",
+    "type": "paper_jurnal",
+    "status": "published",
+    "abstract": "Dalam ekosistem fintech, kepercayaan digital menjadi faktor krusial bagi platform aset digital yang mengelola data sensitif dan risiko finansial tinggi. Penelitian ini menganalisis integrasi standar profesional, sertifikasi IT, dan kerangka regulasi dalam membangun arsitektur kepercayaan yang kokoh. Dengan metode kualitatif deskriptif dan analisis komparatif, studi ini membandingkan transisi pengawasan di Indonesia dari Bappebti ke Otoritas Jasa Keuangan (OJK) terhadap kerangka global seperti Markets in Crypto-Assets (MiCA) di Uni Eropa serta regulasi di Amerika Serikat. Temuan menunjukkan kepercayaan tidak hanya bergantung pada teknologi seperti Multi-Party Computation (MPC), tetapi juga pada keselarasan Standar Kompetensi Kerja Nasional Indonesia (SKKNI) dengan standar etika internasional ACM/IEEE, serta adanya adoption gap antara laju inovasi dan kesiapan regulasi domestik.",
+    "keywords": [
+      "Aset Digital",
+      "Fintech",
+      "Kepercayaan Digital",
+      "Regulasi",
+      "Sertifikasi IT"
+    ],
+    "authors": [
+      "Sarah Fajriah Rahmah",
+      "Evy Nurmiati"
+    ],
+    "advisors": [],
+    "venueId": "venue-jurnal-bisnistek",
+    "submittedAt": "",
+    "decisionAt": "",
+    "publishedAt": "2026-05-01",
+    "doi": "10.69533/nc9hfd44",
+    "publicUrl": "https://ejournal.rizaniamedia.com/index.php/bisnistek/article/view/498",
+    "progressPct": 100,
+    "pinned": true
+  }
+]
