@@ -47,7 +47,7 @@ export function PublishPage({ notify, refresh }: PublishPageProps) {
     if (!preview?.ok) return;
     if (
       !window.confirm(
-        "Commit changes in data/private and data/public to git? Make sure you have reviewed the public diff.",
+        "Commit changes in data/public to git? Make sure you have reviewed the public diff.",
       )
     ) {
       return;
@@ -99,7 +99,7 @@ export function PublishPage({ notify, refresh }: PublishPageProps) {
         {[
           ["1", "Export", "Only public items are copied"],
           ["2", "Build + leak", "Failure blocks the commit"],
-          ["3", "Commit", "data/private + data/public"],
+          ["3", "Commit", "data/public only"],
           ["4", "Push", "Triggers the Netlify build"],
         ].map(([number, title, detail]) => (
           <div key={number} className="border-[3px] border-line bg-card p-3">

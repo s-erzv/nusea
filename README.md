@@ -1,6 +1,30 @@
 # Nusea
 
-Public research portfolio and local back office for Sarah Fajriah Rahmah. The public site presents research, linked documents, a research map, and a profile. The back office runs only on `127.0.0.1` for managing research, documents, pipeline, venues, backups, and publishing.
+**A pixel-styled research portfolio with a private local back office.**
+
+Nusea publishes research, public outputs, a research map, and a profile — while the owner keeps stage notes, private documents, plans, and day-to-day data on their own machine.
+
+![Nusea public homepage](docs/screenshots/home.png)
+
+## What it does
+
+- Public research index with search, status, progress, and detail pages.
+- `Published`, `Scheduled`, and `Coming soon` states make future work visible without exposing private data.
+- Documents page for published journal articles, papers, and public files only.
+- A research pipeline map that counts public work only.
+- Local admin for research, documents, pipeline, venues, backups, and publishing.
+- Allowlist-based public export: private fields never enter the public bundle.
+- Leak check fails the production build if private IDs, URLs, or field names appear in `dist/`.
+
+## Screenshots
+
+| Documents | Pipeline |
+| --- | --- |
+| <img src="docs/screenshots/documents.png" alt="Nusea documents page" width="480"> | <img src="docs/screenshots/pipeline.png" alt="Nusea research pipeline" width="480"> |
+
+| Mobile home | Mobile pipeline |
+| --- | --- |
+| <img src="docs/screenshots/mobile-home.png" alt="Nusea mobile homepage" width="260"> | <img src="docs/screenshots/mobile-pipeline.png" alt="Nusea mobile pipeline" width="260"> |
 
 ## Stack
 
@@ -44,6 +68,10 @@ Change the admin port if needed:
 ADMIN_PORT=5180 pnpm admin
 ```
 
+## Design
+
+All text uses Poppins. The pixel feel comes from hard borders, offset shadows, the orange/yellow palette, the grid background, and the pixel avatar — not from a pixel typeface. The public site supports light and dark mode.
+
 ## Scripts
 
 | Command | Purpose |
@@ -62,7 +90,7 @@ ADMIN_PORT=5180 pnpm admin
 
 ```text
 data/
-├── private/          # full source of truth, gitignored, never edited from the public UI
+├── private/          # full source of truth, gitignored, local only
 │   ├── profile.json
 │   ├── items.json
 │   ├── assets.json
@@ -72,7 +100,7 @@ data/
 │   ├── ideas.json
 │   ├── tasks.json
 │   └── history.json
-├── public/           # generated output, allowlisted fields only
+├── public/           # generated output, allowlisted fields only, committed
 │   ├── profile.json
 │   ├── items.json
 │   ├── assets.json
@@ -95,6 +123,8 @@ The allowlist lives in:
 
 Only records with `visibility: "public"` enter `data/public/`. New fields stay private until explicitly added to the allowlist.
 
+Documents are exported with `researchIds`, not raw `itemIds`. The builder filters those IDs against public research, so a public file can never reveal a private research ID.
+
 `pnpm check:leak` inspects the production build for:
 
 - IDs and URLs belonging to private records
@@ -102,6 +132,8 @@ Only records with `visibility: "public"` enter `data/public/`. New fields stay p
 - References to `data/private`
 
 The build must fail on any leak. Do not bypass this check.
+
+Without `data/private/` (for example on Netlify), the check still scans `dist/` for forbidden fields and private references. Locally, with the private store present, it also verifies that no private IDs or URLs leak.
 
 The public site only imports `data/public/` and `shared/`; `src/` must not import `admin/`.
 
@@ -119,7 +151,7 @@ Only public documents appear in `/documents`. Private links and local paths stay
 
 Available tabs:
 
-- **Dashboard** — public research with its linked document buttons.
+- **Dashboard** — public research and the document links attached to it, including private links marked `· private`.
 - **Research** — CRUD for every research field, including stage notes and private checklists.
 - **Pipeline** — status kanban with history tracking.
 - **Documents** — private/public document links and link checks.
@@ -156,7 +188,7 @@ The **Data** tab supports CSV import/export for research and grants.
 2. Open **Publish** and run **Preview**.
 3. Preview runs `publish:data`, the production build, typecheck, and `check:leak`.
 4. If preview passes, review the `data/public/` diff.
-5. **Commit** stages only `data/private/` and `data/public/`.
+5. **Commit** stages only `data/public/`.
 6. **Push** triggers the Netlify build.
 
 Commit is disabled when preview fails. Push always asks for confirmation.
@@ -166,7 +198,7 @@ Equivalent manual commands:
 ```bash
 pnpm publish:data
 pnpm build
-git add data/private data/public
+git add data/public
 git commit -m "data: publish YYYY-MM-DD"
 git push
 ```
@@ -180,9 +212,10 @@ The back office is a local tool and must never be exposed to the internet.
 - Every `/api` endpoint requires a session token; an invalid token returns `401`.
 - The token is random per process and compared in constant time.
 - The admin is not built into `dist/`; the public build uses only `index.html` and `src/`.
-- `data/.backups/` and `assets-private/` are gitignored.
+- `data/private/`, `data/.backups/`, and `assets-private/` are gitignored.
+- The admin commit flow stages only `data/public/`, never `data/private/`.
 
-Important: the admin commit flow stages `data/private/`. The remote repo must be private. If the repo is public, do not use admin commits and move `data/private/` outside git. Private data that has already been committed remains in git history until the history is rewritten.
+Private data that is not in `data/public/` never reaches the public site. If a document is private, its URL is not listed on any public page — but link-sharing settings on Google Docs, Drive, or Figma still control who can open the raw URL.
 
 ## Netlify deploy
 
@@ -193,7 +226,7 @@ Important: the admin commit flow stages `data/private/`. The remote repo must be
 - Node.js 22
 - SPA redirect to `index.html`
 
-Connect the repo to Netlify. Never deploy the admin server. `data/private/` is available in the Netlify build environment because it is committed, but it never enters the public bundle; `check:leak` verifies this.
+Connect the repo to Netlify. Never deploy the admin server. Netlify builds from the committed `data/public/` files; `data/private/` is not required and is not in the repository.
 
 ## Verification
 
@@ -205,8 +238,3 @@ pnpm build
 ```
 
 Tests cover the public allowlist, leak detection, server guard, backup/atomic writes, status transitions and history, and CSV parsing.
-
-## Notes
-
-- All text uses Poppins. The pixel feel comes from borders, shadows, and the avatar, not the typeface.
-- Site name, social links, and study program currently use values from `data/private/profile.json`.
