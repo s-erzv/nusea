@@ -36,19 +36,19 @@ export function DashboardPage({ data, onNavigate }: DashboardPageProps) {
   const warnings = [
     ...publishedPrivate.map((item) => ({
       id: `published-${item.id}`,
-      text: `"${item.title}" berstatus terbit tetapi masih privat.`,
+      text: `"${item.title}" is published but still private.`,
       tab: "items" as AdminTab,
     })),
     ...publicUnready.map((item) => ({
       id: `unready-${item.id}`,
-      text: `"${item.title}" publik tetapi status ${STATUS_LABELS[item.status]}. Cek kelayakan.`,
+      text: `"${item.title}" is public but status is ${STATUS_LABELS[item.status]}. Check readiness.`,
       tab: "items" as AdminTab,
     })),
     ...data.grants
       .filter((grant) => isGrantOutputWarningActive(grant.selectionStage))
       .map((grant) => ({
         id: `grant-${grant.id}`,
-        text: `${grant.scheme}: luaran wajib terbit setelah dana diterima (${GRANT_STAGE_LABELS[grant.selectionStage]}).`,
+        text: `${grant.scheme}: required outputs must be published after funding is received (${GRANT_STAGE_LABELS[grant.selectionStage]}).`,
         tab: "grants" as AdminTab,
       })),
     ...(data.profile.visibility === "public"
@@ -56,7 +56,7 @@ export function DashboardPage({ data, onNavigate }: DashboardPageProps) {
       : [
           {
             id: "profile-private",
-            text: "Profil masih privat; situs publik memakai fallback.",
+            text: "Profile is still private; the public site uses a fallback.",
             tab: "profile" as AdminTab,
           },
         ]),
@@ -69,7 +69,7 @@ export function DashboardPage({ data, onNavigate }: DashboardPageProps) {
         rows.push({
           label: task.title,
           date: task.dueAt,
-          meta: "Tugas",
+          meta: "Task",
           tab: "tasks",
         });
       }
@@ -77,17 +77,17 @@ export function DashboardPage({ data, onNavigate }: DashboardPageProps) {
     for (const grant of data.grants) {
       if (grant.proposalDeadline) {
         rows.push({
-          label: `Proposal ${grant.scheme}`,
+          label: `Proposal — ${grant.scheme}`,
           date: grant.proposalDeadline,
-          meta: "Deadline hibah",
+          meta: "Grant deadline",
           tab: "grants",
         });
       }
       if (grant.outputDeadline) {
         rows.push({
-          label: `Luaran ${grant.scheme}`,
+          label: `Output — ${grant.scheme}`,
           date: grant.outputDeadline,
-          meta: "Deadline luaran",
+          meta: "Output deadline",
           tab: "grants",
         });
       }
@@ -111,9 +111,9 @@ export function DashboardPage({ data, onNavigate }: DashboardPageProps) {
   return (
     <div>
       <PageHeader
-        kicker="Overview / Save Room"
+        kicker="Overview / Workspace"
         title="Dashboard"
-        description="Ringkasan pipeline, tenggat, dan risiko eksposur. Data admin hanya hidup di mesin ini."
+        description="Pipeline, deadlines, and exposure risk at a glance. Admin data stays on this machine."
         actions={
           <a
             className="pixel-btn pixel-btn-ghost"
@@ -121,47 +121,47 @@ export function DashboardPage({ data, onNavigate }: DashboardPageProps) {
             target="_blank"
             rel="noreferrer"
           >
-            BUKA SITUS PUBLIK
+            OPEN PUBLIC SITE
           </a>
         }
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Panel title="Riset aktif">
+        <Panel title="Active research">
           <p className="text-[28px] text-orange">{data.items.length}</p>
           <p className="text-[15px] text-muted">
-            {publicItems.length} publik · {data.items.length - publicItems.length} privat
+            {publicItems.length} public · {data.items.length - publicItems.length} private
           </p>
         </Panel>
-        <Panel title="Menunggu tindakan">
+        <Panel title="Needs action">
           <p className="text-[28px]">{openTasks.length}</p>
           <p className="text-[15px] text-muted">
-            {openTasks.filter((task) => task.dueAt === today).length} jatuh tempo hari ini
+            {openTasks.filter((task) => task.dueAt === today).length} due today
           </p>
         </Panel>
-        <Panel title="Aset">
+        <Panel title="Assets">
           <p className="text-[28px]">{data.assets.length}</p>
           <p className="text-[15px] text-muted">
-            {data.assets.filter((asset) => asset.visibility === "public").length} publik
+            {data.assets.filter((asset) => asset.visibility === "public").length} public
           </p>
         </Panel>
-        <Panel title="Dana lolos">
+        <Panel title="Funding secured">
           <p className="text-[20px] text-orange">{formatIdr(totalFunding)}</p>
-          <p className="text-[15px] text-muted">Hibah tahap ditetapkan ke atas</p>
+          <p className="text-[15px] text-muted">Grants at awarded stage or later</p>
         </Panel>
       </div>
 
       <div className="mt-5 grid gap-5 lg:grid-cols-2">
         <Panel
-          title="Tenggat terdekat"
+          title="Upcoming deadlines"
           actions={
             <button type="button" className="admin-mini-btn" onClick={() => onNavigate("tasks")}>
-              LIHAT TUGAS
+              VIEW TASKS
             </button>
           }
         >
           {deadlines.length === 0 ? (
-            <p className="text-[16px] text-muted">Tidak ada tenggat mendatang.</p>
+            <p className="text-[16px] text-muted">No upcoming deadlines.</p>
           ) : (
             <ul className="divide-y-2 divide-line">
               {deadlines.map((deadline) => {
@@ -186,7 +186,7 @@ export function DashboardPage({ data, onNavigate }: DashboardPageProps) {
                               days !== null && days <= 3 ? "var(--danger)" : "var(--muted)",
                           }}
                         >
-                          {days === 0 ? "Hari ini" : `${days} hari`}
+                          {days === 0 ? "Today" : `${days} days`}
                         </span>
                       </span>
                     </button>
@@ -197,9 +197,9 @@ export function DashboardPage({ data, onNavigate }: DashboardPageProps) {
           )}
         </Panel>
 
-        <Panel title={`Peringatan eksposur (${warnings.length})`}>
+        <Panel title={`Exposure warnings (${warnings.length})`}>
           {warnings.length === 0 ? (
-            <p className="text-[16px]">Tidak ada peringatan. Aman untuk lanjut cek publikasi.</p>
+            <p className="text-[16px]">No warnings. Safe to continue with the publication check.</p>
           ) : (
             <ul className="space-y-2">
               {warnings.map((warning) => (
@@ -230,9 +230,9 @@ export function DashboardPage({ data, onNavigate }: DashboardPageProps) {
                   type="button"
                   className="border-[3px] border-line bg-card p-2 text-left transition-colors hover:bg-paper"
                   onClick={() => onNavigate("kanban")}
-                  title={sample ? `Contoh: ${sample.title}` : "Belum ada item"}
+                  title={sample ? `Example: ${sample.title}` : "No items yet"}
                 >
-                  <p className="font-pixel text-[7px] uppercase leading-4 text-muted">{label}</p>
+                  <p className="font-pixel text-[12px] uppercase leading-4 text-muted">{label}</p>
                   <p className="mt-1 text-[20px]">{count}</p>
                 </button>
               );
@@ -243,10 +243,10 @@ export function DashboardPage({ data, onNavigate }: DashboardPageProps) {
 
       <div className="mt-5">
         <Panel
-          title="Terakhir diperbarui"
+          title="Recently updated"
           actions={
             <button type="button" className="admin-mini-btn" onClick={() => onNavigate("items")}>
-              KELOLA RISET
+              MANAGE RESEARCH
             </button>
           }
         >

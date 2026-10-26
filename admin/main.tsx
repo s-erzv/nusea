@@ -4,7 +4,7 @@ import App from "./App";
 import "../src/index.css";
 import "./index.css";
 
-const storedTheme = localStorage.getItem("nuza-theme");
+const storedTheme = localStorage.getItem("nusea-theme");
 if (
   storedTheme === "dark" ||
   (!storedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches)

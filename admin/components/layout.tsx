@@ -14,7 +14,7 @@ export function PageHeader({
   return (
     <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <p className="font-pixel text-[7px] uppercase leading-4 text-muted">{kicker}</p>
+        <p className="font-pixel text-[12px] uppercase leading-4 text-muted">{kicker}</p>
         <h1 className="mt-2 text-[20px] leading-[1.6] sm:text-[24px]">{title}</h1>
         {description ? (
           <p className="mt-2 max-w-3xl text-[18px] leading-snug text-muted">

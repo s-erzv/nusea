@@ -5,12 +5,12 @@ export function cn(...values: Array<string | false | null | undefined>): string 
 }
 
 export function formatDate(value: string): string {
-  if (!value) return "Belum diisi";
+  if (!value) return "Not set";
   const parsed = value.includes("T")
     ? new Date(value)
     : new Date(`${value}T00:00:00.000Z`);
   if (Number.isNaN(parsed.getTime())) return value;
-  return new Intl.DateTimeFormat("id-ID", {
+  return new Intl.DateTimeFormat("en-US", {
     day: "2-digit",
     month: "long",
     year: "numeric",
@@ -24,7 +24,7 @@ export function formatDateShort(value: string): string {
     ? new Date(value)
     : new Date(`${value}T00:00:00.000Z`);
   if (Number.isNaN(parsed.getTime())) return value;
-  return new Intl.DateTimeFormat("id-ID", {
+  return new Intl.DateTimeFormat("en-US", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -35,7 +35,7 @@ export function formatDateShort(value: string): string {
 export { statusProgress };
 
 export function excerpt(value: string, length = 190): string {
-  if (!value) return "Abstrak belum diisi.";
+  if (!value) return "No abstract yet.";
   if (value.length <= length) return value;
   return `${value.slice(0, length).trimEnd()}…`;
 }

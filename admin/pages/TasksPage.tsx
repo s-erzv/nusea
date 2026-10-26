@@ -70,7 +70,9 @@ export function TasksPage({ data, saveEntity, notify }: TasksPageProps) {
         );
     const backup = await saveEntity("tasks", next);
     setEditing(null);
-    notify(isNew ? "Tugas baru disimpan." : `Tugas disimpan.${backup ? ` Backup: ${backup}` : ""}`);
+    notify(
+      isNew ? "New task saved." : `Task saved.${backup ? ` Backup: ${backup}` : ""}`,
+    );
   }
 
   async function toggle(task: Task) {
@@ -79,16 +81,16 @@ export function TasksPage({ data, saveEntity, notify }: TasksPageProps) {
       entry.id === task.id ? { ...entry, done: !entry.done, updatedAt: at } : entry,
     );
     await saveEntity("tasks", next);
-    notify(task.done ? "Tugas dibuka lagi." : "Tugas ditandai selesai.");
+    notify(task.done ? "Task reopened." : "Task marked complete.");
   }
 
   async function remove(task: Task) {
-    if (!window.confirm(`Hapus tugas "${task.title}"?`)) return;
+    if (!window.confirm(`Delete task "${task.title}"?`)) return;
     await saveEntity(
       "tasks",
       data.tasks.filter((entry) => entry.id !== task.id),
     );
-    notify("Tugas dihapus.");
+    notify("Task deleted.");
   }
 
   async function quickAdd() {
@@ -111,9 +113,12 @@ export function TasksPage({ data, saveEntity, notify }: TasksPageProps) {
       };
       await saveEntity("tasks", [...data.tasks, next]);
       setQuickTitle("");
-      notify("Tugas cepat ditambahkan.");
+      notify("Quick task added.");
     } catch (error) {
-      notify(error instanceof Error ? error.message : "Gagal menambah tugas.", "error");
+      notify(
+        error instanceof Error ? error.message : "Could not add task.",
+        "error",
+      );
     } finally {
       setBusy(false);
     }
@@ -125,31 +130,31 @@ export function TasksPage({ data, saveEntity, notify }: TasksPageProps) {
   return (
     <div>
       <PageHeader
-        kicker="Kerja / Tugas"
-        title="Daftar tugas"
-        description="Tugas hari ini, jatuh tempo, dan tindak lanjut. Terkait riset bila perlu."
+        kicker="Work / Tasks"
+        title="Task list"
+        description="Today, overdue, and follow-up tasks. Link them to research when useful."
         actions={
           <button type="button" className="pixel-btn" onClick={startNew}>
-            + TUGAS BARU
+            + NEW TASK
           </button>
         }
       />
 
       <div className="mb-5 grid gap-3 sm:grid-cols-3">
-        <Panel title="Hari ini">
+        <Panel title="Today">
           <p className="text-[24px] text-orange">{dueToday.length}</p>
         </Panel>
-        <Panel title="Lewat tenggat">
+        <Panel title="Overdue">
           <p className="text-[24px]" style={{ color: overdue.length ? "var(--danger)" : undefined }}>
             {overdue.length}
           </p>
         </Panel>
-        <Panel title="Belum selesai">
+        <Panel title="Open">
           <p className="text-[24px]">{openTasks.length}</p>
         </Panel>
       </div>
 
-      <Panel title="Tambah cepat">
+      <Panel title="Quick add">
         <form
           className="grid gap-2 sm:grid-cols-[1fr_auto_auto]"
           onSubmit={(event) => {
@@ -159,20 +164,20 @@ export function TasksPage({ data, saveEntity, notify }: TasksPageProps) {
         >
           <input
             className="pixel-input admin-input"
-            placeholder="Judul tugas…"
+            placeholder="Task title…"
             value={quickTitle}
             onChange={(event) => setQuickTitle(event.target.value)}
-            aria-label="Judul tugas cepat"
+            aria-label="Quick task title"
           />
           <input
             type="date"
             className="pixel-input admin-input"
             value={quickDue}
             onChange={(event) => setQuickDue(event.target.value)}
-            aria-label="Jatuh tempo tugas cepat"
+            aria-label="Quick task due date"
           />
           <button type="submit" className="pixel-btn" disabled={busy || !quickTitle.trim()}>
-            {busy ? "…" : "TAMBAH"}
+            {busy ? "…" : "ADD"}
           </button>
         </form>
       </Panel>
@@ -181,7 +186,7 @@ export function TasksPage({ data, saveEntity, notify }: TasksPageProps) {
         <div className="mt-5">
           <SchemaEditor
             key={editing.id}
-            title={isNew ? "Tugas baru" : "Edit tugas"}
+            title={isNew ? "New task" : "Edit task"}
             initial={editing}
             fields={taskFields(data, isNew)}
             schema={taskSchema}
@@ -192,22 +197,22 @@ export function TasksPage({ data, saveEntity, notify }: TasksPageProps) {
       ) : null}
 
       <Panel
-        title={`Daftar tugas (${filtered.length}/${data.tasks.length})`}
+        title={`Task list (${filtered.length}/${data.tasks.length})`}
         actions={
           <select
             className="pixel-input admin-input admin-input-xs"
             value={statusFilter}
             onChange={(event) => setStatusFilter(event.target.value)}
-            aria-label="Filter status tugas"
+            aria-label="Filter by task status"
           >
-            <option value="all">Semua</option>
-            <option value="open">Belum selesai</option>
-            <option value="done">Selesai</option>
+            <option value="all">All</option>
+            <option value="open">Open</option>
+            <option value="done">Done</option>
           </select>
         }
       >
         {filtered.length === 0 ? (
-          <AdminEmpty>Tidak ada tugas.</AdminEmpty>
+          <AdminEmpty>No tasks.</AdminEmpty>
         ) : (
           <ul className="divide-y-2 divide-line">
             {filtered.map((task) => {
@@ -223,16 +228,16 @@ export function TasksPage({ data, saveEntity, notify }: TasksPageProps) {
                     className="mt-1 h-5 w-5 shrink-0 accent-[var(--orange)]"
                     checked={task.done}
                     onChange={() => void toggle(task)}
-                    aria-label={`Tandai ${task.title} ${task.done ? "belum selesai" : "selesai"}`}
+                    aria-label={`Mark ${task.title} as ${task.done ? "open" : "done"}`}
                   />
                   <div className="min-w-0 flex-1">
                     <p className={task.done ? "line-through opacity-60" : "font-bold"}>
                       {task.title}
                     </p>
                     <p className="mt-1 text-[15px] text-muted">
-                      {task.dueAt ? `Tenggat ${formatDate(task.dueAt)}` : "Tanpa tenggat"}
+                      {task.dueAt ? `Due ${formatDate(task.dueAt)}` : "No due date"}
                       {days !== null && !task.done
-                        ? ` · ${days < 0 ? `${Math.abs(days)} hari lewat` : days === 0 ? "hari ini" : `${days} hari lagi`}`
+                        ? ` · ${days < 0 ? `${Math.abs(days)} days overdue` : days === 0 ? "today" : `in ${days} days`}`
                         : ""}
                       {` · ${PRIORITY_LABELS[task.priority]}`}
                     </p>
@@ -246,7 +251,11 @@ export function TasksPage({ data, saveEntity, notify }: TasksPageProps) {
                     ) : null}
                   </div>
                   <div className="flex flex-wrap gap-1">
-                    {isOverdue ? <span className="admin-pill" data-public={false}>Lewat</span> : null}
+                    {isOverdue ? (
+                      <span className="admin-pill" data-public={false}>
+                        Overdue
+                      </span>
+                    ) : null}
                     <button
                       type="button"
                       className="admin-mini-btn"
@@ -262,7 +271,7 @@ export function TasksPage({ data, saveEntity, notify }: TasksPageProps) {
                       className="admin-mini-btn admin-mini-danger"
                       onClick={() => void remove(task)}
                     >
-                      HAPUS
+                      DELETE
                     </button>
                   </div>
                 </li>

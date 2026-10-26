@@ -7,7 +7,7 @@ export function PixelAvatar({ size = "hero" }: PixelAvatarProps) {
   return (
     <svg
       role="img"
-      aria-label="Avatar pixel peneliti Nuza"
+      aria-label="Pixel avatar of the Nusea researcher"
       viewBox="0 0 18 18"
       className={`sprite ${dimension}`}
       shapeRendering="crispEdges"

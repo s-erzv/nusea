@@ -116,7 +116,7 @@ export class DataStore {
           fromStatus: before.status,
           toStatus: item.status,
           changedAt: now,
-          note: "Status diubah dari form admin.",
+          note: "Status changed from the admin form.",
         }),
       ];
     });
@@ -131,15 +131,15 @@ export class DataStore {
   async transitionItemStatus(
     itemId: string,
     toStatus: ResearchStatus,
-    note = "Dipindahkan dari kanban.",
+    note = "Moved from the kanban.",
   ): Promise<{ item: ResearchItem; entry: HistoryEntry }> {
     if (!(ALL_STATUSES as readonly string[]).includes(toStatus)) {
-      throw new Error(`Status tidak dikenal: ${toStatus}`);
+      throw new Error(`Unknown status: ${toStatus}`);
     }
 
     const items = await this.read("items");
     const index = items.findIndex((item) => item.id === itemId);
-    if (index === -1) throw new Error(`Riset tidak ditemukan: ${itemId}`);
+    if (index === -1) throw new Error(`Research item not found: ${itemId}`);
 
     const current = items[index];
     const now = new Date().toISOString();

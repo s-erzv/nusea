@@ -37,9 +37,12 @@ function IdeaCard({ idea, onEdit, onDelete, onSaveScores, notify }: IdeaCardProp
     setSaving(true);
     try {
       await onSaveScores(scores);
-      notify(`Skor "${idea.title}" disimpan (${total}/40).`);
+      notify(`Score for "${idea.title}" saved (${total}/40).`);
     } catch (error) {
-      notify(error instanceof Error ? error.message : "Gagal menyimpan skor.", "error");
+      notify(
+        error instanceof Error ? error.message : "Could not save scores.",
+        "error",
+      );
     } finally {
       setSaving(false);
     }
@@ -49,7 +52,7 @@ function IdeaCard({ idea, onEdit, onDelete, onSaveScores, notify }: IdeaCardProp
     <article className="admin-idea-card">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <p className="font-pixel text-[7px] uppercase leading-4 text-muted">
+          <p className="font-pixel text-[12px] uppercase leading-4 text-muted">
             Loot / {idea.cluster}
           </p>
           <h2 className="mt-1 text-[16px] leading-snug">{idea.title}</h2>
@@ -79,15 +82,17 @@ function IdeaCard({ idea, onEdit, onDelete, onSaveScores, notify }: IdeaCardProp
                   [key]: Math.max(0, Math.min(10, Number(event.target.value) || 0)),
                 })
               }
-              aria-label={`Skor ${IDEA_SCORE_LABELS[key]} untuk ${idea.title}`}
+              aria-label={`${IDEA_SCORE_LABELS[key]} score for ${idea.title}`}
             />
           </label>
         ))}
       </div>
 
-      <p className="mt-3 text-[16px] leading-snug">{idea.problem || "Belum ada problem."}</p>
+      <p className="mt-3 text-[16px] leading-snug">
+        {idea.problem || "No problem statement yet."}
+      </p>
       <p className="mt-2 text-[15px] leading-snug text-muted">
-        {idea.whyOnChain || "Belum ada alasan on-chain."}
+        {idea.whyOnChain || "No on-chain rationale yet."}
       </p>
 
       <div className="mt-3 flex flex-wrap gap-1">
@@ -97,16 +102,16 @@ function IdeaCard({ idea, onEdit, onDelete, onSaveScores, notify }: IdeaCardProp
           disabled={!dirty || saving}
           onClick={() => void saveScores()}
         >
-          {saving ? "SIMPAN…" : "SIMPAN SKOR"}
+          {saving ? "SAVING…" : "SAVE SCORES"}
         </button>
         <button type="button" className="admin-mini-btn" onClick={onEdit}>
           EDIT
         </button>
         <button type="button" className="admin-mini-btn admin-mini-danger" onClick={onDelete}>
-          HAPUS
+          DELETE
         </button>
       </div>
-      {saving ? <p className="sr-only">Menyimpan skor</p> : null}
+      {saving ? <p className="sr-only">Saving scores</p> : null}
     </article>
   );
 }
@@ -150,7 +155,9 @@ export function IdeasPage({ data, saveEntity, notify }: IdeasPageProps) {
         );
     const backup = await saveEntity("ideas", next);
     setEditing(null);
-    notify(isNew ? "Ide baru disimpan." : `Ide disimpan.${backup ? ` Backup: ${backup}` : ""}`);
+    notify(
+      isNew ? "New idea saved." : `Idea saved.${backup ? ` Backup: ${backup}` : ""}`,
+    );
   }
 
   async function saveScores(idea: Idea, scores: Idea["scores"]) {
@@ -162,23 +169,23 @@ export function IdeasPage({ data, saveEntity, notify }: IdeasPageProps) {
   }
 
   async function remove(idea: Idea) {
-    if (!window.confirm(`Hapus ide "${idea.title}"?`)) return;
+    if (!window.confirm(`Delete idea "${idea.title}"?`)) return;
     await saveEntity(
       "ideas",
       data.ideas.filter((entry) => entry.id !== idea.id),
     );
-    notify("Ide dihapus.");
+    notify("Idea deleted.");
   }
 
   return (
     <div>
       <PageHeader
-        kicker="Bank ide / Loot"
-        title="Bank ide"
-        description="Skor 0–10 per dimensi. Daftar otomatis diurutkan dari total skor tertinggi."
+        kicker="Idea bank / Loot"
+        title="Idea bank"
+        description="Scores from 0–10 per dimension. The list is sorted by total score, highest first."
         actions={
           <button type="button" className="pixel-btn" onClick={startNew}>
-            + IDE BARU
+            + NEW IDEA
           </button>
         }
       />
@@ -187,7 +194,7 @@ export function IdeasPage({ data, saveEntity, notify }: IdeasPageProps) {
         <div className="mb-5">
           <SchemaEditor
             key={editing.id}
-            title={isNew ? "Ide baru" : `Edit: ${editing.title}`}
+            title={isNew ? "New idea" : `Edit: ${editing.title}`}
             initial={editing}
             fields={ideaFields(isNew)}
             schema={ideaSchema}
@@ -198,15 +205,15 @@ export function IdeasPage({ data, saveEntity, notify }: IdeasPageProps) {
       ) : null}
 
       <Panel
-        title={`Daftar ide (${filtered.length}/${data.ideas.length})`}
+        title={`Idea list (${filtered.length}/${data.ideas.length})`}
         actions={
           <select
             className="pixel-input admin-input admin-input-xs"
             value={statusFilter}
             onChange={(event) => setStatusFilter(event.target.value)}
-            aria-label="Filter status ide"
+            aria-label="Filter by idea status"
           >
-            <option value="all">Semua status</option>
+            <option value="all">All statuses</option>
             {ideaStatusOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -216,7 +223,7 @@ export function IdeasPage({ data, saveEntity, notify }: IdeasPageProps) {
         }
       >
         {filtered.length === 0 ? (
-          <AdminEmpty>Belum ada ide.</AdminEmpty>
+          <AdminEmpty>No ideas yet.</AdminEmpty>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
             {filtered.map((idea) => (

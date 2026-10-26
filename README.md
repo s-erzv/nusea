@@ -1,33 +1,33 @@
-# Nuza Lab
+# Nusea
 
-Portofolio riset publik dan back office lokal untuk Sarah Fajriah Rahmah. Situs publik menampilkan riset, aset, peta riset, dan profil. Back office berjalan hanya di `127.0.0.1` untuk mengelola data, pipeline, hibah, ide, tugas, sumber, venue, backup, dan publikasi.
+Public research portfolio and local back office for Sarah Fajriah Rahmah. The public site presents research, public assets, a research map, a database view, and a profile. The back office runs only on `127.0.0.1` for managing data, pipeline, grants, ideas, tasks, sources, venues, backups, and publishing.
 
 ## Stack
 
 - Vite + React 19 + TypeScript
 - Tailwind CSS
-- Express + Vite middleware untuk admin lokal
-- Zod untuk validasi data
-- Vitest untuk test
-- Netlify untuk deploy situs publik
+- Express + Vite middleware for the local admin
+- Zod for data validation
+- Vitest for tests
+- Netlify for the public deployment
 
-## Prasyarat
+## Requirements
 
-- Node.js 22 atau lebih baru
-- pnpm 10.34.3 (lihat `packageManager` di `package.json`)
+- Node.js 22 or newer
+- pnpm 10.34.3 (see `packageManager` in `package.json`)
 
-Gunakan pnpm, bukan npm.
+Use pnpm, not npm.
 
 ```bash
 pnpm install
 ```
 
-## Menjalankan
+## Run
 
-Jalankan situs publik dan admin di dua terminal terpisah.
+Run the public site and admin in separate terminals.
 
 ```bash
-# Terminal 1 — situs publik
+# Terminal 1 — public site
 pnpm dev
 # http://127.0.0.1:5173
 
@@ -36,33 +36,33 @@ pnpm admin
 # http://127.0.0.1:5174
 ```
 
-Saat admin mulai, terminal mencetak token sesi acak. Tempel token tersebut di halaman gate admin. Token berubah setiap server admin dijalankan ulang dan tidak disimpan di repo.
+When the admin starts, the terminal prints a random session token. Paste it into the admin gate. The token changes every time the admin server restarts and is never stored in the repo.
 
-Port admin dapat diganti:
+Change the admin port if needed:
 
 ```bash
 ADMIN_PORT=5180 pnpm admin
 ```
 
-## Script
+## Scripts
 
-| Perintah | Fungsi |
+| Command | Purpose |
 | --- | --- |
-| `pnpm dev` | Situs publik dengan Vite di `127.0.0.1:5173` |
-| `pnpm admin` | Back office lokal di `127.0.0.1:5174` |
-| `pnpm typecheck` | Typecheck situs publik dan admin |
-| `pnpm lint` | ESLint tanpa warning |
-| `pnpm test` | Semua test Vitest |
-| `pnpm publish:data` | Buat `data/public/` dari `data/private/` |
-| `pnpm check:leak` | Pindai `dist/` terhadap ID, URL, dan field privat |
-| `pnpm build` | Typecheck + build produksi + `check:leak` |
-| `pnpm preview` | Preview hasil build di `127.0.0.1` |
+| `pnpm dev` | Public site with Vite at `127.0.0.1:5173` |
+| `pnpm admin` | Local back office at `127.0.0.1:5174` |
+| `pnpm typecheck` | Typecheck the public site and admin |
+| `pnpm lint` | ESLint with zero warnings |
+| `pnpm test` | Full Vitest suite |
+| `pnpm publish:data` | Build `data/public/` from `data/private/` |
+| `pnpm check:leak` | Scan `dist/` for private IDs, URLs, and fields |
+| `pnpm build` | Typecheck + production build + `check:leak` |
+| `pnpm preview` | Preview the production build at `127.0.0.1` |
 
-## Struktur data
+## Data structure
 
 ```text
 data/
-├── private/          # sumber kebenaran lengkap, jangan diedit dari UI publik
+├── private/          # full source of truth, gitignored, never edited from the public UI
 │   ├── profile.json
 │   ├── items.json
 │   ├── assets.json
@@ -72,122 +72,134 @@ data/
 │   ├── ideas.json
 │   ├── tasks.json
 │   └── history.json
-├── public/           # hasil generate, hanya field yang diizinkan
+├── public/           # generated output, allowlisted fields only
 │   ├── profile.json
 │   ├── items.json
 │   ├── assets.json
 │   ├── venues.json
 │   ├── grants.json
 │   └── ideas.json
-└── .backups/         # backup otomatis, diabaikan git
+└── .backups/         # automatic backups, gitignored
 ```
 
-`data/private/` adalah sumber lengkap. Jangan mengedit `data/public/` secara manual; file itu dibuat ulang oleh `pnpm publish:data`.
+`data/private/` is the complete source and is intentionally gitignored. Keep it in a private backup, not in this repository. A fresh clone only needs `data/public/` to build the public site; restore your private files before running `pnpm admin`.
 
-## Batas publik dan pemeriksaan kebocoran
+Do not edit `data/public/` by hand; `pnpm publish:data` regenerates it.
 
-Allowlist ada di:
+## Public boundary and leak checks
 
-- `shared/public-schemas.ts` — daftar field yang boleh keluar
-- `shared/public-data.ts` — filter `visibility: "public"` dan pembentukan bundle publik
+The allowlist lives in:
 
-Hanya record dengan `visibility: "public"` yang masuk ke `data/public/`. Field baru tetap privat sampai ditambahkan secara eksplisit ke allowlist.
+- `shared/public-schemas.ts` — fields allowed to leave the private store
+- `shared/public-data.ts` — filters `visibility: "public"` and builds the public bundle
 
-`pnpm check:leak` memeriksa hasil build terhadap:
+Only records with `visibility: "public"` enter `data/public/`. New fields stay private until explicitly added to the allowlist.
 
-- ID dan URL milik record privat
-- Nama field privat seperti `notes`, `tasks`, `sources`, `stageNote`, `localPath`, `itemIds`, `howVerified`, `fileOnHand`, dan `submitChecklist`
-- Referensi ke `data/private`
+`pnpm check:leak` inspects the production build for:
 
-Build harus gagal jika ada kebocoran. Jangan melewati pemeriksaan ini.
+- IDs and URLs belonging to private records
+- Private field names such as `notes`, `tasks`, `sources`, `stageNote`, `localPath`, `itemIds`, `howVerified`, `fileOnHand`, and `submitChecklist`
+- References to `data/private`
 
-Situs publik hanya mengimpor `data/public/` dan `shared/`; `src/` tidak boleh mengimpor `admin/`.
+The build must fail on any leak. Do not bypass this check.
+
+The public site only imports `data/public/` and `shared/`; `src/` must not import `admin/`.
+
+## Public pages
+
+- `/` — overview, featured research, database preview
+- `/database` — public asset and spreadsheet links
+- `/pipeline` — research pipeline and activity
+- `/about` — profile and contact
+- `/research/:slug` — research detail
+
+Only public assets appear in `/database`. Private spreadsheet links and local paths stay inside the back office.
 
 ## Back office
 
-Tab yang tersedia:
+Available tabs:
 
-- **Dashboard** — ringkasan riset, status, tenggat, dan aktivitas.
-- **Riset** — CRUD semua field riset, termasuk catatan tahap dan checklist privat.
-- **Pipeline** — kanban status dengan pencatatan riwayat.
-- **Inventory** — aset privat/publik, tautan, dan pemeriksaan link.
-- **Sumber** — log sitasi dan verifikasi.
-- **Hibah** — skema, tenggat, dan tahap seleksi.
-- **Bank Ide** — skor ide dan status.
-- **Tugas** — tambah cepat dan tandai selesai.
-- **Venue** — daftar jurnal/konferensi.
-- **Profil** — mode baca lalu edit.
-- **Data** — unduh/unggah JSON, impor/ekspor CSV, dan backup.
-- **Publikasikan** — preview, commit, dan push.
+- **Dashboard** — research, status, deadlines, and activity summary.
+- **Research** — CRUD for every research field, including stage notes and private checklists.
+- **Pipeline** — status kanban with history tracking.
+- **Inventory** — private/public assets, links, and link checks.
+- **Sources** — citation and verification log.
+- **Grants** — schemes, deadlines, and selection stages.
+- **Idea Bank** — idea scores and status.
+- **Tasks** — quick add and completion tracking.
+- **Venues** — journals, conferences, and grant venues.
+- **Profile** — read mode followed by editing.
+- **Data** — JSON upload/download, CSV import/export, and backups.
+- **Publish** — preview, commit, and push.
 
-Setiap penyimpanan divalidasi Zod di server dan membuat backup file sebelumnya. Perubahan status lewat form maupun kanban dicatat ke `data/private/history.json`.
+Every save is validated with Zod on the server and creates a backup of the previous file. Status changes from forms and the kanban are recorded in `data/private/history.json`.
 
-### Backup dan restore
+### Backups and restore
 
-- Backup otomatis dibuat sebelum file ditulis.
-- Maksimal 20 backup terakhir per file disimpan di `data/.backups/`.
-- Backup dapat diunduh dari tab **Data**.
-- Restore manual: unduh backup, lalu unggah lewat panel JSON di tab **Data**. Upload mengganti seluruh file setelah validasi.
+- A backup is created before a file is written.
+- The latest 20 backups per file are kept in `data/.backups/`.
+- Backups can be downloaded from the **Data** tab.
+- Manual restore: download a backup, then upload it through the JSON panel in **Data**. Upload replaces the whole file after validation.
 
-Backup berisi data privat. Jangan membagikannya.
+Backups contain private data. Do not share them.
 
 ### CSV
 
-Tab **Data** menyediakan impor/ekspor CSV untuk riset dan hibah.
+The **Data** tab supports CSV import/export for research and grants.
 
-- Gunakan hasil ekspor sebagai template kolom.
-- Daftar (mis. `keywords`, `authors`, `team`) dipisahkan dengan `|`.
-- Boolean memakai `true`/`false`.
-- Baris dengan ID yang sama akan memperbarui record; ID baru akan ditambahkan.
-- File CSV divalidasi ulang oleh server sebelum disimpan.
-- Untuk riset, perubahan status lewat impor juga mencatat riwayat.
+- Use an exported file as the column template.
+- Lists (for example `keywords`, `authors`, `team`) are separated with `|`.
+- Booleans use `true`/`false`.
+- Rows with the same ID update the record; new IDs are appended.
+- The server validates the CSV again before saving.
+- For research, status changes made through import also create history entries.
 
-## Alur publikasi
+## Publishing flow
 
-1. Edit data di admin dan simpan.
-2. Buka **Publikasikan** lalu jalankan **Preview**.
-3. Preview menjalankan `publish:data`, build produksi, typecheck, dan `check:leak`.
-4. Jika preview lolos, periksa diff `data/public/`.
-5. **Commit** hanya men-stage `data/private/` dan `data/public/`.
-6. **Push** memicu build Netlify.
+1. Edit and save data in the admin.
+2. Open **Publish** and run **Preview**.
+3. Preview runs `publish:data`, the production build, typecheck, and `check:leak`.
+4. If preview passes, review the `data/public/` diff.
+5. **Commit** stages only `data/private/` and `data/public/`.
+6. **Push** triggers the Netlify build.
 
-Commit dinonaktifkan jika preview gagal. Push selalu meminta konfirmasi.
+Commit is disabled when preview fails. Push always asks for confirmation.
 
-Perintah manual ekuivalen:
+Equivalent manual commands:
 
 ```bash
 pnpm publish:data
 pnpm build
 git add data/private data/public
-git commit -m "data: publikasikan YYYY-MM-DD"
+git commit -m "data: publish YYYY-MM-DD"
 git push
 ```
 
-## Keamanan
+## Security
 
-Back office adalah alat lokal, bukan aplikasi yang boleh diekspos ke internet.
+The back office is a local tool and must never be exposed to the internet.
 
-- Server admin hanya listen di `127.0.0.1`.
-- Koneksi non-loopback ditolak dengan `403`.
-- Semua endpoint `/api` membutuhkan token sesi; token salah menghasilkan `401`.
-- Token dibuat acak per proses dan dibandingkan dengan perbandingan waktu konstan.
-- Admin tidak ikut dibangun ke `dist/`; build publik hanya memakai `index.html` dan `src/`.
-- `data/.backups/` dan `assets-private/` diabaikan git.
+- The admin server listens only on `127.0.0.1`.
+- Non-loopback connections are rejected with `403`.
+- Every `/api` endpoint requires a session token; an invalid token returns `401`.
+- The token is random per process and compared in constant time.
+- The admin is not built into `dist/`; the public build uses only `index.html` and `src/`.
+- `data/.backups/` and `assets-private/` are gitignored.
 
-Peringatan penting: alur commit admin men-stage `data/private/`. Repo remote harus privat. Jika repo publik, jangan gunakan commit data dari admin dan pindahkan `data/private/` keluar dari git. Data privat yang pernah di-commit tetap ada di riwayat git sampai riwayat dibersihkan.
+Important: the admin commit flow stages `data/private/`. The remote repo must be private. If the repo is public, do not use admin commits and move `data/private/` outside git. Private data that has already been committed remains in git history until the history is rewritten.
 
-## Deploy Netlify
+## Netlify deploy
 
-`netlify.toml` sudah mengatur:
+`netlify.toml` already configures:
 
 - Build command: `pnpm run build`
 - Publish directory: `dist`
 - Node.js 22
-- SPA redirect ke `index.html`
+- SPA redirect to `index.html`
 
-Hubungkan repo ke Netlify. Jangan menambahkan server admin ke deployment. `data/private/` tersedia di lingkungan build Netlify karena repo di-commit, tetapi tidak pernah masuk ke bundle publik; `check:leak` memverifikasi ini.
+Connect the repo to Netlify. Never deploy the admin server. `data/private/` is available in the Netlify build environment because it is committed, but it never enters the public bundle; `check:leak` verifies this.
 
-## Verifikasi
+## Verification
 
 ```bash
 pnpm typecheck
@@ -196,9 +208,9 @@ pnpm test
 pnpm build
 ```
 
-Test mencakup allowlist publik, deteksi kebocoran, guard server, backup/atomic write, transisi status dan riwayat, serta CSV.
+Tests cover the public allowlist, leak detection, server guard, backup/atomic writes, status transitions and history, and CSV parsing.
 
-## Catatan
+## Notes
 
-- Font `Press Start 2P` dan `VT323` dimuat dari Google Fonts; tanpa internet akan memakai fallback monospace.
-- Nama situs, sosial, dan program studi saat ini memakai nilai yang tersedia di `data/private/profile.json`.
+- All text uses Poppins. The pixel feel comes from borders, shadows, and the avatar, not the typeface.
+- Site name, social links, and study program currently use values from `data/private/profile.json`.

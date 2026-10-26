@@ -81,10 +81,10 @@ export function ItemsPage({ data, saveEntity, notify }: ItemsPageProps) {
       (item) => item.id === value.id && (!isNew || item.id !== editing?.id),
     );
     if (isNew && duplicate) {
-      throw new Error(`ID "${value.id}" sudah dipakai.`);
+      throw new Error(`ID "${value.id}" is already in use.`);
     }
     if (isNew && slugify(value.id) !== value.id) {
-      throw new Error("ID baru harus berupa slug huruf kecil, angka, dan tanda hubung.");
+      throw new Error("New IDs must be lowercase slugs using letters, numbers, and hyphens.");
     }
     const at = nowIso();
     const next = isNew
@@ -96,29 +96,33 @@ export function ItemsPage({ data, saveEntity, notify }: ItemsPageProps) {
     setEditing(null);
     notify(
       isNew
-        ? "Riset baru disimpan."
-        : `Riset disimpan.${backup ? ` Backup: ${backup}` : ""}`,
+        ? "New research saved."
+        : `Research saved.${backup ? ` Backup: ${backup}` : ""}`,
     );
   }
 
   async function remove(item: ResearchItem) {
-    if (!window.confirm(`Hapus riset "${item.title}"? Backup dibuat sebelum menghapus.`)) {
+    if (
+      !window.confirm(
+        `Delete research "${item.title}"? A backup will be created first.`,
+      )
+    ) {
       return;
     }
     const next = data.items.filter((entry) => entry.id !== item.id);
     await saveEntity("items", next);
-    notify("Riset dihapus.");
+    notify("Research deleted.");
   }
 
   return (
     <div>
       <PageHeader
-        kicker="CRUD / Riset"
-        title="Kelola riset"
-        description="Semua field termasuk catatan tahap dan checklist privat tersimpan di data/private/items.json."
+        kicker="CRUD / Research"
+        title="Manage research"
+        description="All fields, including stage notes and private checklists, are stored in data/private/items.json."
         actions={
           <button type="button" className="pixel-btn" onClick={startNew}>
-            + RISET BARU
+            + NEW RESEARCH
           </button>
         }
       />
@@ -127,7 +131,7 @@ export function ItemsPage({ data, saveEntity, notify }: ItemsPageProps) {
         <div className="mb-5">
           <SchemaEditor
             key={editing.id}
-            title={isNew ? "Riset baru" : `Edit: ${editing.title}`}
+            title={isNew ? "New research" : `Edit: ${editing.title}`}
             initial={editing}
             fields={itemFields(data, isNew)}
             schema={itemSchema}
@@ -138,10 +142,10 @@ export function ItemsPage({ data, saveEntity, notify }: ItemsPageProps) {
       ) : null}
 
       <Panel
-        title={`Daftar riset (${filtered.length}/${data.items.length})`}
+        title={`Research list (${filtered.length}/${data.items.length})`}
         actions={
           <span className="text-[16px] text-muted">
-            {data.items.filter((item) => item.visibility === "public").length} publik
+            {data.items.filter((item) => item.visibility === "public").length} public
           </span>
         }
       >
@@ -149,18 +153,18 @@ export function ItemsPage({ data, saveEntity, notify }: ItemsPageProps) {
           <input
             type="search"
             className="pixel-input admin-input"
-            placeholder="Cari judul, ID, kata kunci…"
+            placeholder="Search title, ID, keywords…"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            aria-label="Cari riset"
+            aria-label="Search research"
           />
           <select
             className="pixel-input admin-input"
             value={typeFilter}
             onChange={(event) => setTypeFilter(event.target.value)}
-            aria-label="Filter jenis"
+            aria-label="Filter by type"
           >
-            <option value="all">Semua jenis</option>
+            <option value="all">All types</option>
             {typeOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -171,9 +175,9 @@ export function ItemsPage({ data, saveEntity, notify }: ItemsPageProps) {
             className="pixel-input admin-input"
             value={statusFilter}
             onChange={(event) => setStatusFilter(event.target.value)}
-            aria-label="Filter status"
+            aria-label="Filter by status"
           >
-            <option value="all">Semua status</option>
+            <option value="all">All statuses</option>
             {statusOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -184,9 +188,9 @@ export function ItemsPage({ data, saveEntity, notify }: ItemsPageProps) {
             className="pixel-input admin-input"
             value={visibilityFilter}
             onChange={(event) => setVisibilityFilter(event.target.value)}
-            aria-label="Filter visibilitas"
+            aria-label="Filter by visibility"
           >
-            <option value="all">Semua visibilitas</option>
+            <option value="all">All visibility</option>
             {visibilityOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -196,18 +200,18 @@ export function ItemsPage({ data, saveEntity, notify }: ItemsPageProps) {
         </div>
 
         {filtered.length === 0 ? (
-          <AdminEmpty>Tidak ada riset yang cocok.</AdminEmpty>
+          <AdminEmpty>No matching research.</AdminEmpty>
         ) : (
           <div className="admin-table-wrap">
             <table className="admin-table">
               <thead>
                 <tr>
-                  <th>Judul</th>
-                  <th>Jenis</th>
+                  <th>Title</th>
+                  <th>Type</th>
                   <th>Status</th>
-                  <th>Visibilitas</th>
-                  <th>Diperbarui</th>
-                  <th>Aksi</th>
+                  <th>Visibility</th>
+                  <th>Updated</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -221,7 +225,7 @@ export function ItemsPage({ data, saveEntity, notify }: ItemsPageProps) {
                     <td>{STATUS_LABELS[item.status]}</td>
                     <td>
                       <span className="admin-pill" data-public={item.visibility === "public"}>
-                        {item.visibility === "public" ? "Publik" : "Privat"}
+                        {item.visibility === "public" ? "Public" : "Private"}
                       </span>
                     </td>
                     <td>{formatDate(item.updatedAt)}</td>
@@ -242,7 +246,7 @@ export function ItemsPage({ data, saveEntity, notify }: ItemsPageProps) {
                           className="admin-mini-btn admin-mini-danger"
                           onClick={() => void remove(item)}
                         >
-                          HAPUS
+                          DELETE
                         </button>
                       </div>
                     </td>

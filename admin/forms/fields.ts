@@ -22,71 +22,71 @@ function idField(isNew: boolean): FieldDef {
     type: "text",
     readOnly: !isNew,
     help: isNew
-      ? "Huruf kecil, angka, tanda hubung. Dipakai di URL publik."
-      : "ID tidak bisa diubah setelah dibuat.",
+      ? "Lowercase letters, numbers, hyphens. Used in public URLs."
+      : "The ID cannot be changed after creation.",
   };
 }
 
 const visibilityField: FieldDef = {
   key: "visibility",
-  label: "Visibilitas",
+  label: "Visibility",
   type: "select",
   options: visibilityOptions,
-  help: "Hanya item publik yang diekspor ke situs publik.",
+  help: "Only public items are exported to the public site.",
 };
 
 function itemOptions(data: AdminData) {
   return [
-    { value: "", label: "— Tidak terkait —" },
+    { value: "", label: "— Not linked —" },
     ...data.items
       .map((item) => ({ value: item.id, label: item.title }))
-      .sort((a, b) => a.label.localeCompare(b.label, "id")),
+      .sort((a, b) => a.label.localeCompare(b.label, "en")),
   ];
 }
 
 export function itemFields(data: AdminData, isNew: boolean): FieldDef[] {
   return [
     idField(isNew),
-    { key: "title", label: "Judul", type: "text", wide: true },
-    { key: "type", label: "Jenis", type: "select", options: typeOptions },
+    { key: "title", label: "Title", type: "text", wide: true },
+    { key: "type", label: "Type", type: "select", options: typeOptions },
     { key: "status", label: "Status", type: "select", options: statusOptions },
-    { key: "stageNote", label: "Catatan tahap", type: "textarea", rows: 3 },
-    { key: "abstract", label: "Abstrak", type: "textarea", rows: 7 },
-    { key: "keywords", label: "Kata kunci (satu per baris)", type: "list" },
-    { key: "authors", label: "Penulis (satu per baris)", type: "list" },
-    { key: "advisors", label: "Pembimbing (satu per baris)", type: "list" },
+    { key: "stageNote", label: "Stage note", type: "textarea", rows: 3 },
+    { key: "abstract", label: "Abstract", type: "textarea", rows: 7 },
+    { key: "keywords", label: "Keywords (one per line)", type: "list" },
+    { key: "authors", label: "Authors (one per line)", type: "list" },
+    { key: "advisors", label: "Advisors (one per line)", type: "list" },
     {
       key: "venueId",
       label: "Venue",
       type: "select",
       options: [
-        { value: "", label: "— Tanpa venue —" },
+        { value: "", label: "— No venue —" },
         ...data.venues.map((venue) => ({ value: venue.id, label: venue.name })),
       ],
     },
-    { key: "submittedAt", label: "Tanggal submit", type: "date" },
-    { key: "decisionAt", label: "Tanggal keputusan", type: "date" },
-    { key: "publishedAt", label: "Tanggal terbit", type: "date" },
+    { key: "submittedAt", label: "Submission date", type: "date" },
+    { key: "decisionAt", label: "Decision date", type: "date" },
+    { key: "publishedAt", label: "Publication date", type: "date" },
     { key: "doi", label: "DOI", type: "text", placeholder: "10.xxxx/xxxxx" },
-    { key: "publicUrl", label: "URL publik", type: "url" },
-    { key: "priority", label: "Prioritas", type: "select", options: priorityOptions },
+    { key: "publicUrl", label: "Public URL", type: "url" },
+    { key: "priority", label: "Priority", type: "select", options: priorityOptions },
     {
       key: "progressPct",
-      label: "Progres manual (%)",
+      label: "Manual progress (%)",
       type: "number",
       min: 0,
       max: 100,
     },
-    { key: "pinned", label: "Sematkan di quest board", type: "checkbox" },
+    { key: "pinned", label: "Pin to research board", type: "checkbox" },
     visibilityField,
     {
       key: "submitChecklist.plagiarismChecked",
-      label: "Cek plagiasi selesai",
+      label: "Plagiarism check complete",
       type: "checkbox",
     },
     {
       key: "submitChecklist.finalFileReady",
-      label: "File final siap",
+      label: "Final file ready",
       type: "checkbox",
     },
   ];
@@ -96,23 +96,23 @@ export function assetFields(data: AdminData, isNew: boolean): FieldDef[] {
   return [
     idField(isNew),
     { key: "label", label: "Label", type: "text", wide: true },
-    { key: "kind", label: "Jenis", type: "select", options: assetKindOptions },
+    { key: "kind", label: "Type", type: "select", options: assetKindOptions },
     { key: "url", label: "URL", type: "url" },
     {
       key: "localPath",
-      label: "Path lokal privat",
+      label: "Private local path",
       type: "text",
-      help: "Contoh: assets-private/cropsage/dataset.csv. Tidak diekspor.",
+      help: "Example: assets-private/cropsage/dataset.csv. Not exported.",
     },
-    { key: "tags", label: "Tag (satu per baris)", type: "list" },
+    { key: "tags", label: "Tags (one per line)", type: "list" },
     {
       key: "itemIds",
-      label: "Kaitkan ke riset",
+      label: "Link to research",
       type: "checks",
       options: itemOptions(data).slice(1),
     },
-    { key: "isPrimary", label: "Aset utama", type: "checkbox" },
-    { key: "note", label: "Catatan privat", type: "textarea", rows: 3 },
+    { key: "isPrimary", label: "Primary asset", type: "checkbox" },
+    { key: "note", label: "Private note", type: "textarea", rows: 3 },
     visibilityField,
   ];
 }
@@ -120,23 +120,23 @@ export function assetFields(data: AdminData, isNew: boolean): FieldDef[] {
 export function venueFields(isNew: boolean): FieldDef[] {
   return [
     idField(isNew),
-    { key: "name", label: "Nama venue", type: "text", wide: true },
-    { key: "kind", label: "Jenis", type: "select", options: venueKindOptions },
+    { key: "name", label: "Venue name", type: "text", wide: true },
+    { key: "kind", label: "Type", type: "select", options: venueKindOptions },
     {
       key: "indexLevel",
-      label: "Tingkat indeks",
+      label: "Index level",
       type: "select",
       options: indexOptions,
     },
     { key: "url", label: "URL", type: "url" },
     {
       key: "typicalReviewWeeks",
-      label: "Estimasi review (minggu)",
+      label: "Typical review (weeks)",
       type: "number",
       min: 0,
       max: 520,
     },
-    { key: "notes", label: "Catatan privat", type: "textarea", rows: 3 },
+    { key: "notes", label: "Private notes", type: "textarea", rows: 3 },
     visibilityField,
   ];
 }
@@ -146,22 +146,22 @@ export function sourceFields(data: AdminData, isNew: boolean): FieldDef[] {
     idField(isNew),
     {
       key: "itemId",
-      label: "Riset",
+      label: "Research",
       type: "select",
       options: itemOptions(data).slice(1),
     },
-    { key: "citationText", label: "Teks sitasi", type: "textarea", rows: 4 },
-    { key: "urlOrDoi", label: "URL atau DOI", type: "text", wide: true },
+    { key: "citationText", label: "Citation text", type: "textarea", rows: 4 },
+    { key: "urlOrDoi", label: "URL or DOI", type: "text", wide: true },
     {
       key: "verificationStatus",
-      label: "Status verifikasi",
+      label: "Verification status",
       type: "select",
       options: verificationOptions,
     },
-    { key: "verifiedAt", label: "Tanggal verifikasi", type: "date" },
-    { key: "howVerified", label: "Cara verifikasi", type: "textarea", rows: 3 },
-    { key: "fileOnHand", label: "Dokumen sudah dipegang", type: "checkbox" },
-    { key: "notes", label: "Catatan privat", type: "textarea", rows: 3 },
+    { key: "verifiedAt", label: "Verification date", type: "date" },
+    { key: "howVerified", label: "How it was verified", type: "textarea", rows: 3 },
+    { key: "fileOnHand", label: "Document on hand", type: "checkbox" },
+    { key: "notes", label: "Private notes", type: "textarea", rows: 3 },
   ];
 }
 
@@ -170,31 +170,31 @@ export function grantFields(data: AdminData, isNew: boolean): FieldDef[] {
     idField(isNew),
     {
       key: "itemId",
-      label: "Riset induk",
+      label: "Parent research",
       type: "select",
       options: itemOptions(data),
     },
-    { key: "scheme", label: "Skema", type: "text" },
-    { key: "cluster", label: "Klaster", type: "select", options: grantClusterOptions },
+    { key: "scheme", label: "Scheme", type: "text" },
+    { key: "cluster", label: "Cluster", type: "select", options: grantClusterOptions },
     {
       key: "maxFundingIdr",
-      label: "Dana maksimum (Rp)",
+      label: "Maximum funding (IDR)",
       type: "number",
       min: 0,
       step: 1000000,
     },
-    { key: "piName", label: "Nama PI", type: "text" },
-    { key: "team", label: "Tim (satu per baris)", type: "list" },
-    { key: "proposalDeadline", label: "Deadline proposal", type: "date" },
+    { key: "piName", label: "PI name", type: "text" },
+    { key: "team", label: "Team (one per line)", type: "list" },
+    { key: "proposalDeadline", label: "Proposal deadline", type: "date" },
     {
       key: "selectionStage",
-      label: "Tahap seleksi",
+      label: "Selection stage",
       type: "select",
       options: grantStageOptions,
     },
-    { key: "requiredOutputs", label: "Luaran wajib (satu per baris)", type: "list" },
-    { key: "outputDeadline", label: "Deadline luaran", type: "date" },
-    { key: "editionNote", label: "Catatan edisi", type: "textarea", rows: 3 },
+    { key: "requiredOutputs", label: "Required outputs (one per line)", type: "list" },
+    { key: "outputDeadline", label: "Output deadline", type: "date" },
+    { key: "editionNote", label: "Edition note", type: "textarea", rows: 3 },
     visibilityField,
   ];
 }
@@ -202,14 +202,14 @@ export function grantFields(data: AdminData, isNew: boolean): FieldDef[] {
 export function ideaFields(isNew: boolean): FieldDef[] {
   return [
     idField(isNew),
-    { key: "title", label: "Judul ide", type: "text", wide: true },
-    { key: "problem", label: "Masalah", type: "textarea", rows: 3 },
-    { key: "whyOnChain", label: "Mengapa on-chain", type: "textarea", rows: 3 },
-    { key: "cluster", label: "Klaster", type: "select", options: grantClusterOptions },
-    { key: "status", label: "Status ide", type: "select", options: ideaStatusOptions },
+    { key: "title", label: "Idea title", type: "text", wide: true },
+    { key: "problem", label: "Problem", type: "textarea", rows: 3 },
+    { key: "whyOnChain", label: "Why on-chain", type: "textarea", rows: 3 },
+    { key: "cluster", label: "Cluster", type: "select", options: grantClusterOptions },
+    { key: "status", label: "Idea status", type: "select", options: ideaStatusOptions },
     ...ideaScoreFields.map<FieldDef>((score) => ({
       key: `scores.${score.key}`,
-      label: `Skor ${score.label} (0-10)`,
+      label: `${score.label} score (0-10)`,
       type: "number",
       min: 0,
       max: 10,
@@ -221,29 +221,29 @@ export function ideaFields(isNew: boolean): FieldDef[] {
 export function taskFields(data: AdminData, isNew: boolean): FieldDef[] {
   return [
     idField(isNew),
-    { key: "title", label: "Judul tugas", type: "text", wide: true },
-    { key: "dueAt", label: "Jatuh tempo", type: "date" },
-    { key: "done", label: "Selesai", type: "checkbox" },
+    { key: "title", label: "Task title", type: "text", wide: true },
+    { key: "dueAt", label: "Due date", type: "date" },
+    { key: "done", label: "Done", type: "checkbox" },
     {
       key: "itemId",
-      label: "Riset terkait",
+      label: "Related research",
       type: "select",
       options: itemOptions(data),
     },
-    { key: "priority", label: "Prioritas", type: "select", options: priorityOptions },
-    { key: "notes", label: "Catatan privat", type: "textarea", rows: 3 },
+    { key: "priority", label: "Priority", type: "select", options: priorityOptions },
+    { key: "notes", label: "Private notes", type: "textarea", rows: 3 },
   ];
 }
 
 export function profileFields(): FieldDef[] {
   return [
-    { key: "name", label: "Nama", type: "text" },
+    { key: "name", label: "Name", type: "text" },
     { key: "handle", label: "Handle", type: "text" },
-    { key: "campus", label: "Kampus", type: "text", wide: true },
-    { key: "studyProgram", label: "Program studi", type: "text" },
-    { key: "location", label: "Lokasi", type: "text" },
-    { key: "avatar", label: "Avatar", type: "text", help: "Default: nuza-pixel" },
-    { key: "email", label: "Email publik", type: "text" },
+    { key: "campus", label: "Campus", type: "text", wide: true },
+    { key: "studyProgram", label: "Study program", type: "text" },
+    { key: "location", label: "Location", type: "text" },
+    { key: "avatar", label: "Avatar", type: "text", help: "Default: nusea-pixel" },
+    { key: "email", label: "Public email", type: "text" },
     { key: "tagline", label: "Tagline", type: "text", wide: true },
     { key: "bio", label: "Bio", type: "textarea", rows: 5 },
     { key: "socials.scholar", label: "Google Scholar URL", type: "url" },

@@ -22,33 +22,33 @@ interface NavItem {
 
 const NAV: Array<{ group: string; items: NavItem[] }> = [
   {
-    group: "Save Room",
+    group: "Workspace",
     items: [{ tab: "dashboard", label: "Dashboard", mark: "D" }],
   },
   {
-    group: "Riset",
+    group: "Research",
     items: [
-      { tab: "items", label: "Riset", mark: "R" },
+      { tab: "items", label: "Research", mark: "R" },
       { tab: "kanban", label: "Pipeline", mark: "K" },
       { tab: "assets", label: "Inventory", mark: "I" },
-      { tab: "sources", label: "Sumber", mark: "S" },
+      { tab: "sources", label: "Sources", mark: "S" },
     ],
   },
   {
-    group: "Peluang",
+    group: "Opportunities",
     items: [
-      { tab: "grants", label: "Hibah", mark: "H" },
-      { tab: "ideas", label: "Bank Ide", mark: "B" },
-      { tab: "tasks", label: "Tugas", mark: "T" },
-      { tab: "venues", label: "Venue", mark: "V" },
+      { tab: "grants", label: "Grants", mark: "G" },
+      { tab: "ideas", label: "Idea Bank", mark: "B" },
+      { tab: "tasks", label: "Tasks", mark: "T" },
+      { tab: "venues", label: "Venues", mark: "V" },
     ],
   },
   {
-    group: "Sistem",
+    group: "System",
     items: [
-      { tab: "profile", label: "Profil", mark: "P" },
+      { tab: "profile", label: "Profile", mark: "P" },
       { tab: "data", label: "Data", mark: "F" },
-      { tab: "publish", label: "Publikasikan", mark: "!" },
+      { tab: "publish", label: "Publish", mark: "!" },
     ],
   },
 ];
@@ -102,7 +102,7 @@ export default function App() {
       })
       .catch((error: unknown) => {
         if (!active) return;
-        const message = error instanceof Error ? error.message : "Gagal memuat data.";
+        const message = error instanceof Error ? error.message : "Could not load data.";
         if (message.includes("401") || message.includes("Token")) {
           setNeedsToken(true);
         }
@@ -123,7 +123,7 @@ export default function App() {
   }, [toast]);
 
   useEffect(() => {
-    document.title = `Nuza Lab Admin — ${tab}`;
+    document.title = `Nusea Admin — ${tab}`;
   }, [tab]);
 
   function navigate(next: AdminTab) {
@@ -136,7 +136,7 @@ export default function App() {
     const next = !dark;
     setDark(next);
     document.documentElement.classList.toggle("dark", next);
-    localStorage.setItem("nuza-theme", next ? "dark" : "light");
+    localStorage.setItem("nusea-theme", next ? "dark" : "light");
   }
 
   async function saveEntity(entity: Parameters<SaveEntity>[0], value: unknown) {
@@ -165,16 +165,16 @@ export default function App() {
             setLoading(true);
           }}
         >
-          <p className="font-pixel text-[8px] uppercase leading-5 text-orange">
-            Nuza Lab / Back Office
+          <p className="font-pixel text-[12px] uppercase leading-5 text-orange">
+            Nusea / Back Office
           </p>
-          <h1 className="mt-3 text-[22px] leading-relaxed">Token sesi diperlukan</h1>
+          <h1 className="mt-3 text-[22px] leading-relaxed">Session token required</h1>
           <p className="mt-2 text-[17px] leading-snug text-muted">
-            Token dicetak di terminal saat <code>pnpm run admin</code>. Jangan bagikan
-            token ini; server hanya menerima koneksi dari 127.0.0.1.
+            The token is printed in the terminal when you run <code>pnpm run admin</code>.
+            Do not share it; the server only accepts connections from 127.0.0.1.
           </p>
-          <label className="mt-5 block font-pixel text-[7px] uppercase leading-4" htmlFor="token">
-            Token admin
+          <label className="mt-5 block font-pixel text-[12px] uppercase leading-4" htmlFor="token">
+            Admin token
           </label>
           <input
             id="token"
@@ -187,7 +187,7 @@ export default function App() {
           />
           {loadError ? <p className="admin-warning mt-3">{loadError}</p> : null}
           <button type="submit" className="pixel-btn mt-4" disabled={!tokenInput.trim()}>
-            MASUK
+            SIGN IN
           </button>
         </form>
       </div>
@@ -198,10 +198,10 @@ export default function App() {
     return (
       <div className="admin-token-screen">
         <div className="admin-token-card">
-          <p className="font-pixel text-[8px] uppercase leading-5 text-orange">
-            Nuza Lab / Back Office
+          <p className="font-pixel text-[12px] uppercase leading-5 text-orange">
+            Nusea / Back Office
           </p>
-          <p className="mt-4 text-[20px]">Memuat save file…</p>
+          <p className="mt-4 text-[20px]">Loading workspace…</p>
         </div>
       </div>
     );
@@ -211,8 +211,8 @@ export default function App() {
     return (
       <div className="admin-token-screen">
         <div className="admin-token-card">
-          <h1 className="text-[20px]">Gagal memuat data</h1>
-          <p className="admin-warning mt-3">{loadError || "Kesalahan tidak dikenal."}</p>
+          <h1 className="text-[20px]">Could not load data</h1>
+          <p className="admin-warning mt-3">{loadError || "Unknown error."}</p>
           <button
             type="button"
             className="pixel-btn mt-4"
@@ -221,12 +221,14 @@ export default function App() {
               setLoading(true);
               void refresh()
                 .catch((error: unknown) =>
-                  setLoadError(error instanceof Error ? error.message : "Gagal memuat."),
+                  setLoadError(
+                    error instanceof Error ? error.message : "Could not load.",
+                  ),
                 )
                 .finally(() => setLoading(false));
             }}
           >
-            COBA LAGI
+            TRY AGAIN
           </button>
         </div>
       </div>
@@ -241,14 +243,14 @@ export default function App() {
         <div className="admin-brand">
           <span className="admin-brand-block">N</span>
           <div>
-            <p className="font-pixel text-[9px] leading-4">NUZA LAB</p>
-            <p className="font-pixel text-[6px] uppercase leading-4 text-muted">
+            <p className="font-pixel text-[13px] leading-4">NUSEA</p>
+            <p className="font-pixel text-[10px] uppercase leading-4 text-muted">
               Back Office / Local
             </p>
           </div>
         </div>
 
-        <nav className="admin-nav" aria-label="Navigasi admin">
+        <nav className="admin-nav" aria-label="Admin navigation">
           {NAV.map((group) => (
             <div key={group.group} className="admin-nav-group">
               <p className="admin-nav-title">{group.group}</p>
@@ -276,11 +278,11 @@ export default function App() {
         </nav>
 
         <div className="admin-sidebar-foot">
-          <p className="font-pixel text-[6px] uppercase leading-4 text-muted">
-            {data.profile.name || "Nuza"}
+          <p className="font-pixel text-[10px] uppercase leading-4 text-muted">
+            {data.profile.name || "Nusea"}
           </p>
           <p className="text-[15px] leading-snug text-muted">
-            Data lokal · backup 20 · tanpa Supabase
+            Local data · 20 backups · no Supabase
           </p>
           <a
             href="http://127.0.0.1:5173"
@@ -288,7 +290,7 @@ export default function App() {
             rel="noreferrer"
             className="pixel-link mt-2 inline-block text-[15px]"
           >
-            Buka situs publik ↗
+            Open public site ↗
           </a>
         </div>
       </aside>
@@ -296,11 +298,11 @@ export default function App() {
       <div className="admin-main">
         <header className="admin-topbar">
           <div>
-            <p className="font-pixel text-[7px] uppercase leading-4 text-muted">
-              Save Room / {tab}
+            <p className="font-pixel text-[12px] uppercase leading-4 text-muted">
+              Workspace / {tab}
             </p>
             <p className="text-[15px] text-muted">
-              {data.profile.handle} · {data.profile.campus || "kampus belum diisi"}
+              {data.profile.handle} · {data.profile.campus || "campus not set"}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -310,14 +312,14 @@ export default function App() {
               className="pixel-btn pixel-btn-ghost admin-topbar-btn"
               onClick={toggleTheme}
             >
-              {dark ? "SIANG" : "MALAM"}
+              {dark ? "LIGHT" : "DARK"}
             </button>
             <button
               type="button"
               className="pixel-btn pixel-btn-ghost admin-topbar-btn"
               onClick={() => navigate("publish")}
             >
-              PUBLIKASIKAN
+              PUBLISH
             </button>
           </div>
         </header>
@@ -363,7 +365,7 @@ export default function App() {
         </main>
 
         <footer className="admin-footer">
-          NUZA LAB · local-only admin · {new Date().getFullYear()}
+          NUSEA · local-only admin · {new Date().getFullYear()}
         </footer>
       </div>
 

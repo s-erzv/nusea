@@ -83,7 +83,7 @@ export function SchemaForm<T extends object>({
               <>
                 <label
                   htmlFor={id}
-                  className="admin-label mb-1 block font-pixel text-[7px] uppercase leading-4"
+                  className="admin-label mb-1 block font-pixel text-[12px] uppercase leading-4"
                 >
                   {field.label}
                 </label>
@@ -123,7 +123,7 @@ export function SchemaForm<T extends object>({
                       );
                     })}
                     {!field.options?.length ? (
-                      <p className="text-[16px] text-muted">Belum ada pilihan.</p>
+                      <p className="text-[16px] text-muted">No options yet.</p>
                     ) : null}
                   </div>
                 ) : field.type === "textarea" || field.type === "list" ? (

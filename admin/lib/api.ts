@@ -7,10 +7,10 @@ import type {
   PublishPreview,
 } from "./types";
 
-const TOKEN_KEY = "nuza-admin-token";
+const TOKEN_KEY = "nusea-admin-token";
 
 let token =
-  (typeof window !== "undefined" ? window.__NUZA_ADMIN_TOKEN__ : undefined) ??
+  (typeof window !== "undefined" ? window.__NUSEA_ADMIN_TOKEN__ : undefined) ??
   (typeof window !== "undefined"
     ? (new URLSearchParams(window.location.search).get("token") ??
       localStorage.getItem(TOKEN_KEY))
@@ -37,12 +37,12 @@ export class ApiError extends Error {
 }
 
 async function api<T>(path: string, init?: RequestInit): Promise<T> {
-  if (!token) throw new ApiError("Token sesi belum diisi.", 401);
+  if (!token) throw new ApiError("Session token is missing.", 401);
   const response = await fetch(path, {
     ...init,
     headers: {
       "content-type": "application/json",
-      "x-nuza-token": token,
+      "x-nusea-token": token,
       ...(init?.headers ?? {}),
     },
   });
@@ -50,7 +50,7 @@ async function api<T>(path: string, init?: RequestInit): Promise<T> {
     | { error?: string }
     | null;
   if (!response.ok) {
-    throw new ApiError(body?.error ?? `Permintaan gagal (${response.status}).`, response.status);
+    throw new ApiError(body?.error ?? `Request failed (${response.status}).`, response.status);
   }
   return body as T;
 }
@@ -85,12 +85,12 @@ export const adminApi = {
   backups: () => api<{ backups: BackupEntry[] }>("/api/backups"),
 
   backupText: async (name: string) => {
-    if (!token) throw new ApiError("Token sesi belum diisi.", 401);
+    if (!token) throw new ApiError("Session token is missing.", 401);
     const response = await fetch(`/api/backups/${encodeURIComponent(name)}`, {
-      headers: { "x-nuza-token": token },
+      headers: { "x-nusea-token": token },
     });
     if (!response.ok) {
-      throw new ApiError("Gagal mengunduh backup.", response.status);
+      throw new ApiError("Could not download backup.", response.status);
     }
     return response.text();
   },

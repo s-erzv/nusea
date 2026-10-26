@@ -14,17 +14,17 @@ import { useDocumentTitle } from "../lib/useDocumentTitle";
 export function ResearchDetailPage() {
   const { slug = "" } = useParams();
   const item = items.find((entry) => entry.id === slug);
-  useDocumentTitle(item?.title ?? "Riset tidak ditemukan");
+  useDocumentTitle(item?.title ?? "Research not found");
 
   if (!item) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-16">
         <EmptyState
-          title="QUEST TIDAK DITEMUKAN"
-          body="Riset ini tidak ada atau belum ditandai publik."
+          title="RESEARCH NOT FOUND"
+          body="This research does not exist or is not public yet."
           action={
             <Link to="/" className="pixel-btn">
-              KEMBALI KE BERANDA
+              BACK TO RESEARCH
             </Link>
           }
         />
@@ -40,7 +40,7 @@ export function ResearchDetailPage() {
       ? { label: "DOI", href: doiUrl(item.doi), value: item.doi }
       : null,
     item.publicUrl
-      ? { label: "Halaman publik", href: item.publicUrl, value: item.publicUrl }
+      ? { label: "Public page", href: item.publicUrl, value: item.publicUrl }
       : null,
   ].filter((value): value is { label: string; href: string; value: string } =>
     Boolean(value),
@@ -48,14 +48,14 @@ export function ResearchDetailPage() {
 
   const timeline = [
     { label: "Submitted", value: item.submittedAt },
-    { label: "Keputusan", value: item.decisionAt },
-    { label: "Terbit", value: item.publishedAt },
+    { label: "Decision", value: item.decisionAt },
+    { label: "Published", value: item.publishedAt },
   ].filter((entry) => entry.value);
 
   return (
     <article className="mx-auto max-w-5xl px-4 py-8 sm:py-12">
       <Link to="/" className="pixel-btn pixel-btn-ghost pixel-btn-small">
-        &lt; KEMBALI
+        &lt; BACK
       </Link>
 
       <header className="pixel-card-lg mt-4 overflow-hidden">
@@ -71,8 +71,8 @@ export function ResearchDetailPage() {
               {ITEM_TYPE_LABELS[item.type]}
             </span>
           </div>
-          <span className="font-pixel text-[8px] leading-4 text-muted">
-            {level ? `LEVEL ${level} / 9` : isTerminalStatus(item.status) ? "ARSIP" : "—"}
+          <span className="font-pixel text-[12px] leading-4 text-muted">
+            {level ? `STAGE ${level} / 9` : isTerminalStatus(item.status) ? "ARCHIVED" : "—"}
           </span>
         </div>
 
@@ -81,14 +81,14 @@ export function ResearchDetailPage() {
             {item.title}
           </h1>
           <p className="mt-4 text-[19px] leading-snug">
-            <span className="font-pixel text-[7px] uppercase text-muted">Penulis</span>
+            <span className="font-pixel text-[12px] uppercase text-muted">Authors</span>
             <br />
-            {item.authors.length > 0 ? item.authors.join(", ") : "Belum diisi"}
+            {item.authors.length > 0 ? item.authors.join(", ") : "Not set"}
           </p>
           {item.advisors.length > 0 ? (
             <p className="mt-2 text-[19px] leading-snug">
-              <span className="font-pixel text-[7px] uppercase text-muted">
-                Pembimbing
+              <span className="font-pixel text-[12px] uppercase text-muted">
+                Advisors
               </span>
               <br />
               {item.advisors.join(", ")}
@@ -97,11 +97,11 @@ export function ResearchDetailPage() {
 
           <div className="mt-5 border-[3px] border-line bg-paper p-3">
             <div className="flex flex-wrap items-center justify-between gap-2 text-[17px]">
-              <span className="font-pixel text-[7px] uppercase">XP quest</span>
+              <span className="font-pixel text-[12px] uppercase">Progress</span>
               <span>{progress}%</span>
             </div>
             <div className="mt-2">
-              <XPBar value={progress} label={`Progres ${item.title}`} />
+              <XPBar value={progress} label={`Research progress: ${item.title}`} />
             </div>
           </div>
         </div>
@@ -110,7 +110,7 @@ export function ResearchDetailPage() {
       <div className="mt-5 grid gap-5 lg:grid-cols-[1.55fr_1fr]">
         <section className="pixel-card p-5 sm:p-6" aria-labelledby="abstrak-title">
           <h2 id="abstrak-title" className="text-[16px]">
-            Abstrak
+            Abstract
           </h2>
           <div className="mt-4 space-y-3 text-[19px] leading-relaxed">
             {item.abstract ? (
@@ -118,11 +118,11 @@ export function ResearchDetailPage() {
                 .split(/\n{2,}/)
                 .map((paragraph, index) => <p key={index}>{paragraph}</p>)
             ) : (
-              <p className="text-muted">Abstrak belum diisi.</p>
+              <p className="text-muted">No abstract yet.</p>
             )}
           </div>
 
-          <h2 className="mt-7 text-[16px]">Kata kunci</h2>
+          <h2 className="mt-7 text-[16px]">Keywords</h2>
           <div className="mt-3 flex flex-wrap gap-2">
             {item.keywords.length > 0 ? (
               item.keywords.map((keyword) => (
@@ -131,7 +131,7 @@ export function ResearchDetailPage() {
                 </span>
               ))
             ) : (
-              <p className="text-muted">Belum diisi.</p>
+              <p className="text-muted">Not set.</p>
             )}
           </div>
         </section>
@@ -146,18 +146,18 @@ export function ResearchDetailPage() {
                 <p className="mt-3 text-[20px] leading-snug">{venue.name}</p>
                 <p className="mt-1 text-[17px] text-muted">
                   {venue.kind === "jurnal"
-                    ? "Jurnal"
+                    ? "Journal"
                     : venue.kind === "konferensi"
-                      ? "Konferensi"
-                      : "Hibah"}{" "}
+                      ? "Conference"
+                      : "Grant"}{" "}
                   ·{" "}
                   {venue.indexLevel === "tidak_terindeks"
-                    ? "Tidak terindeks"
+                    ? "Not indexed"
                     : venue.indexLevel}
                 </p>
                 {venue.typicalReviewWeeks > 0 ? (
                   <p className="mt-2 text-[17px] text-muted">
-                    Estimasi review: {venue.typicalReviewWeeks} minggu
+                    Estimated review: {venue.typicalReviewWeeks} weeks
                   </p>
                 ) : null}
                 {venue.url ? (
@@ -167,18 +167,18 @@ export function ResearchDetailPage() {
                     target="_blank"
                     rel="noreferrer"
                   >
-                    Buka laman venue
+                    Open venue page
                   </a>
                 ) : null}
               </>
             ) : (
-              <p className="mt-3 text-[18px] text-muted">Venue belum ditentukan.</p>
+              <p className="mt-3 text-[18px] text-muted">Venue not set.</p>
             )}
           </section>
 
           <section className="pixel-card p-5" aria-labelledby="tautan-title">
             <h2 id="tautan-title" className="text-[15px]">
-              Tautan publik
+              Public links
             </h2>
             {links.length > 0 ? (
               <ul className="mt-3 space-y-3">
@@ -198,14 +198,14 @@ export function ResearchDetailPage() {
               </ul>
             ) : (
               <p className="mt-3 text-[18px] text-muted">
-                Belum ada tautan publik untuk riset ini.
+                No public links for this research yet.
               </p>
             )}
           </section>
 
           <section className="pixel-card p-5" aria-labelledby="tanggal-title">
             <h2 id="tanggal-title" className="text-[15px]">
-              Lini masa
+              Timeline
             </h2>
             {timeline.length > 0 ? (
               <ol className="mt-4 space-y-3">
@@ -224,11 +224,11 @@ export function ResearchDetailPage() {
               </ol>
             ) : (
               <p className="mt-3 text-[18px] text-muted">
-                Tanggal publik belum diisi.
+                Publication dates are not set.
               </p>
             )}
             <p className="mt-4 border-t-2 border-dashed border-line pt-3 text-[16px] text-muted">
-              Terakhir diperbarui {formatDateShort(item.updatedAt)}.
+              Last updated {formatDateShort(item.updatedAt)}.
             </p>
           </section>
         </div>

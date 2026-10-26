@@ -1,3 +1,3 @@
 interface Window {
-  __NUZA_ADMIN_TOKEN__?: string;
+  __NUSEA_ADMIN_TOKEN__?: string;
 }

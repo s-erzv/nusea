@@ -9,7 +9,7 @@ import { makeItem } from "./fixtures";
 const dirs: string[] = [];
 
 async function tempStore(): Promise<{ root: string; store: DataStore }> {
-  const root = await mkdtemp(path.join(os.tmpdir(), "nuza-store-"));
+  const root = await mkdtemp(path.join(os.tmpdir(), "nusea-store-"));
   dirs.push(root);
   await atomicWriteJson(path.join(root, "data", "private", "items.json"), [
     makeItem({ id: "riset-satu", status: "draft", progressPct: 10 }),
@@ -22,18 +22,18 @@ afterEach(async () => {
   await Promise.all(dirs.splice(0).map((dir) => rm(dir, { recursive: true, force: true })));
 });
 
-describe("transisi status", () => {
-  it("menulis item dan riwayat riwayat", async () => {
+describe("status transitions", () => {
+  it("writes the item and a history entry", async () => {
     const { root, store } = await tempStore();
 
-    const result = await store.transitionItemStatus("riset-satu", "submitted", "Siap submit");
+    const result = await store.transitionItemStatus("riset-satu", "submitted", "Ready to submit");
 
     expect(result.item.status).toBe("submitted");
     expect(result.item.progressPct).toBeGreaterThanOrEqual(50);
     expect(result.entry.fromStatus).toBe("draft");
     expect(result.entry.toStatus).toBe("submitted");
     expect(result.entry.itemId).toBe("riset-satu");
-    expect(result.entry.note).toBe("Siap submit");
+    expect(result.entry.note).toBe("Ready to submit");
     expect(result.entry.visibility).toBe("private");
 
     const items = JSON.parse(
@@ -50,7 +50,7 @@ describe("transisi status", () => {
     expect(backups.length).toBeGreaterThanOrEqual(2);
   });
 
-  it("mencatat riwayat saat status diubah lewat penyimpanan massal", async () => {
+  it("records history when status changes through a bulk save", async () => {
     const { root, store } = await tempStore();
     const current = await store.read("items");
 
@@ -68,18 +68,18 @@ describe("transisi status", () => {
       await readFile(path.join(root, "data", "private", "history.json"), "utf8"),
     );
     expect(history).toHaveLength(1);
-    expect(history[0].note).toBe("Status diubah dari form admin.");
+    expect(history[0].note).toBe("Status changed from the admin form.");
   });
 
-  it("menolak status tak dikenal dan item tak ada tanpa menulis riwayat", async () => {
+  it("rejects unknown statuses and missing items without writing history", async () => {
     const { root, store } = await tempStore();
 
     await expect(
       store.transitionItemStatus("riset-satu", "entah" as never),
-    ).rejects.toThrow(/Status tidak dikenal/);
+    ).rejects.toThrow(/Unknown status/);
     await expect(
       store.transitionItemStatus("tidak-ada", "draft"),
-    ).rejects.toThrow(/tidak ditemukan/);
+    ).rejects.toThrow(/not found/);
 
     const history = JSON.parse(
       await readFile(path.join(root, "data", "private", "history.json"), "utf8"),

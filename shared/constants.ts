@@ -18,18 +18,18 @@ export type PipelineStatus = (typeof PIPELINE_STATUSES)[number];
 export type ResearchStatus = (typeof ALL_STATUSES)[number];
 
 export const STATUS_LABELS: Record<ResearchStatus, string> = {
-  ide: "Ide",
-  riset: "Riset",
-  draft: "Draf",
-  review_internal: "Review Internal",
+  ide: "Idea",
+  riset: "Research",
+  draft: "Draft",
+  review_internal: "Internal Review",
   submitted: "Submitted",
   under_review: "Under Review",
-  revisi: "Revisi",
+  revisi: "Revision",
   accepted: "Accepted",
-  published: "Terbit",
-  ditolak: "Ditolak",
-  ditarik: "Ditarik",
-  ditunda: "Ditunda",
+  published: "Published",
+  ditolak: "Rejected",
+  ditarik: "Withdrawn",
+  ditunda: "On Hold",
 };
 
 export const STATUS_NUMBERS: Record<PipelineStatus, number> = {
@@ -58,14 +58,14 @@ export const ITEM_TYPES = [
 export type ItemType = (typeof ITEM_TYPES)[number];
 
 export const ITEM_TYPE_LABELS: Record<ItemType, string> = {
-  paper_jurnal: "Paper Jurnal",
-  paper_konferensi: "Paper Konferensi",
-  hibah: "Hibah",
-  prototype: "Prototipe",
+  paper_jurnal: "Journal Paper",
+  paper_konferensi: "Conference Paper",
+  hibah: "Grant",
+  prototype: "Prototype",
   slides: "Slides",
-  skripsi: "Skripsi",
-  tugas_kuliah: "Tugas Kuliah",
-  lainnya: "Lainnya",
+  skripsi: "Thesis",
+  tugas_kuliah: "Coursework",
+  lainnya: "Other",
 };
 
 export const ASSET_KINDS = [
@@ -98,17 +98,17 @@ export const ASSET_KIND_LABELS: Record<AssetKind, string> = {
   dataset: "Dataset",
   slides: "Slides",
   diagram: "Diagram",
-  gambar: "Gambar",
-  lainnya: "Lainnya",
+  gambar: "Image",
+  lainnya: "Other",
 };
 
 export const VENUE_KINDS = ["jurnal", "konferensi", "hibah"] as const;
 export type VenueKind = (typeof VENUE_KINDS)[number];
 
 export const VENUE_KIND_LABELS: Record<VenueKind, string> = {
-  jurnal: "Jurnal",
-  konferensi: "Konferensi",
-  hibah: "Hibah",
+  jurnal: "Journal",
+  konferensi: "Conference",
+  hibah: "Grant",
 };
 
 export const INDEX_LEVELS = [
@@ -140,7 +140,7 @@ export const INDEX_LEVEL_LABELS: Record<IndexLevel, string> = {
   "Scopus Q3": "Scopus Q3",
   "Scopus Q4": "Scopus Q4",
   WoS: "WoS",
-  tidak_terindeks: "Tidak terindeks",
+  tidak_terindeks: "Not indexed",
 };
 
 export const GRANT_CLUSTERS = [
@@ -169,15 +169,15 @@ export const GRANT_STAGES = [
 export type GrantStage = (typeof GRANT_STAGES)[number];
 
 export const GRANT_STAGE_LABELS: Record<GrantStage, string> = {
-  persiapan: "Persiapan",
-  diajukan: "Diajukan",
-  ditetapkan: "Ditetapkan",
-  pelaksanaan: "Pelaksanaan",
-  selesai: "Selesai",
+  persiapan: "Preparation",
+  diajukan: "Submitted",
+  ditetapkan: "Awarded",
+  pelaksanaan: "In Progress",
+  selesai: "Completed",
 };
 
 export const GRANT_OUTPUT_WARNING =
-  "Luaran jurnal harus terbit setelah dana diterima.";
+  "Journal output must be published after funds are received.";
 
 export function isGrantOutputWarningActive(stage: GrantStage): boolean {
   return GRANT_STAGES.indexOf(stage) >= GRANT_STAGES.indexOf("ditetapkan");
@@ -193,10 +193,10 @@ export const VERIFICATION_STATUSES = [
 export type VerificationStatus = (typeof VERIFICATION_STATUSES)[number];
 
 export const VERIFICATION_STATUS_LABELS: Record<VerificationStatus, string> = {
-  belum: "Belum",
-  terverifikasi: "Terverifikasi",
-  tidak_ditemukan: "Tidak ditemukan",
-  dibuang: "Dibuang",
+  belum: "Not verified",
+  terverifikasi: "Verified",
+  tidak_ditemukan: "Not found",
+  dibuang: "Discarded",
 };
 
 export const IDEA_STATUSES = [
@@ -209,19 +209,19 @@ export const IDEA_STATUSES = [
 export type IdeaStatus = (typeof IDEA_STATUSES)[number];
 
 export const IDEA_STATUS_LABELS: Record<IdeaStatus, string> = {
-  baru: "Baru",
-  dievaluasi: "Dievaluasi",
-  dikembangkan: "Dikembangkan",
-  ditolak: "Ditolak",
+  baru: "New",
+  dievaluasi: "Evaluated",
+  dikembangkan: "In development",
+  ditolak: "Rejected",
 };
 
 export const PRIORITIES = ["low", "medium", "high"] as const;
 export type Priority = (typeof PRIORITIES)[number];
 
 export const PRIORITY_LABELS: Record<Priority, string> = {
-  low: "Rendah",
-  medium: "Sedang",
-  high: "Tinggi",
+  low: "Low",
+  medium: "Medium",
+  high: "High",
 };
 
 export const IDEA_SCORE_KEYS = [
@@ -234,10 +234,10 @@ export const IDEA_SCORE_KEYS = [
 export type IdeaScoreKey = (typeof IDEA_SCORE_KEYS)[number];
 
 export const IDEA_SCORE_LABELS: Record<IdeaScoreKey, string> = {
-  novelty: "Kebaruan",
-  feasibility: "Kelayakan",
-  impact: "Dampak",
-  relevance: "Relevansi",
+  novelty: "Novelty",
+  feasibility: "Feasibility",
+  impact: "Impact",
+  relevance: "Relevance",
 };
 
 export function ideaTotalScore(scores: Record<IdeaScoreKey, number>): number {

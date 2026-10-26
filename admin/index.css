@@ -39,7 +39,7 @@ body {
   border: 3px solid var(--line);
   background: var(--yellow);
   color: #14213d;
-  font-family: "Press Start 2P", monospace;
+  font-family: "Poppins", ui-sans-serif, system-ui, sans-serif;
   font-size: 16px;
   box-shadow: 3px 3px 0 var(--shadow);
 }
@@ -58,9 +58,9 @@ body {
 
 .admin-nav-title {
   margin: 0 0 3px 6px;
-  font-family: "Press Start 2P", monospace;
-  font-size: 6px;
-  line-height: 1.6;
+  font-family: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  font-size: 10px;
+  line-height: 1.5;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
@@ -76,8 +76,8 @@ body {
   color: var(--ink);
   padding: 4px 5px;
   text-align: left;
-  font-size: 18px;
-  line-height: 1.1;
+  font-size: 15px;
+  line-height: 1.2;
   cursor: pointer;
 }
 
@@ -103,8 +103,8 @@ body {
   border: 2px solid var(--line);
   background: var(--paper);
   color: var(--ink);
-  font-family: "Press Start 2P", monospace;
-  font-size: 7px;
+  font-family: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  font-size: 10px;
 }
 
 .admin-nav-link[data-active="true"] .admin-nav-mark {
@@ -123,8 +123,8 @@ body {
   background: var(--paper);
   color: var(--ink);
   padding: 0 4px;
-  font-family: "Press Start 2P", monospace;
-  font-size: 6px;
+  font-family: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  font-size: 9px;
   line-height: 1;
 }
 
@@ -166,16 +166,16 @@ body {
   background: var(--yellow);
   color: #14213d;
   padding: 4px 6px;
-  font-family: "Press Start 2P", monospace;
-  font-size: 6px;
-  line-height: 1.6;
+  font-family: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  font-size: 10px;
+  line-height: 1.5;
   text-transform: uppercase;
 }
 
 .admin-topbar-btn {
   min-height: 36px;
   padding: 4px 8px;
-  font-size: 7px;
+  font-size: 11px;
 }
 
 .admin-content {
@@ -234,9 +234,9 @@ body {
 .admin-input {
   min-height: 42px;
   padding: 6px 8px;
-  font-family: "VT323", monospace;
-  font-size: 18px;
-  line-height: 1.2;
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1.4;
   box-shadow: 2px 2px 0 var(--shadow);
 }
 
@@ -264,9 +264,9 @@ body {
   padding: 7px 8px;
   text-align: left;
   vertical-align: bottom;
-  font-family: "Press Start 2P", monospace;
-  font-size: 6px;
-  line-height: 1.7;
+  font-family: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  font-size: 10px;
+  line-height: 1.4;
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -292,9 +292,9 @@ body {
   background: var(--card);
   color: var(--ink);
   padding: 2px 5px;
-  font-family: "Press Start 2P", monospace;
-  font-size: 6px;
-  line-height: 1.6;
+  font-family: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  font-size: 10px;
+  line-height: 1.5;
   text-transform: uppercase;
 }
 
@@ -317,9 +317,9 @@ body {
   background: var(--paper);
   color: var(--ink);
   padding: 2px 5px;
-  font-family: "Press Start 2P", monospace;
-  font-size: 7px;
-  line-height: 1.5;
+  font-family: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  font-size: 10px;
+  line-height: 1.4;
   cursor: pointer;
 }
 
@@ -441,9 +441,9 @@ body {
   background: var(--yellow);
   color: #14213d;
   padding: 3px 6px;
-  font-family: "Press Start 2P", monospace;
-  font-size: 8px;
-  line-height: 1.6;
+  font-family: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  font-size: 11px;
+  line-height: 1.5;
 }
 
 .admin-pre {
@@ -534,7 +534,7 @@ body {
     width: 20px;
     height: 20px;
     flex-basis: 20px;
-    font-size: 6px;
+    font-size: 9px;
   }
 
   .admin-sidebar-foot {
@@ -553,7 +553,7 @@ body {
 
 @media (max-width: 639px) {
   .admin-nav-link {
-    font-size: 16px;
+    font-size: 14px;
     padding: 3px 4px;
   }
 
@@ -568,4 +568,16 @@ body {
   .admin-token-card {
     padding: 16px;
   }
+}
+
+.admin-brand-block,
+.admin-nav-title,
+.admin-nav-mark,
+.admin-count,
+.admin-local-badge,
+.admin-table th,
+.admin-pill,
+.admin-mini-btn,
+.admin-idea-score {
+  font-weight: 600;
 }

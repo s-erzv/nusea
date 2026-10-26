@@ -16,7 +16,7 @@ export function EmptyState({
   const Title = titleAs;
   return (
     <div className="pixel-card pixel-corner p-6 text-center">
-      <Title className="font-pixel text-[10px] leading-6">{title}</Title>
+      <Title className="font-pixel text-[14px] leading-6">{title}</Title>
       <p className="mx-auto mt-3 max-w-xl text-[19px] leading-snug text-muted">{body}</p>
       {action ? <div className="mt-5 flex justify-center">{action}</div> : null}
     </div>

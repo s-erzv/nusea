@@ -189,7 +189,7 @@ async function main() {
   const root = process.cwd();
   const privateDir = path.join(root, "data", "private");
   const publicDir = path.join(root, "data", "public");
-  const distDir = path.resolve(root, process.env.NUZA_DIST ?? "dist");
+  const distDir = path.resolve(root, process.env.NUSEA_DIST ?? "dist");
 
   const privateSnapshot: PrivateSnapshot = {};
   for (const entity of [
@@ -208,7 +208,7 @@ async function main() {
         path.join(privateDir, `${entity}.json`),
       );
     } catch {
-      throw new Error(`File privat wajib ada: data/private/${entity}.json`);
+      throw new Error(`Missing private file: data/private/${entity}.json`);
     }
   }
 
@@ -226,7 +226,7 @@ async function main() {
         path.join(publicDir, `${entity}.json`),
       );
     } catch {
-      throw new Error(`File publik wajib ada: data/public/${entity}.json`);
+      throw new Error(`Missing public file: data/public/${entity}.json`);
     }
   }
 
@@ -240,12 +240,12 @@ async function main() {
     process.exitCode = 1;
     return;
   }
-  console.log("Check leak lolos: tidak ada ID/URL/field privat di dist/.");
+  console.log("Leak check passed: no private IDs, URLs, or fields in dist/.");
 }
 
 if (process.argv[1]?.endsWith("check-leak.ts")) {
   main().catch((error) => {
-    console.error("Gagal memeriksa kebocoran:", error);
+    console.error("Leak check failed:", error);
     process.exitCode = 1;
   });
 }

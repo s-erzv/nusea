@@ -3,16 +3,16 @@ import { EmptyState } from "../components/EmptyState";
 import { useDocumentTitle } from "../lib/useDocumentTitle";
 
 export function NotFoundPage() {
-  useDocumentTitle("Halaman tidak ditemukan");
+  useDocumentTitle("Page not found");
   return (
     <div className="mx-auto max-w-3xl px-4 py-16">
       <EmptyState
         titleAs="h1"
-        title="404 — AREA BELUM TERBUKA"
-        body="Halaman yang kamu cari tidak ada di peta ini."
+        title="404 — PAGE NOT FOUND"
+        body="The page you are looking for does not exist."
         action={
           <Link to="/" className="pixel-btn">
-            KEMBALI KE BERANDA
+            BACK TO RESEARCH
           </Link>
         }
       />

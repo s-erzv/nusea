@@ -72,20 +72,24 @@ export function GrantsPage({ data, saveEntity, notify }: GrantsPageProps) {
         );
     const backup = await saveEntity("grants", next);
     setEditing(null);
-    notify(isNew ? "Hibah baru disimpan." : `Hibah disimpan.${backup ? ` Backup: ${backup}` : ""}`);
+    notify(
+      isNew
+        ? "New grant saved."
+        : `Grant saved.${backup ? ` Backup: ${backup}` : ""}`,
+    );
   }
 
   async function remove(grant: Grant) {
-    if (!window.confirm(`Hapus hibah "${grant.scheme}"?`)) return;
+    if (!window.confirm(`Delete grant "${grant.scheme}"?`)) return;
     await saveEntity(
       "grants",
       data.grants.filter((entry) => entry.id !== grant.id),
     );
-    notify("Hibah dihapus.");
+    notify("Grant deleted.");
   }
 
   const itemTitle = (id: string) =>
-    data.items.find((item) => item.id === id)?.title ?? (id || "Tanpa riset induk");
+    data.items.find((item) => item.id === id)?.title ?? (id || "No parent research");
 
   const totalFunding = data.grants.reduce(
     (total, grant) =>
@@ -96,27 +100,27 @@ export function GrantsPage({ data, saveEntity, notify }: GrantsPageProps) {
   return (
     <div>
       <PageHeader
-        kicker="Tracker / Hibah"
-        title="Tracker hibah"
+        kicker="Tracker / Grants"
+        title="Grant tracker"
         description={GRANT_OUTPUT_WARNING}
         actions={
           <button type="button" className="pixel-btn" onClick={startNew}>
-            + HIBAH BARU
+            + NEW GRANT
           </button>
         }
       />
 
       <div className="mb-5 grid gap-3 sm:grid-cols-2">
-        <Panel title="Total dana lolos penetapan">
+        <Panel title="Total awarded funding">
           <p className="text-[24px] text-orange">{formatIdr(totalFunding)}</p>
           <p className="text-[15px] text-muted">
-            Dihitung dari hibah berstatus Ditetapkan, Pelaksanaan, atau Selesai.
+            Calculated from grants at Awarded, In progress, or Completed stage.
           </p>
         </Panel>
-        <Panel title="Pengingat luaran">
+        <Panel title="Output reminder">
           <p className="text-[18px] leading-relaxed">
-            Luaran jurnal wajib <strong>terbit setelah dana diterima</strong>. Jangan
-            menandai naskah sebagai luaran hibah sebelum tahap penetapan.
+            Journal outputs must be <strong>published after funding is received</strong>.
+            Do not mark a manuscript as a grant output before the award stage.
           </p>
         </Panel>
       </div>
@@ -125,7 +129,7 @@ export function GrantsPage({ data, saveEntity, notify }: GrantsPageProps) {
         <div className="mb-5">
           <SchemaEditor
             key={editing.id}
-            title={isNew ? "Hibah baru" : `Edit: ${editing.scheme}`}
+            title={isNew ? "New grant" : `Edit: ${editing.scheme}`}
             initial={editing}
             fields={grantFields(data, isNew)}
             schema={grantSchema}
@@ -135,15 +139,15 @@ export function GrantsPage({ data, saveEntity, notify }: GrantsPageProps) {
         </div>
       ) : null}
 
-      <Panel title={`Daftar hibah (${filtered.length}/${data.grants.length})`}>
+      <Panel title={`Grant list (${filtered.length}/${data.grants.length})`}>
         <div className="mb-4 max-w-sm">
           <select
             className="pixel-input admin-input"
             value={stageFilter}
             onChange={(event) => setStageFilter(event.target.value)}
-            aria-label="Filter tahap hibah"
+            aria-label="Filter by grant stage"
           >
-            <option value="all">Semua tahap</option>
+            <option value="all">All stages</option>
             {grantStageOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -153,7 +157,7 @@ export function GrantsPage({ data, saveEntity, notify }: GrantsPageProps) {
         </div>
 
         {filtered.length === 0 ? (
-          <AdminEmpty>Belum ada hibah yang cocok.</AdminEmpty>
+          <AdminEmpty>No matching grants.</AdminEmpty>
         ) : (
           <div className="grid gap-4 lg:grid-cols-2">
             {filtered.map((grant) => {
@@ -163,7 +167,7 @@ export function GrantsPage({ data, saveEntity, notify }: GrantsPageProps) {
                 <article key={grant.id} className="admin-grant-card">
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div>
-                      <p className="font-pixel text-[7px] uppercase leading-4 text-muted">
+                      <p className="font-pixel text-[12px] uppercase leading-4 text-muted">
                         {grant.cluster}
                       </p>
                       <h2 className="mt-1 text-[16px] leading-snug">{grant.scheme}</h2>
@@ -179,7 +183,7 @@ export function GrantsPage({ data, saveEntity, notify }: GrantsPageProps) {
 
                   <dl className="mt-3 grid gap-2 text-[16px] sm:grid-cols-2">
                     <div>
-                      <dt className="text-[15px] text-muted">Dana maksimum</dt>
+                      <dt className="text-[15px] text-muted">Maximum funding</dt>
                       <dd>{formatIdr(grant.maxFundingIdr)}</dd>
                     </div>
                     <div>
@@ -187,24 +191,24 @@ export function GrantsPage({ data, saveEntity, notify }: GrantsPageProps) {
                       <dd>{grant.piName || "—"}</dd>
                     </div>
                     <div>
-                      <dt className="text-[15px] text-muted">Deadline proposal</dt>
+                      <dt className="text-[15px] text-muted">Proposal deadline</dt>
                       <dd>
                         {formatDate(grant.proposalDeadline)}
                         {days !== null ? (
                           <span className="text-muted">
                             {" "}
-                            ({days < 0 ? `${Math.abs(days)} hari lewat` : `${days} hari lagi`})
+                            ({days < 0 ? `${Math.abs(days)} days overdue` : `in ${days} days`})
                           </span>
                         ) : null}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-[15px] text-muted">Deadline luaran</dt>
+                      <dt className="text-[15px] text-muted">Output deadline</dt>
                       <dd>{formatDate(grant.outputDeadline)}</dd>
                     </div>
                   </dl>
 
-                  <p className="mt-3 text-[15px] text-muted">Riset induk</p>
+                  <p className="mt-3 text-[15px] text-muted">Parent research</p>
                   <p className="text-[16px] leading-tight">{itemTitle(grant.itemId)}</p>
 
                   {grant.requiredOutputs.length > 0 ? (
@@ -237,7 +241,7 @@ export function GrantsPage({ data, saveEntity, notify }: GrantsPageProps) {
                       className="admin-mini-btn admin-mini-danger"
                       onClick={() => void remove(grant)}
                     >
-                      HAPUS
+                      DELETE
                     </button>
                   </div>
                 </article>

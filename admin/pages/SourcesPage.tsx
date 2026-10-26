@@ -68,18 +68,18 @@ export function SourcesPage({ data, saveEntity, notify }: SourcesPageProps) {
     setEditing(null);
     notify(
       isNew
-        ? "Sumber baru disimpan. Tidak pernah diekspor ke publik."
-        : `Sumber disimpan.${backup ? ` Backup: ${backup}` : ""}`,
+        ? "New source saved. It is never exported publicly."
+        : `Source saved.${backup ? ` Backup: ${backup}` : ""}`,
     );
   }
 
   async function remove(source: SourceLog) {
-    if (!window.confirm("Hapus catatan sumber ini?")) return;
+    if (!window.confirm("Delete this source record?")) return;
     await saveEntity(
       "sources",
       data.sources.filter((entry) => entry.id !== source.id),
     );
-    notify("Sumber dihapus.");
+    notify("Source deleted.");
   }
 
   const itemTitle = (id: string) =>
@@ -88,12 +88,12 @@ export function SourcesPage({ data, saveEntity, notify }: SourcesPageProps) {
   return (
     <div>
       <PageHeader
-        kicker="Log / Sumber"
-        title="Log sumber"
-        description="Semua field di sini privat. Jangan pernah menyalin catatan verifikasi ke data publik."
+        kicker="Log / Sources"
+        title="Source log"
+        description="Every field here is private. Never copy verification notes into public data."
         actions={
           <button type="button" className="pixel-btn" onClick={startNew}>
-            + SUMBER BARU
+            + NEW SOURCE
           </button>
         }
       />
@@ -102,7 +102,7 @@ export function SourcesPage({ data, saveEntity, notify }: SourcesPageProps) {
         <div className="mb-5">
           <SchemaEditor
             key={editing.id}
-            title={isNew ? "Sumber baru" : "Edit sumber"}
+            title={isNew ? "New source" : "Edit source"}
             initial={editing}
             fields={sourceFields(data, isNew)}
             schema={sourceSchema}
@@ -112,23 +112,23 @@ export function SourcesPage({ data, saveEntity, notify }: SourcesPageProps) {
         </div>
       ) : null}
 
-      <Panel title={`Daftar sumber (${filtered.length}/${data.sources.length})`}>
+      <Panel title={`Source list (${filtered.length}/${data.sources.length})`}>
         <div className="mb-4 grid gap-3 sm:grid-cols-3">
           <input
             type="search"
             className="pixel-input admin-input"
-            placeholder="Cari sitasi, DOI, catatan…"
+            placeholder="Search citation, DOI, notes…"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            aria-label="Cari sumber"
+            aria-label="Search sources"
           />
           <select
             className="pixel-input admin-input"
             value={verifiedFilter}
             onChange={(event) => setVerifiedFilter(event.target.value)}
-            aria-label="Filter status verifikasi"
+            aria-label="Filter by verification status"
           >
-            <option value="all">Semua verifikasi</option>
+            <option value="all">All verification</option>
             {verificationOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -139,9 +139,9 @@ export function SourcesPage({ data, saveEntity, notify }: SourcesPageProps) {
             className="pixel-input admin-input"
             value={itemFilter}
             onChange={(event) => setItemFilter(event.target.value)}
-            aria-label="Filter riset sumber"
+            aria-label="Filter sources by research"
           >
-            <option value="all">Semua riset</option>
+            <option value="all">All research</option>
             {data.items.map((item) => (
               <option key={item.id} value={item.id}>
                 {item.title}
@@ -151,17 +151,17 @@ export function SourcesPage({ data, saveEntity, notify }: SourcesPageProps) {
         </div>
 
         {filtered.length === 0 ? (
-          <AdminEmpty>Belum ada sumber yang cocok.</AdminEmpty>
+          <AdminEmpty>No matching sources.</AdminEmpty>
         ) : (
           <div className="admin-table-wrap">
             <table className="admin-table">
               <thead>
                 <tr>
-                  <th>Sitasi</th>
-                  <th>Riset</th>
-                  <th>Verifikasi</th>
-                  <th>Dokumen</th>
-                  <th>Aksi</th>
+                  <th>Citation</th>
+                  <th>Research</th>
+                  <th>Verification</th>
+                  <th>Document</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -187,7 +187,7 @@ export function SourcesPage({ data, saveEntity, notify }: SourcesPageProps) {
                       ) : null}
                       {source.verifiedAt ? (
                         <p className="text-[15px] text-muted">
-                          Dicek {formatDate(source.verifiedAt)}
+                          Checked {formatDate(source.verifiedAt)}
                         </p>
                       ) : null}
                     </td>
@@ -203,10 +203,10 @@ export function SourcesPage({ data, saveEntity, notify }: SourcesPageProps) {
                     <td>
                       {source.fileOnHand ? (
                         <span className="font-bold" style={{ color: "var(--success)" }}>
-                          Ada
+                          Yes
                         </span>
                       ) : (
-                        <span className="text-muted">Belum</span>
+                        <span className="text-muted">No</span>
                       )}
                     </td>
                     <td>
@@ -226,7 +226,7 @@ export function SourcesPage({ data, saveEntity, notify }: SourcesPageProps) {
                           className="admin-mini-btn admin-mini-danger"
                           onClick={() => void remove(source)}
                         >
-                          HAPUS
+                          DELETE
                         </button>
                       </div>
                     </td>

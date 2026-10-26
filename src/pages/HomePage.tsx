@@ -23,7 +23,7 @@ type StatusFilter = ResearchStatus | "all";
 type ViewMode = "card" | "list";
 
 export function HomePage() {
-  useDocumentTitle("Beranda");
+  useDocumentTitle("Research");
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -75,12 +75,12 @@ export function HomePage() {
     setStatusFilter("all");
   }
 
-  function scrollToQuests() {
-    document.getElementById("quests")?.scrollIntoView({ behavior: "smooth" });
+  function scrollToResearch() {
+    document.getElementById("research")?.scrollIntoView({ behavior: "smooth" });
   }
 
   const tagline =
-    profile?.tagline || "Lab riset pribadi untuk identitas, sistem informasi, dan Web3.";
+    profile?.tagline || "Independent research on digital identity, information systems, and Web3.";
 
   return (
     <>
@@ -88,7 +88,7 @@ export function HomePage() {
         <div className="grid items-stretch gap-4 lg:grid-cols-[0.85fr_1.15fr]">
           <div className="pixel-card-lg relative overflow-hidden bg-paper p-4">
             <div className="mb-3 flex items-center justify-between gap-2 border-[3px] border-line bg-card px-3 py-2">
-              <span className="font-pixel text-[8px] leading-4">PLAYER 1</span>
+              <span className="font-pixel text-[12px] leading-4">RESEARCHER</span>
               <span className="flex items-center gap-1" aria-hidden="true">
                 <span className="h-2 w-2 border border-line bg-orange" />
                 <span className="h-2 w-2 border border-line bg-yellow" />
@@ -108,8 +108,8 @@ export function HomePage() {
               <PixelAvatar />
             </div>
             <div className="mt-3 border-[3px] border-line bg-card px-3 py-2 text-center">
-              <p className="font-pixel text-[8px] leading-4">
-                {profile?.handle || "NUZA"}_ONLINE
+              <p className="font-pixel text-[12px] leading-4">
+                {profile?.handle || "NUSEA"} · ONLINE
                 <span className="blink" aria-hidden="true">
                   _
                 </span>
@@ -118,23 +118,23 @@ export function HomePage() {
           </div>
 
           <div className="pixel-card-lg flex flex-col justify-center bg-card p-5 sm:p-8">
-            <p className="mb-3 inline-flex w-fit items-center gap-2 border-[3px] border-line bg-yellow px-2 py-1 font-pixel text-[7px] uppercase leading-4 text-[#14213D]">
-              <span aria-hidden="true">▚</span> Lab riset pribadi
+            <p className="mb-3 inline-flex w-fit items-center gap-2 border-[3px] border-line bg-yellow px-2 py-1 font-pixel text-[12px] uppercase leading-4 text-[#14213D]">
+              <span aria-hidden="true">▚</span> Independent research lab
             </p>
             <h1 className="text-balance text-[26px] leading-[1.5] sm:text-[38px]">
-              NUZA<span className="text-orange">_</span>LAB
+              NUSEA<span className="text-orange">.</span>
             </h1>
             <p className="mt-4 text-[21px] leading-snug">{tagline}</p>
             <p className="mt-3 max-w-xl text-[18px] leading-snug text-muted">
               {profile?.bio ||
-                "Portofolio riset tentang identitas digital, sistem informasi, dan Web3."}
+                "A research portfolio on digital identity, information systems, and Web3."}
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <button type="button" className="pixel-btn" onClick={scrollToQuests}>
-                JELAJAHI QUEST
+              <button type="button" className="pixel-btn" onClick={scrollToResearch}>
+                EXPLORE RESEARCH
               </button>
-              <Link to="/tentang" className="pixel-btn pixel-btn-ghost">
-                TENTANG SAYA
+              <Link to="/about" className="pixel-btn pixel-btn-ghost">
+                ABOUT ME
               </Link>
             </div>
           </div>
@@ -142,7 +142,7 @@ export function HomePage() {
 
         <div className="mt-4">
           <Scoreboard
-            quests={items.length}
+            research={items.length}
             published={publishedItems.length}
             assets={assets.length}
             venues={venues.length}
@@ -150,28 +150,28 @@ export function HomePage() {
         </div>
       </section>
 
-      <section id="quests" className="mx-auto max-w-6xl scroll-mt-24 px-4 pt-14">
+      <section id="research" className="mx-auto max-w-6xl scroll-mt-24 px-4 pt-14">
         <SectionHeading
           numbered="01"
-          kicker="Quest board"
-          title="Daftar riset yang bisa dilihat publik"
-          description="Cari berdasarkan judul, kata kunci, penulis, atau abstrak. Level mengikuti tahap pipeline; XP menunjukkan seberapa jauh quest berjalan."
+          kicker="Research index"
+          title="Public research, in the open"
+          description="Search by title, keyword, author, or abstract. Stage tracks the pipeline position; progress shows how far each research item has advanced."
         />
 
         <div className="mt-6 border-[3px] border-line bg-card p-4 shadow-hard sm:p-5">
           <div className="grid gap-3 lg:grid-cols-[1fr_auto]">
             <div>
               <label
-                htmlFor="quest-search"
-                className="mb-1 block font-pixel text-[7px] uppercase leading-4"
+                htmlFor="research-search"
+                className="mb-1 block font-pixel text-[12px] uppercase leading-4"
               >
-                Cari quest
+                Search research
               </label>
               <input
-                id="quest-search"
+                id="research-search"
                 type="search"
                 className="pixel-input"
-                placeholder="Misal: identitas, SLR, TOGAF…"
+                placeholder="Try: identity, SLR, TOGAF…"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
               />
@@ -179,20 +179,20 @@ export function HomePage() {
             <div className="flex flex-wrap items-end gap-3">
               <div>
                 <label
-                  htmlFor="quest-status"
-                  className="mb-1 block font-pixel text-[7px] uppercase leading-4"
+                  htmlFor="research-status"
+                  className="mb-1 block font-pixel text-[12px] uppercase leading-4"
                 >
                   Status
                 </label>
                 <select
-                  id="quest-status"
+                  id="research-status"
                   className="pixel-input min-w-[170px]"
                   value={statusFilter}
                   onChange={(event) =>
                     setStatusFilter(event.target.value as StatusFilter)
                   }
                 >
-                  <option value="all">Semua status</option>
+                  <option value="all">All statuses</option>
                   {ALL_STATUSES.map((status) => (
                     <option key={status} value={status}>
                       {STATUS_LABELS[status]}
@@ -201,31 +201,31 @@ export function HomePage() {
                 </select>
               </div>
               <div>
-                <span className="mb-1 block font-pixel text-[7px] uppercase leading-4">
-                  Tampilan
+                <span className="mb-1 block font-pixel text-[12px] uppercase leading-4">
+                  View
                 </span>
                 <div className="flex border-[3px] border-line">
                   <button
                     type="button"
                     className={cn(
-                      "min-h-[46px] px-3 font-pixel text-[7px]",
+                      "min-h-[46px] px-3 font-pixel text-[12px]",
                       view === "card" ? "bg-yellow text-[#14213D]" : "bg-card",
                     )}
                     aria-pressed={view === "card"}
                     onClick={() => setView("card")}
                   >
-                    KARTU
+                    CARDS
                   </button>
                   <button
                     type="button"
                     className={cn(
-                      "min-h-[46px] border-l-[3px] border-line px-3 font-pixel text-[7px]",
+                      "min-h-[46px] border-l-[3px] border-line px-3 font-pixel text-[12px]",
                       view === "list" ? "bg-yellow text-[#14213D]" : "bg-card",
                     )}
                     aria-pressed={view === "list"}
                     onClick={() => setView("list")}
                   >
-                    DAFTAR
+                    LIST
                   </button>
                 </div>
               </div>
@@ -233,8 +233,8 @@ export function HomePage() {
           </div>
 
           <div className="mt-4">
-            <span className="mb-2 block font-pixel text-[7px] uppercase leading-4">
-              Jenis
+            <span className="mb-2 block font-pixel text-[12px] uppercase leading-4">
+              Type
             </span>
             <div className="flex flex-wrap gap-2">
               <button
@@ -244,7 +244,7 @@ export function HomePage() {
                 aria-pressed={typeFilter === "all"}
                 onClick={() => setTypeFilter("all")}
               >
-                <span aria-hidden="true">00</span> Semua
+                <span aria-hidden="true">00</span> All
                 <span className="border-l-2 border-line pl-2">{items.length}</span>
               </button>
               {ITEM_TYPES.map((type, index) => (
@@ -269,12 +269,12 @@ export function HomePage() {
 
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
           <p className="text-[18px] text-muted" role="status" aria-live="polite">
-            {filtered.length} quest ditampilkan
-            {hasFilters ? " (terfilter)" : ""}
+            {filtered.length} {filtered.length === 1 ? "research item" : "research items"} shown
+            {hasFilters ? " (filtered)" : ""}
           </p>
           {hasFilters ? (
             <button type="button" className="pixel-btn pixel-btn-ghost pixel-btn-small" onClick={resetFilters}>
-              RESET FILTER
+              RESET FILTERS
             </button>
           ) : null}
         </div>
@@ -282,16 +282,16 @@ export function HomePage() {
         <div className="mt-4">
           {filtered.length === 0 ? (
             <EmptyState
-              title={items.length === 0 ? "BELUM ADA QUEST PUBLIK" : "QUEST TIDAK DITEMUKAN"}
+              title={items.length === 0 ? "NO PUBLIC RESEARCH YET" : "NO RESEARCH FOUND"}
               body={
                 items.length === 0
-                  ? "Saat ini belum ada riset yang ditandai publik. Pemilik lab dapat mengubahnya lewat back office."
-                  : "Coba kata kunci lain atau kosongkan filter jenis dan status."
+                  ? "No research is marked public yet. The lab owner can change that in the back office."
+                  : "Try another keyword or clear the type and status filters."
               }
               action={
                 hasFilters ? (
                   <button type="button" className="pixel-btn" onClick={resetFilters}>
-                    TAMPILKAN SEMUA
+                    SHOW ALL
                   </button>
                 ) : undefined
               }

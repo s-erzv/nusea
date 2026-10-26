@@ -27,14 +27,14 @@ export function authorizeRequest(
     return {
       ok: false,
       status: 403,
-      error: "Back office hanya dapat diakses dari 127.0.0.1.",
+      error: "Back office is only available on 127.0.0.1.",
     };
   }
   if (!providedToken || !safeTokenEquals(providedToken, expectedToken)) {
     return {
       ok: false,
       status: 401,
-      error: "Token sesi admin tidak valid. Salin token dari terminal.",
+      error: "Invalid admin session token. Copy the token from the terminal.",
     };
   }
   return { ok: true };
@@ -44,7 +44,7 @@ export function accessGuard(token: string) {
   return (req: Request, res: Response, next: NextFunction): void => {
     const result = authorizeRequest(
       req.socket.remoteAddress,
-      req.get("x-nuza-token"),
+      req.get("x-nusea-token"),
       token,
     );
     if (!result.ok) {

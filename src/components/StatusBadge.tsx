@@ -17,7 +17,7 @@ export function StatusBadge({ status }: { status: ResearchStatus }) {
 
   return (
     <span className="pixel-badge" data-tone={tone}>
-      {number ? `LV ${number} ` : ""}
+      {number ? `${String(number).padStart(2, "0")} ` : ""}
       {STATUS_LABELS[status]}
     </span>
   );

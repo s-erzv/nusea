@@ -38,13 +38,13 @@ async function main() {
   ]);
 
   console.log(
-    `Data publik: ${bundle.items.length} riset, ${bundle.assets.length} aset, ${bundle.venues.length} venue, ${bundle.grants.length} hibah, ${bundle.ideas.length} ide.`,
+    `Public data: ${bundle.items.length} research, ${bundle.assets.length} assets, ${bundle.venues.length} venues, ${bundle.grants.length} grants, ${bundle.ideas.length} ideas.`,
   );
 }
 
 if (process.argv[1]?.endsWith("publish-data.ts")) {
   main().catch((error) => {
-    console.error("Gagal menerbitkan data:", error);
+    console.error("Failed to publish data:", error);
     process.exitCode = 1;
   });
 }

@@ -31,11 +31,14 @@ export function KanbanPage({ data, refresh, notify }: KanbanPageProps) {
     if (!item || item.status === toStatus) return;
     setBusy(itemId);
     try {
-      await adminApi.transition(itemId, toStatus, "Dipindahkan dari kanban.");
+      await adminApi.transition(itemId, toStatus, "Moved from the kanban.");
       await refresh();
-      notify(`${item.title} → ${STATUS_LABELS[toStatus]}. Riwayat tercatat.`);
+      notify(`${item.title} → ${STATUS_LABELS[toStatus]}. History recorded.`);
     } catch (error) {
-      notify(error instanceof Error ? error.message : "Gagal memindahkan status.", "error");
+      notify(
+        error instanceof Error ? error.message : "Could not move status.",
+        "error",
+      );
     } finally {
       setBusy(null);
       setDragging(null);
@@ -67,11 +70,11 @@ export function KanbanPage({ data, refresh, notify }: KanbanPageProps) {
           const id = event.dataTransfer.getData("text/plain") || dragging;
           if (id) void move(id, status);
         }}
-        aria-label={`Kolom ${STATUS_LABELS[status]}`}
+        aria-label={`${STATUS_LABELS[status]} column`}
       >
         <header className="admin-kanban-head">
           <div>
-            <p className="font-pixel text-[7px] uppercase leading-4 text-muted">
+            <p className="font-pixel text-[12px] uppercase leading-4 text-muted">
               {terminal ? "Terminal" : `Level ${STATUS_NUMBERS[status as keyof typeof STATUS_NUMBERS] ?? "—"}`}
             </p>
             <h2 className="text-[12px] leading-5">{STATUS_LABELS[status]}</h2>
@@ -105,7 +108,7 @@ export function KanbanPage({ data, refresh, notify }: KanbanPageProps) {
                 />
               </div>
               <label className="mt-2 block">
-                <span className="sr-only">Pindahkan status {item.title}</span>
+                <span className="sr-only">Move status for {item.title}</span>
                 <select
                   className="pixel-input admin-input admin-input-xs"
                   value={item.status}
@@ -125,7 +128,7 @@ export function KanbanPage({ data, refresh, notify }: KanbanPageProps) {
           ))}
           {items.length === 0 ? (
             <p className="border-2 border-dashed border-line px-2 py-4 text-center text-[15px] text-muted">
-              Kosong
+              Empty
             </p>
           ) : null}
         </div>
@@ -138,7 +141,7 @@ export function KanbanPage({ data, refresh, notify }: KanbanPageProps) {
       <PageHeader
         kicker="Pipeline"
         title="Kanban pipeline"
-        description="Tarik kartu ke kolom lain, atau pakai pilihan status untuk keyboard. Setiap perubahan otomatis menulis data/private/history.json."
+        description="Drag cards between columns or use the status select for keyboard control. Every change writes to data/private/history.json."
       />
 
       <div className="admin-kanban-wrap">

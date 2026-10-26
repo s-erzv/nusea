@@ -36,7 +36,7 @@ export function SchemaEditor<T extends object>({
         if (!next[key]) next[key] = issue.message;
       }
       setErrors(next);
-      setMessage(`Ada ${parsed.error.issues.length} isian yang perlu diperbaiki.`);
+      setMessage(`${parsed.error.issues.length} field(s) need attention.`);
       return;
     }
     setErrors({});
@@ -44,7 +44,7 @@ export function SchemaEditor<T extends object>({
     try {
       await onSave(parsed.data);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Gagal menyimpan.");
+      setMessage(error instanceof Error ? error.message : "Could not save.");
     } finally {
       setSaving(false);
     }
@@ -55,7 +55,7 @@ export function SchemaEditor<T extends object>({
       <div className="admin-panel-head">
         <h2 className="text-[14px] leading-6">{title}</h2>
         <button type="button" className="admin-mini-btn" onClick={onCancel}>
-          TUTUP
+          CLOSE
         </button>
       </div>
       <div className="p-4">
@@ -83,7 +83,7 @@ export function SchemaEditor<T extends object>({
             onClick={handleSave}
             disabled={saving}
           >
-            {saving ? "MENYIMPAN…" : "SIMPAN"}
+            {saving ? "SAVING…" : "SAVE"}
           </button>
           <button
             type="button"
@@ -91,7 +91,7 @@ export function SchemaEditor<T extends object>({
             onClick={onCancel}
             disabled={saving}
           >
-            BATAL
+            CANCEL
           </button>
         </div>
       </div>

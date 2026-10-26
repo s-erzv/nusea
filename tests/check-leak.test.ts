@@ -8,7 +8,7 @@ import { findLeaks } from "../scripts/check-leak";
 const dirs: string[] = [];
 
 async function tempDist(): Promise<string> {
-  const dir = await mkdtemp(path.join(os.tmpdir(), "nuza-dist-"));
+  const dir = await mkdtemp(path.join(os.tmpdir(), "nusea-dist-"));
   dirs.push(dir);
   return dir;
 }
@@ -70,7 +70,7 @@ describe("check:leak", () => {
       ["exec", "tsx", "scripts/check-leak.ts"],
       {
         cwd: process.cwd(),
-        env: { ...process.env, NUZA_DIST: dist },
+        env: { ...process.env, NUSEA_DIST: dist },
         encoding: "utf8",
         timeout: 30_000,
       },

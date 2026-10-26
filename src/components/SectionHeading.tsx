@@ -16,7 +16,7 @@ export function SectionHeading({
   const Heading = as;
   return (
     <div className="max-w-3xl">
-      <p className="mb-2 inline-flex items-center gap-2 border-2 border-line bg-yellow px-2 py-1 font-pixel text-[7px] uppercase leading-4 text-[#14213D]">
+      <p className="mb-2 inline-flex items-center gap-2 border-2 border-line bg-yellow px-2 py-1 font-pixel text-[12px] uppercase leading-4 text-[#14213D]">
         {numbered ? <span aria-hidden="true">{numbered}</span> : null}
         {kicker}
       </p>

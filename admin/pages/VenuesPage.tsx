@@ -26,7 +26,7 @@ export function VenuesPage({ data, saveEntity, notify }: VenuesPageProps) {
       .filter(
         (venue) => visibilityFilter === "all" || venue.visibility === visibilityFilter,
       )
-      .sort((a, b) => a.name.localeCompare(b.name, "id"));
+      .sort((a, b) => a.name.localeCompare(b.name, "en"));
   }, [data.venues, query, visibilityFilter]);
 
   function startNew() {
@@ -55,27 +55,31 @@ export function VenuesPage({ data, saveEntity, notify }: VenuesPageProps) {
         );
     const backup = await saveEntity("venues", next);
     setEditing(null);
-    notify(isNew ? "Venue baru disimpan." : `Venue disimpan.${backup ? ` Backup: ${backup}` : ""}`);
+    notify(
+      isNew
+        ? "New venue saved."
+        : `Venue saved.${backup ? ` Backup: ${backup}` : ""}`,
+    );
   }
 
   async function remove(venue: Venue) {
-    if (!window.confirm(`Hapus venue "${venue.name}"?`)) return;
+    if (!window.confirm(`Delete venue "${venue.name}"?`)) return;
     await saveEntity(
       "venues",
       data.venues.filter((entry) => entry.id !== venue.id),
     );
-    notify("Venue dihapus.");
+    notify("Venue deleted.");
   }
 
   return (
     <div>
       <PageHeader
         kicker="CRUD / Venue"
-        title="Venue dan target publikasi"
-        description="Catatan venue selalu privat; hanya field yang ada di allowlist publik yang bisa tampil."
+        title="Venues and publication targets"
+        description="Venue notes are always private; only fields in the public allowlist can appear."
         actions={
           <button type="button" className="pixel-btn" onClick={startNew}>
-            + VENUE BARU
+            + NEW VENUE
           </button>
         }
       />
@@ -84,7 +88,7 @@ export function VenuesPage({ data, saveEntity, notify }: VenuesPageProps) {
         <div className="mb-5">
           <SchemaEditor
             key={editing.id}
-            title={isNew ? "Venue baru" : `Edit: ${editing.name}`}
+            title={isNew ? "New venue" : `Edit: ${editing.name}`}
             initial={editing}
             fields={venueFields(isNew)}
             schema={venueSchema}
@@ -94,23 +98,23 @@ export function VenuesPage({ data, saveEntity, notify }: VenuesPageProps) {
         </div>
       ) : null}
 
-      <Panel title={`Daftar venue (${filtered.length}/${data.venues.length})`}>
+      <Panel title={`Venue list (${filtered.length}/${data.venues.length})`}>
         <div className="mb-4 grid gap-3 sm:grid-cols-2">
           <input
             type="search"
             className="pixel-input admin-input"
-            placeholder="Cari venue…"
+            placeholder="Search venues…"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            aria-label="Cari venue"
+            aria-label="Search venues"
           />
           <select
             className="pixel-input admin-input"
             value={visibilityFilter}
             onChange={(event) => setVisibilityFilter(event.target.value)}
-            aria-label="Filter visibilitas venue"
+            aria-label="Filter by venue visibility"
           >
-            <option value="all">Semua visibilitas</option>
+            <option value="all">All visibility</option>
             {visibilityOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -120,19 +124,19 @@ export function VenuesPage({ data, saveEntity, notify }: VenuesPageProps) {
         </div>
 
         {filtered.length === 0 ? (
-          <AdminEmpty>Tidak ada venue.</AdminEmpty>
+          <AdminEmpty>No venues.</AdminEmpty>
         ) : (
           <div className="admin-table-wrap">
             <table className="admin-table">
               <thead>
                 <tr>
-                  <th>Nama</th>
-                  <th>Jenis</th>
-                  <th>Indeks</th>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Index</th>
                   <th>Review</th>
-                  <th>Visibilitas</th>
-                  <th>Diperbarui</th>
-                  <th>Aksi</th>
+                  <th>Visibility</th>
+                  <th>Updated</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -143,11 +147,19 @@ export function VenuesPage({ data, saveEntity, notify }: VenuesPageProps) {
                       <p className="text-[15px] text-muted">{venue.id}</p>
                     </td>
                     <td>{VENUE_KIND_LABELS[venue.kind]}</td>
-                    <td>{venue.indexLevel === "tidak_terindeks" ? "Tidak terindeks" : venue.indexLevel}</td>
-                    <td>{venue.typicalReviewWeeks > 0 ? `${venue.typicalReviewWeeks} mgg` : "—"}</td>
+                    <td>
+                      {venue.indexLevel === "tidak_terindeks"
+                        ? "Not indexed"
+                        : venue.indexLevel}
+                    </td>
+                    <td>
+                      {venue.typicalReviewWeeks > 0
+                        ? `${venue.typicalReviewWeeks} wks`
+                        : "—"}
+                    </td>
                     <td>
                       <span className="admin-pill" data-public={venue.visibility === "public"}>
-                        {venue.visibility === "public" ? "Publik" : "Privat"}
+                        {venue.visibility === "public" ? "Public" : "Private"}
                       </span>
                     </td>
                     <td>{formatDate(venue.updatedAt)}</td>
@@ -168,7 +180,7 @@ export function VenuesPage({ data, saveEntity, notify }: VenuesPageProps) {
                           className="admin-mini-btn admin-mini-danger"
                           onClick={() => void remove(venue)}
                         >
-                          HAPUS
+                          DELETE
                         </button>
                       </div>
                     </td>

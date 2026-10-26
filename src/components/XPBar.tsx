@@ -4,7 +4,7 @@ interface XPBarProps {
   animate?: boolean;
 }
 
-export function XPBar({ value, label = "Progres riset", animate = true }: XPBarProps) {
+export function XPBar({ value, label = "Research progress", animate = true }: XPBarProps) {
   const safe = Math.max(0, Math.min(100, Math.round(value)));
   return (
     <div

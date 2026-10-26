@@ -20,22 +20,22 @@ export function ProfilePage({ data, saveEntity, notify }: ProfilePageProps) {
     const next: Profile = { ...value, id: "profile", updatedAt: nowIso() };
     const backup = await saveEntity("profile", next);
     setEditing(false);
-    notify(`Profil disimpan.${backup ? ` Backup: ${backup}` : ""}`);
+    notify(`Profile saved.${backup ? ` Backup: ${backup}` : ""}`);
   }
 
   return (
     <div>
       <PageHeader
-        kicker="Identitas / Profil"
-        title="Profil publik"
-        description="Hanya profil berstatus publik yang muncul di situs. Email dan sosial bisa dikosongkan."
+        kicker="Identity / Profile"
+        title="Public profile"
+        description="Only a public profile appears on the site. Email and social links can be left empty."
         actions={
           <button
             type="button"
             className="pixel-btn"
             onClick={() => setEditing((current) => !current)}
           >
-            {editing ? "TUTUP EDITOR" : "EDIT PROFIL"}
+            {editing ? "CLOSE EDITOR" : "EDIT PROFILE"}
           </button>
         }
       />
@@ -45,7 +45,7 @@ export function ProfilePage({ data, saveEntity, notify }: ProfilePageProps) {
           {editing ? (
             <SchemaEditor
               key={profile.updatedAt}
-              title="Data profil"
+              title="Profile data"
               initial={profile}
               fields={profileFields()}
               schema={profileSchema}
@@ -53,21 +53,21 @@ export function ProfilePage({ data, saveEntity, notify }: ProfilePageProps) {
               onCancel={() => setEditing(false)}
             />
           ) : (
-            <Panel title="Data profil">
+            <Panel title="Profile data">
               <dl className="grid gap-3 sm:grid-cols-2">
                 {[
-                  ["Nama", profile.name],
+                  ["Name", profile.name],
                   ["Handle", profile.handle],
-                  ["Kampus", profile.campus || "—"],
-                  ["Program studi", profile.studyProgram || "—"],
-                  ["Lokasi", profile.location || "—"],
+                  ["Campus", profile.campus || "—"],
+                  ["Study program", profile.studyProgram || "—"],
+                  ["Location", profile.location || "—"],
                   ["Email", profile.email || "—"],
-                  ["Avatar", profile.avatar || "nuza-pixel"],
-                  ["Visibilitas", profile.visibility === "public" ? "Publik" : "Privat"],
+                  ["Avatar", profile.avatar || "nusea-pixel"],
+                  ["Visibility", profile.visibility === "public" ? "Public" : "Private"],
                   ["Scholar", profile.socials.scholar || "—"],
                   ["ORCID", profile.socials.orcid || "—"],
                   ["GitHub", profile.socials.github || "—"],
-                  ["Diperbarui", formatDate(profile.updatedAt)],
+                  ["Updated", formatDate(profile.updatedAt)],
                 ].map(([label, value]) => (
                   <div key={label}>
                     <dt className="text-[15px] text-muted">{label}</dt>
@@ -88,12 +88,12 @@ export function ProfilePage({ data, saveEntity, notify }: ProfilePageProps) {
         </div>
 
         <aside className="space-y-4">
-          <Panel title="Pratinjau kartu">
+          <Panel title="Card preview">
             <div className="border-[3px] border-line bg-paper p-4">
               <div className="mb-3 flex h-20 w-20 items-center justify-center border-[3px] border-line bg-sky pixel-shadow-sm">
-                <span className="font-pixel text-[10px]">NUZA</span>
+                <span className="font-pixel text-[14px]">N</span>
               </div>
-              <p className="font-pixel text-[8px] uppercase leading-4 text-muted">
+              <p className="font-pixel text-[12px] uppercase leading-4 text-muted">
                 {profile.handle}
               </p>
               <p className="mt-1 text-[18px] leading-tight">{profile.name}</p>
@@ -101,24 +101,24 @@ export function ProfilePage({ data, saveEntity, notify }: ProfilePageProps) {
             </div>
           </Panel>
 
-          <Panel title="Status ekspor">
+          <Panel title="Export status">
             {profile.visibility === "public" ? (
               <p className="text-[16px]">
-                Profil <strong>publik</strong> dan ikut diekspor.
+                Profile is <strong>public</strong> and will be exported.
               </p>
             ) : (
               <p className="admin-warning">
-                Profil <strong>privat</strong>. Situs publik akan memakai fallback. Ubah
-                visibilitas menjadi publik sebelum deploy.
+                Profile is <strong>private</strong>. The public site will use a fallback.
+                Change visibility to public before deploying.
               </p>
             )}
           </Panel>
 
-          <Panel title="Catatan">
+          <Panel title="Notes">
             <ul className="space-y-2 text-[15px] leading-snug text-muted">
-              <li>▸ Avatar default: nuza-pixel.</li>
-              <li>▸ Scholar/ORCID/GitHub hanya diekspor jika profil publik.</li>
-              <li>▸ Jangan menaruh email kampus privat di tagline/bio.</li>
+              <li>▸ Default avatar: nusea-pixel.</li>
+              <li>▸ Scholar/ORCID/GitHub are only exported when the profile is public.</li>
+              <li>▸ Do not put a private campus email in the tagline/bio.</li>
             </ul>
           </Panel>
         </aside>

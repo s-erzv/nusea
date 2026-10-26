@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" role="img" aria-label="Nusea">
+  <rect width="32" height="32" fill="#BEE3FF"/>
+  <rect x="2" y="2" width="28" height="28" fill="#14213D"/>
+  <rect x="5" y="5" width="22" height="22" fill="none" stroke="#FF8A2B" stroke-width="3"/>
+  <rect x="7" y="7" width="4" height="13" fill="#FFD93D"/>
+  <rect x="21" y="7" width="4" height="13" fill="#FFD93D"/>
+  <rect x="11" y="9" width="3" height="3" fill="#FF8A2B"/>
+  <rect x="14" y="12" width="3" height="3" fill="#FF8A2B"/>
+  <rect x="17" y="15" width="4" height="3" fill="#FF8A2B"/>
+  <rect x="7" y="23" width="7" height="2" fill="#BEE3FF"/>
+  <rect x="15" y="23" width="4" height="2" fill="#FFD93D"/>
+  <rect x="20" y="23" width="5" height="2" fill="#BEE3FF"/>
+  <rect x="11" y="26" width="10" height="2" fill="#FF8A2B"/>
+</svg>

@@ -100,7 +100,9 @@ export function DataPage({ data, saveEntity, notify, refresh }: DataPageProps) {
       const result = await adminApi.backups();
       setBackups(result.backups);
     } catch (error) {
-      setBackupError(error instanceof Error ? error.message : "Gagal memuat backup.");
+          setBackupError(
+            error instanceof Error ? error.message : "Could not load backups.",
+          );
     }
   }
 
@@ -113,7 +115,7 @@ export function DataPage({ data, saveEntity, notify, refresh }: DataPageProps) {
       })
       .catch((error: unknown) => {
         if (active) {
-          setBackupError(error instanceof Error ? error.message : "Gagal memuat backup.");
+      setBackupError(error instanceof Error ? error.message : "Could not load backups.");
         }
       });
     return () => {
@@ -123,7 +125,7 @@ export function DataPage({ data, saveEntity, notify, refresh }: DataPageProps) {
 
   function downloadJson(entity: EntityFile) {
     download(
-      `nuza-${FILE_LABELS[entity]}`,
+      `nusea-${FILE_LABELS[entity]}`,
       `${JSON.stringify(data[entity], null, 2)}\n`,
     );
   }
@@ -131,7 +133,7 @@ export function DataPage({ data, saveEntity, notify, refresh }: DataPageProps) {
   async function uploadJson(file: File) {
     if (
       !window.confirm(
-        `Ganti seluruh ${FILE_LABELS[uploadEntity]} dengan isi file ini? Backup lama dibuat otomatis.`,
+        `Replace the entire ${FILE_LABELS[uploadEntity]} with this file? A backup will be created automatically.`,
       )
     ) {
       return;
@@ -141,14 +143,17 @@ export function DataPage({ data, saveEntity, notify, refresh }: DataPageProps) {
       const text = await file.text();
       const parsed = JSON.parse(text) as unknown;
       if (uploadEntity !== "profile" && !Array.isArray(parsed)) {
-        throw new Error("File entitas harus berupa array JSON.");
+        throw new Error("Entity files must contain a JSON array.");
       }
       await saveEntity(uploadEntity, parsed);
       await refresh();
       await loadBackups();
-      notify(`${FILE_LABELS[uploadEntity]} diganti dan divalidasi.`);
+      notify(`${FILE_LABELS[uploadEntity]} replaced and validated.`);
     } catch (error) {
-      notify(error instanceof Error ? error.message : "Gagal mengunggah JSON.", "error");
+      notify(
+        error instanceof Error ? error.message : "Could not upload JSON.",
+        "error",
+      );
     } finally {
       setBusy(false);
     }
@@ -164,7 +169,7 @@ export function DataPage({ data, saveEntity, notify, refresh }: DataPageProps) {
       finalFileReady: item.submitChecklist.finalFileReady,
     }));
     download(
-      `nuza-items-${todayIso()}.csv`,
+      `nusea-items-${todayIso()}.csv`,
       serializeCsv(ITEM_COLUMNS, rows),
       "text/csv",
     );
@@ -172,7 +177,7 @@ export function DataPage({ data, saveEntity, notify, refresh }: DataPageProps) {
 
   function exportGrants() {
     download(
-      `nuza-grants-${todayIso()}.csv`,
+      `nusea-grants-${todayIso()}.csv`,
       serializeCsv(GRANT_COLUMNS, data.grants),
       "text/csv",
     );
@@ -181,7 +186,7 @@ export function DataPage({ data, saveEntity, notify, refresh }: DataPageProps) {
   function buildItem(record: Record<string, string>): ResearchItem {
     const now = nowIso();
     const id = record.id?.trim() || slugify(record.title ?? "");
-    if (!id) throw new Error("Setiap baris butuh kolom id atau title.");
+    if (!id) throw new Error("Every row needs an id or title column.");
     const existing = data.items.find((item) => item.id === id);
     return {
       id,
@@ -221,7 +226,7 @@ export function DataPage({ data, saveEntity, notify, refresh }: DataPageProps) {
   function buildGrant(record: Record<string, string>): Grant {
     const now = nowIso();
     const id = record.id?.trim() || slugify(record.scheme ?? "");
-    if (!id) throw new Error("Setiap baris butuh kolom id atau scheme.");
+    if (!id) throw new Error("Every row needs an id or scheme column.");
     const existing = data.grants.find((grant) => grant.id === id);
     return {
       id,
@@ -249,15 +254,21 @@ export function DataPage({ data, saveEntity, notify, refresh }: DataPageProps) {
     setBusy(true);
     try {
       const records = csvToRecords(await file.text());
-      if (records.length === 0) throw new Error("CSV kosong atau header tidak ditemukan.");
+      if (records.length === 0) {
+        throw new Error("CSV is empty or no header was found.");
+      }
       if (kind === "items") {
         const imported = records.map(buildItem);
         const ids = new Set<string>();
         for (const item of imported) {
-          if (ids.has(item.id)) throw new Error(`ID ganda di CSV: ${item.id}`);
+          if (ids.has(item.id)) throw new Error(`Duplicate ID in CSV: ${item.id}`);
           ids.add(item.id);
         }
-        if (!window.confirm(`Impor ${imported.length} baris riset? Baris dengan ID sama akan diperbarui.`)) {
+        if (
+          !window.confirm(
+            `Import ${imported.length} research rows? Rows with the same ID will be updated.`,
+          )
+        ) {
           return;
         }
         const next = [...data.items];
@@ -267,10 +278,14 @@ export function DataPage({ data, saveEntity, notify, refresh }: DataPageProps) {
           else next.push(item);
         }
         await saveEntity("items", next);
-        notify(`${imported.length} baris riset diimpor.`);
+        notify(`${imported.length} research rows imported.`);
       } else {
         const imported = records.map(buildGrant);
-        if (!window.confirm(`Impor ${imported.length} baris hibah? Baris dengan ID sama akan diperbarui.`)) {
+        if (
+          !window.confirm(
+            `Import ${imported.length} grant rows? Rows with the same ID will be updated.`,
+          )
+        ) {
           return;
         }
         const next = [...data.grants];
@@ -280,12 +295,15 @@ export function DataPage({ data, saveEntity, notify, refresh }: DataPageProps) {
           else next.push(grant);
         }
         await saveEntity("grants", next);
-        notify(`${imported.length} baris hibah diimpor.`);
+        notify(`${imported.length} grant rows imported.`);
       }
       await refresh();
       await loadBackups();
     } catch (error) {
-      notify(error instanceof Error ? error.message : "Gagal mengimpor CSV.", "error");
+      notify(
+        error instanceof Error ? error.message : "Could not import CSV.",
+        "error",
+      );
     } finally {
       setBusy(false);
     }
@@ -296,7 +314,10 @@ export function DataPage({ data, saveEntity, notify, refresh }: DataPageProps) {
       const text = await adminApi.backupText(name);
       download(name, text);
     } catch (error) {
-      notify(error instanceof Error ? error.message : "Gagal mengunduh backup.", "error");
+      notify(
+        error instanceof Error ? error.message : "Could not download backup.",
+        "error",
+      );
     }
   }
 
@@ -304,18 +325,18 @@ export function DataPage({ data, saveEntity, notify, refresh }: DataPageProps) {
     <div>
       <PageHeader
         kicker="Data / Raw"
-        title="Data dan backup"
-        description="File JSON mentah di data/private dan backup 20 terakhir. Semua operasi tetap lokal."
+        title="Data and backups"
+        description="Raw JSON files in data/private plus the latest 20 backups. All operations stay local."
       />
 
-      <Panel title="File JSON mentah">
+      <Panel title="Raw JSON files">
         <div className="admin-table-wrap">
           <table className="admin-table">
             <thead>
               <tr>
                 <th>File</th>
-                <th>Jumlah</th>
-                <th>Unduh</th>
+                <th>Count</th>
+                <th>Download</th>
               </tr>
             </thead>
             <tbody>
@@ -329,7 +350,7 @@ export function DataPage({ data, saveEntity, notify, refresh }: DataPageProps) {
                       className="admin-mini-btn"
                       onClick={() => downloadJson(entity)}
                     >
-                      UNDUH JSON
+                      DOWNLOAD JSON
                     </button>
                   </td>
                 </tr>
@@ -342,7 +363,7 @@ export function DataPage({ data, saveEntity, notify, refresh }: DataPageProps) {
             className="pixel-input admin-input"
             value={uploadEntity}
             onChange={(event) => setUploadEntity(event.target.value as EntityFile)}
-            aria-label="Entitas untuk unggah JSON"
+            aria-label="Entity to upload as JSON"
           >
             {(Object.keys(FILE_LABELS) as EntityFile[]).map((entity) => (
               <option key={entity} value={entity}>
@@ -360,28 +381,28 @@ export function DataPage({ data, saveEntity, notify, refresh }: DataPageProps) {
               event.target.value = "";
               if (file) void uploadJson(file);
             }}
-            aria-label={`Unggah JSON ${FILE_LABELS[uploadEntity]}`}
+            aria-label={`Upload JSON for ${FILE_LABELS[uploadEntity]}`}
           />
           <p className="self-center text-[15px] text-muted">
-            Ganti seluruh file setelah validasi.
+            Replaces the entire file after validation.
           </p>
         </div>
       </Panel>
 
       <div className="mt-5">
-        <Panel title="CSV riset dan hibah">
+        <Panel title="Research and grant CSV">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="border-[3px] border-line bg-paper p-3">
-              <h3 className="text-[16px]">Riset</h3>
+              <h3 className="text-[16px]">Research</h3>
               <p className="mb-3 text-[15px] text-muted">
-                Kolom: id, title, type, status, visibility, + field lain.
+                Columns: id, title, type, status, visibility, + other fields.
               </p>
               <div className="flex flex-wrap gap-2">
                 <button type="button" className="admin-mini-btn" onClick={exportItems}>
-                  EKSPOR CSV
+                  EXPORT CSV
                 </button>
                 <label className="admin-mini-btn cursor-pointer">
-                  IMPOR CSV
+                  IMPORT CSV
                   <input
                     type="file"
                     accept="text/csv,.csv"
@@ -397,16 +418,16 @@ export function DataPage({ data, saveEntity, notify, refresh }: DataPageProps) {
               </div>
             </div>
             <div className="border-[3px] border-line bg-paper p-3">
-              <h3 className="text-[16px]">Hibah</h3>
+              <h3 className="text-[16px]">Grants</h3>
               <p className="mb-3 text-[15px] text-muted">
-                Kolom: id, scheme, cluster, selectionStage, + field lain.
+                Columns: id, scheme, cluster, selectionStage, + other fields.
               </p>
               <div className="flex flex-wrap gap-2">
                 <button type="button" className="admin-mini-btn" onClick={exportGrants}>
-                  EKSPOR CSV
+                  EXPORT CSV
                 </button>
                 <label className="admin-mini-btn cursor-pointer">
-                  IMPOR CSV
+                  IMPORT CSV
                   <input
                     type="file"
                     accept="text/csv,.csv"
@@ -423,8 +444,8 @@ export function DataPage({ data, saveEntity, notify, refresh }: DataPageProps) {
             </div>
           </div>
           <p className="mt-3 text-[15px] leading-snug text-muted">
-            Daftar memakai pemisah garis tegak (|). Baris dengan ID yang sama akan
-            diperbarui; baris lain tetap. Semua hasil impor divalidasi Zod di server.
+            Lists use a pipe (|) separator. Rows with the same ID are updated;
+            other rows stay unchanged. Every import is validated with Zod on the server.
           </p>
         </Panel>
       </div>
@@ -434,22 +455,24 @@ export function DataPage({ data, saveEntity, notify, refresh }: DataPageProps) {
           title={`Backup (${backups.length})`}
           actions={
             <button type="button" className="admin-mini-btn" onClick={() => void loadBackups()}>
-              MUAT ULANG
+              RELOAD
             </button>
           }
         >
           {backupError ? <p className="admin-warning">{backupError}</p> : null}
           {backups.length === 0 ? (
-            <AdminEmpty>Belum ada backup. Backup dibuat saat file pertama kali ditulis.</AdminEmpty>
+            <AdminEmpty>
+              No backups yet. A backup is created when a file is first written.
+            </AdminEmpty>
           ) : (
             <div className="admin-table-wrap">
               <table className="admin-table">
                 <thead>
                   <tr>
-                    <th>Nama</th>
-                    <th>Ukuran</th>
-                    <th>Waktu</th>
-                    <th>Unduh</th>
+                    <th>Name</th>
+                    <th>Size</th>
+                    <th>Time</th>
+                    <th>Download</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -464,7 +487,7 @@ export function DataPage({ data, saveEntity, notify, refresh }: DataPageProps) {
                           className="admin-mini-btn"
                           onClick={() => void downloadBackup(backup.name)}
                         >
-                          UNDUH
+                          DOWNLOAD
                         </button>
                       </td>
                     </tr>
@@ -474,7 +497,7 @@ export function DataPage({ data, saveEntity, notify, refresh }: DataPageProps) {
             </div>
           )}
           <p className="mt-3 text-[15px] text-muted">
-            Restore manual: unduh backup, lalu unggah lewat panel JSON di atas.
+            Manual restore: download a backup, then upload it through the JSON panel above.
           </p>
         </Panel>
       </div>

@@ -16,14 +16,14 @@ import {
 
 const idSchema = z
   .string()
-  .min(1, "ID wajib diisi")
-  .regex(/^[a-z0-9][a-z0-9-]*$/, "ID hanya huruf kecil, angka, dan tanda hubung");
+  .min(1, "ID is required")
+  .regex(/^[a-z0-9][a-z0-9-]*$/, "ID must use lowercase letters, numbers, and hyphens");
 
 const timestampSchema = z.string().datetime({ offset: true });
 
 const dateOrEmptySchema = z.string().refine(
   (value) => value === "" || /^\d{4}-\d{2}-\d{2}$/.test(value),
-  "Gunakan format YYYY-MM-DD atau kosongkan",
+  "Use YYYY-MM-DD format or leave it empty",
 );
 
 const urlOrEmptySchema = z.string().refine((value) => {
@@ -34,7 +34,7 @@ const urlOrEmptySchema = z.string().refine((value) => {
   } catch {
     return false;
   }
-}, "URL harus diawali http:// atau https://");
+}, "URL must start with http:// or https://");
 
 const baseRecordShape = {
   id: idSchema,
@@ -46,8 +46,8 @@ const baseRecordShape = {
 export const profileSchema = z.object({
   ...baseRecordShape,
   id: z.literal("profile"),
-  name: z.string().min(1, "Nama wajib diisi"),
-  handle: z.string().min(1, "Handle wajib diisi"),
+  name: z.string().min(1, "Name is required"),
+  handle: z.string().min(1, "Handle is required"),
   campus: z.string(),
   studyProgram: z.string(),
   tagline: z.string(),
@@ -55,7 +55,7 @@ export const profileSchema = z.object({
   avatar: z.string(),
   email: z.string().refine(
     (value) => value === "" || z.string().email().safeParse(value).success,
-    "Email tidak valid",
+    "Invalid email",
   ),
   location: z.string(),
   socials: z.object({
@@ -67,7 +67,7 @@ export const profileSchema = z.object({
 
 export const venueSchema = z.object({
   ...baseRecordShape,
-  name: z.string().min(1, "Nama venue wajib diisi"),
+  name: z.string().min(1, "Venue name is required"),
   kind: z.enum(VENUE_KINDS),
   indexLevel: z.enum(INDEX_LEVELS),
   url: urlOrEmptySchema,
@@ -77,7 +77,7 @@ export const venueSchema = z.object({
 
 export const itemSchema = z.object({
   ...baseRecordShape,
-  title: z.string().min(1, "Judul wajib diisi"),
+  title: z.string().min(1, "Title is required"),
   type: z.enum(ITEM_TYPES),
   status: z.enum(ALL_STATUSES),
   stageNote: z.string(),
@@ -103,7 +103,7 @@ export const itemSchema = z.object({
 export const assetSchema = z.object({
   ...baseRecordShape,
   kind: z.enum(ASSET_KINDS),
-  label: z.string().min(1, "Label aset wajib diisi"),
+  label: z.string().min(1, "Asset label is required"),
   url: urlOrEmptySchema,
   localPath: z.string(),
   itemIds: z.array(z.string()),
@@ -115,8 +115,8 @@ export const assetSchema = z.object({
 export const sourceSchema = z.object({
   ...baseRecordShape,
   visibility: z.literal("private"),
-  itemId: z.string().min(1, "Riset wajib dipilih"),
-  citationText: z.string().min(1, "Teks sitasi wajib diisi"),
+  itemId: z.string().min(1, "Research item is required"),
+  citationText: z.string().min(1, "Citation text is required"),
   urlOrDoi: z.string(),
   verificationStatus: z.enum(VERIFICATION_STATUSES),
   verifiedAt: dateOrEmptySchema,
@@ -128,7 +128,7 @@ export const sourceSchema = z.object({
 export const grantSchema = z.object({
   ...baseRecordShape,
   itemId: z.string(),
-  scheme: z.string().min(1, "Skema hibah wajib diisi"),
+  scheme: z.string().min(1, "Grant scheme is required"),
   cluster: z.enum(GRANT_CLUSTERS),
   maxFundingIdr: z.number().int().min(0),
   piName: z.string(),
@@ -142,7 +142,7 @@ export const grantSchema = z.object({
 
 export const ideaSchema = z.object({
   ...baseRecordShape,
-  title: z.string().min(1, "Judul ide wajib diisi"),
+  title: z.string().min(1, "Idea title is required"),
   problem: z.string(),
   whyOnChain: z.string(),
   cluster: z.enum(GRANT_CLUSTERS),
@@ -157,7 +157,7 @@ export const ideaSchema = z.object({
 export const taskSchema = z.object({
   ...baseRecordShape,
   visibility: z.literal("private"),
-  title: z.string().min(1, "Judul tugas wajib diisi"),
+  title: z.string().min(1, "Task title is required"),
   dueAt: dateOrEmptySchema,
   done: z.boolean(),
   itemId: z.string(),

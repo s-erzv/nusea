@@ -54,7 +54,7 @@ export function formatDate(value: string): string {
     ? new Date(value)
     : new Date(`${value}T00:00:00.000Z`);
   if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat("id-ID", {
+  return new Intl.DateTimeFormat("en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -161,6 +161,6 @@ export const ideaScoreFields = IDEA_SCORE_KEYS.map((key) => ({
 }));
 
 export const visibilityOptions = [
-  { value: "private", label: "Privat" },
-  { value: "public", label: "Publik" },
+  { value: "private", label: "Private" },
+  { value: "public", label: "Public" },
 ];

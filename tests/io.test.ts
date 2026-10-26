@@ -12,7 +12,7 @@ import {
 const dirs: string[] = [];
 
 async function tempDir(): Promise<string> {
-  const dir = await mkdtemp(path.join(os.tmpdir(), "nuza-io-"));
+  const dir = await mkdtemp(path.join(os.tmpdir(), "nusea-io-"));
   dirs.push(dir);
   return dir;
 }
