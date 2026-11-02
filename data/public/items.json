@@ -58,30 +58,30 @@
   {
     "id": "slr-identitas-nomor-telepon",
     "createdAt": "2026-10-20T08:00:00.000Z",
-    "updatedAt": "2026-10-26T00:00:00.000Z",
+    "updatedAt": "2026-11-02T00:00:00.000Z",
     "title": "Phone-Number-Based Identity Abstraction for Web3 Wallets: A Systematic Literature Review",
     "type": "paper_jurnal",
-    "status": "scheduled",
-    "abstract": "",
+    "status": "published",
+    "abstract": "Web3 wallet adoption faces severe onboarding hurdles due to complex seed phrases and reliance on foreign social logins. Meanwhile, everyday transactions in emerging markets like Indonesia heavily rely on trusted phone number verification via SMS OTP. This study examines how this familiar habit can be leveraged as an identity abstraction method for Web3 wallets. Utilizing a Systematic Literature Review (SLR) under the PRISMA 2020 protocol, a search on Google Scholar via Publish or Perish yielded 156 initial records, narrowing down to 34 selected documents. The findings identify six primary research clusters: biometrics, social login, seed phrases, phone/SMS authentication, wallet usability, and decentralized identity theory. Crucially, existing literature shows that phone/SMS authentication remains strictly confined to conventional banking and e-government, never intersecting with Web3 wallet contexts. This separation highlights a significant research gap. The study concludes that utilizing phone numbers as an identity anchor for Web3 wallets in emerging markets presents a promising yet largely unexplored space, offering a localized, user-friendly alternative to mitigate adoption barriers.",
     "keywords": [
-      "PRISMA",
-      "identitas",
-      "nomor telepon",
-      "onboarding",
-      "dompet Web3"
+      "Identity Abstraction",
+      "Web3 Wallet",
+      "Phone Number Authentication",
+      "Decentralized Identity",
+      "Systematic Literature Review"
     ],
     "authors": [
       "Sarah Fajriah Rahmah",
       "Annazma Ghazalba"
     ],
     "advisors": [],
-    "venueId": "",
-    "submittedAt": "",
-    "decisionAt": "",
-    "publishedAt": "",
-    "doi": "",
-    "publicUrl": "",
-    "progressPct": 90,
+    "venueId": "venue-jmti",
+    "submittedAt": "2026-10-18",
+    "decisionAt": "2026-10-28",
+    "publishedAt": "2026-10-31",
+    "doi": "10.59819/jmti.v6i2.7186",
+    "publicUrl": "https://ojs.mahadewa.ac.id/index.php/jmti/article/view/7186",
+    "progressPct": 100,
     "pinned": false
   }
 ]

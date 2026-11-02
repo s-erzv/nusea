@@ -20,6 +20,16 @@
     "typicalReviewWeeks": 12
   },
   {
+    "id": "venue-jmti",
+    "createdAt": "2026-11-02T00:00:00.000Z",
+    "updatedAt": "2026-11-02T00:00:00.000Z",
+    "name": "Jurnal Manajemen dan Teknologi Informasi (JMTI)",
+    "kind": "jurnal",
+    "indexLevel": "Sinta 5",
+    "url": "https://ojs.mahadewa.ac.id/index.php/jmti",
+    "typicalReviewWeeks": 0
+  },
+  {
     "id": "venue-boptn",
     "createdAt": "2026-10-20T08:00:00.000Z",
     "updatedAt": "2026-10-20T08:00:00.000Z",

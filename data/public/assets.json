@@ -14,5 +14,21 @@
       "pdf"
     ],
     "isPrimary": true
+  },
+  {
+    "id": "asset-pdf-jmti-phone-identity",
+    "createdAt": "2026-11-02T00:00:00.000Z",
+    "updatedAt": "2026-11-02T00:00:00.000Z",
+    "kind": "pdf",
+    "label": "PDF artikel: Phone-Number-Based Identity Abstraction for Web3 Wallets",
+    "url": "https://ojs.mahadewa.ac.id/index.php/jmti/article/download/7186/3899",
+    "researchIds": [
+      "slr-identitas-nomor-telepon"
+    ],
+    "tags": [
+      "publikasi",
+      "pdf"
+    ],
+    "isPrimary": true
   }
 ]
