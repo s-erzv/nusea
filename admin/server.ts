@@ -1,6 +1,5 @@
 import { randomBytes } from "node:crypto";
 import { execFile } from "node:child_process";
-import { readdir, readFile, stat } from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -11,17 +10,15 @@ import react from "@vitejs/plugin-react";
 import { ALL_STATUSES, type ResearchStatus } from "../shared/constants";
 import { itemSchema } from "../shared/schemas";
 import { accessGuard, isLoopbackAddress } from "./server/guard";
-import {
-  DataStore,
-  formatZodError,
-  isEntityFile,
-} from "./server/data-store";
+import { createStore } from "./server/create-store";
+import { ConflictError, formatZodError, isEntityFile } from "./server/data-store";
 
 const execFileAsync = promisify(execFile);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const port = Number.parseInt(process.env.ADMIN_PORT ?? "5174", 10);
 const token = randomBytes(32).toString("hex");
-const store = new DataStore(root);
+const store = createStore(root);
+const storage = process.env.DATABASE_URL ? "Neon Postgres (nusea schema)" : "local JSON files";
 const pnpm = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
 
 type AsyncHandler = (
@@ -83,54 +80,30 @@ app.get("/api/health", (_req, res) => {
 app.get(
   "/api/bootstrap",
   asyncRoute(async (_req, res) => {
-    const data = await store.readAll();
-    res.json({ data, serverTime: new Date().toISOString() });
+    const [data, updatedAt] = await Promise.all([store.readAll(), store.versions()]);
+    res.json({ data, updatedAt, serverTime: new Date().toISOString() });
   }),
 );
 
 app.get(
   "/api/backups",
   asyncRoute(async (_req, res) => {
-    let names: string[] = [];
-    try {
-      names = await readdir(store.backupsDir);
-    } catch {
-      names = [];
-    }
-    const backups = await Promise.all(
-      names
-        .filter((name) => name.endsWith(".bak.json"))
-        .map(async (name) => {
-          const info = await stat(path.join(store.backupsDir, name));
-          return {
-            name,
-            size: info.size,
-            modifiedAt: info.mtime.toISOString(),
-          };
-        }),
-    );
-    backups.sort((a, b) => b.modifiedAt.localeCompare(a.modifiedAt));
-    res.json({ backups });
+    res.json({ backups: await store.listBackups() });
   }),
 );
 
 app.get(
   "/api/backups/:name",
   asyncRoute(async (req, res) => {
-    const name = req.params.name;
-    if (
-      !name.endsWith(".bak.json") ||
-      path.basename(name) !== name ||
-      name.includes("..")
-    ) {
-      res.status(400).json({ error: "Invalid backup name." });
-      return;
-    }
     try {
-      const content = await readFile(path.join(store.backupsDir, name), "utf8");
+      const content = await store.readBackup(req.params.name);
       res.type("application/json").send(content);
-    } catch {
-      res.status(404).json({ error: "Backup not found." });
+    } catch (error) {
+      const invalid =
+        error instanceof Error && error.message === "Invalid backup name.";
+      res
+        .status(invalid ? 400 : 404)
+        .json({ error: invalid ? error.message : "Backup not found." });
     }
   }),
 );
@@ -143,37 +116,40 @@ app.put(
       res.status(404).json({ error: `Unknown entity: ${entity}` });
       return;
     }
-    const value = (req.body as { value?: unknown } | undefined)?.value;
+    const body = req.body as { value?: unknown; expected_updated_at?: unknown } | undefined;
+    const value = body?.value;
     if (value === undefined) {
       res.status(400).json({ error: "Body must contain { value }." });
       return;
     }
+    const expected = typeof body?.expected_updated_at === "string" ? body.expected_updated_at : undefined;
     try {
       if (entity === "items") {
         const done = await store.writeItemsWithHistory(
           itemSchema.array().parse(value),
+          expected,
         );
         res.json({
           ok: true,
           value: done.value,
-          backupPath: done.backupPath
-            ? path.relative(root, done.backupPath)
-            : null,
+          backupPath: done.backupPath,
           historyEntries: done.entries.length,
           savedAt: new Date().toISOString(),
         });
         return;
       }
-      const result = await store.write(entity, value);
+      const result = await store.write(entity, value, expected);
       res.json({
         ok: true,
         value: result.value,
-        backupPath: result.backupPath
-          ? path.relative(root, result.backupPath)
-          : null,
+        backupPath: result.backupPath,
         savedAt: new Date().toISOString(),
       });
     } catch (error) {
+      if (error instanceof ConflictError) {
+        res.status(409).json({ error: error.message, code: "conflict" });
+        return;
+      }
       if (error instanceof Error && "issues" in error) {
         res.status(400).json({
           error: formatZodError(error as never),
@@ -188,9 +164,10 @@ app.put(
 app.post(
   "/api/items/:id/status",
   asyncRoute(async (req, res) => {
-    const { status, note } = (req.body ?? {}) as {
+    const { status, note, expected_updated_at } = (req.body ?? {}) as {
       status?: string;
       note?: string;
+      expected_updated_at?: string;
     };
     if (!status || !(ALL_STATUSES as readonly string[]).includes(status)) {
       res.status(400).json({ error: "Invalid status." });
@@ -201,9 +178,14 @@ app.post(
         req.params.id,
         status as ResearchStatus,
         typeof note === "string" && note.trim() ? note.trim() : undefined,
+        typeof expected_updated_at === "string" ? expected_updated_at : undefined,
       );
       res.json({ ok: true, ...result });
     } catch (error) {
+      if (error instanceof ConflictError) {
+        res.status(409).json({ error: error.message, code: "conflict" });
+        return;
+      }
       res.status(400).json({
         error: error instanceof Error ? error.message : "Could not move status.",
       });
@@ -387,6 +369,7 @@ server.listen(port, "127.0.0.1", () => {
   console.log("  NUSEA — BACK OFFICE (LOCAL)");
   console.log(`  URL   : http://127.0.0.1:${port}`);
   console.log(`  TOKEN : ${token}`);
+  console.log(`  STORE : ${storage}`);
   console.log("  Accepts connections from 127.0.0.1 only.");
   console.log("");
 });
@@ -394,6 +377,7 @@ server.listen(port, "127.0.0.1", () => {
 function shutdown() {
   server.close(() => process.exit(0));
   void vite.close();
+  void store.close();
 }
 
 process.on("SIGINT", shutdown);

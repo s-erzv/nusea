@@ -8,7 +8,7 @@ import {
   type ResearchStatus,
 } from "../../shared/constants";
 
-import { adminApi } from "../lib/api";
+import { ApiError, adminApi } from "../lib/api";
 import { statusOptions } from "../lib/helpers";
 import { PageHeader } from "../components/layout";
 import type { AdminData, Notify } from "../lib/types";
@@ -18,9 +18,10 @@ interface KanbanPageProps {
   data: AdminData;
   refresh: () => Promise<void>;
   notify: Notify;
+  versions?: Record<string, string>;
 }
 
-export function KanbanPage({ data, refresh, notify }: KanbanPageProps) {
+export function KanbanPage({ data, refresh, notify, versions }: KanbanPageProps) {
   const [dragging, setDragging] = useState<string | null>(null);
   const [overColumn, setOverColumn] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -31,10 +32,15 @@ export function KanbanPage({ data, refresh, notify }: KanbanPageProps) {
     if (!item || item.status === toStatus) return;
     setBusy(itemId);
     try {
-      await adminApi.transition(itemId, toStatus, "Moved from the kanban.");
+      await adminApi.transition(itemId, toStatus, "Moved from the kanban.", versions?.items);
       await refresh();
       notify(`${item.title} → ${STATUS_LABELS[toStatus]}. History recorded.`);
     } catch (error) {
+      if (error instanceof ApiError && error.status === 409) {
+        await refresh();
+        notify("Data changed elsewhere. The latest version was reloaded; try again.", "error");
+        return;
+      }
       notify(
         error instanceof Error ? error.message : "Could not move status.",
         "error",

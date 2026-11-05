@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import type { z } from "zod";
 import {
@@ -40,6 +40,44 @@ export type DataFiles = {
   history: z.infer<(typeof fileSchemas)["history"]>;
 };
 
+export class ConflictError extends Error {
+  constructor(message = "Conflict: this entity changed since it was loaded.") {
+    super(message);
+    this.name = "ConflictError";
+  }
+}
+
+export interface BackupEntry {
+  name: string;
+  size: number;
+  modifiedAt: string;
+}
+
+export interface EntityStore {
+  read<K extends EntityFile>(entity: K): Promise<DataFiles[K]>;
+  readAll(): Promise<DataFiles>;
+  versions(): Promise<Record<EntityFile, string>>;
+  write<K extends EntityFile>(
+    entity: K,
+    value: unknown,
+    expectedUpdatedAt?: string,
+  ): Promise<{ backupPath: string | null; value: DataFiles[K] }>;
+  writeItemsWithHistory(nextItems: ResearchItem[], expectedUpdatedAt?: string): Promise<{
+    backupPath: string | null;
+    value: ResearchItem[];
+    entries: HistoryEntry[];
+  }>;
+  transitionItemStatus(
+    itemId: string,
+    toStatus: ResearchStatus,
+    note?: string,
+    expectedUpdatedAt?: string,
+  ): Promise<{ item: ResearchItem; entry: HistoryEntry }>;
+  listBackups(): Promise<BackupEntry[]>;
+  readBackup(name: string): Promise<string>;
+  close(): Promise<void>;
+}
+
 export function isEntityFile(value: string): value is EntityFile {
   return (ENTITY_FILES as readonly string[]).includes(value);
 }
@@ -53,7 +91,7 @@ export function formatZodError(error: z.ZodError): string {
     .join("; ");
 }
 
-export class DataStore {
+export class DataStore implements EntityStore {
   readonly root: string;
   readonly privateDir: string;
   readonly backupsDir: string;
@@ -85,16 +123,69 @@ export class DataStore {
   async write<K extends EntityFile>(
     entity: K,
     value: unknown,
+    expectedUpdatedAt?: string,
   ): Promise<{ backupPath: string | null; value: DataFiles[K] }> {
     const parsed = fileSchemas[entity].parse(value) as DataFiles[K];
+    if (expectedUpdatedAt !== undefined) {
+      const current = (await stat(this.filePath(entity))).mtime.toISOString();
+      if (current !== expectedUpdatedAt) throw new ConflictError();
+    }
     const backupPath = await writeJsonWithBackup(this.filePath(entity), parsed, {
       backupsDir: this.backupsDir,
       keep: this.keepBackups,
     });
-    return { backupPath, value: parsed };
+    return {
+      backupPath: backupPath ? path.relative(this.root, backupPath) : null,
+      value: parsed,
+    };
   }
 
-  async writeItemsWithHistory(nextItems: ResearchItem[]): Promise<{
+  async listBackups(): Promise<BackupEntry[]> {
+    let names: string[] = [];
+    try {
+      names = await readdir(this.backupsDir);
+    } catch {
+      return [];
+    }
+    const backups = await Promise.all(
+      names
+        .filter((name) => name.endsWith(".bak.json"))
+        .map(async (name) => {
+          const info = await stat(path.join(this.backupsDir, name));
+          return {
+            name,
+            size: info.size,
+            modifiedAt: info.mtime.toISOString(),
+          };
+        }),
+    );
+    return backups.sort((a, b) => b.modifiedAt.localeCompare(a.modifiedAt));
+  }
+
+  async readBackup(name: string): Promise<string> {
+    if (
+      !name.endsWith(".bak.json") ||
+      path.basename(name) !== name ||
+      name.includes("..")
+    ) {
+      throw new Error("Invalid backup name.");
+    }
+    return readFile(path.join(this.backupsDir, name), "utf8");
+  }
+
+  async close(): Promise<void> {}
+
+  async versions(): Promise<Record<EntityFile, string>> {
+    const out = {} as Record<EntityFile, string>;
+    await Promise.all(
+      ENTITY_FILES.map(async (entity) => {
+        out[entity] = (await stat(this.filePath(entity))).mtime.toISOString();
+      }),
+    );
+    return out;
+  }
+
+  async writeItemsWithHistory(nextItems: ResearchItem[], expectedUpdatedAt?: string): Promise<{
     backupPath: string | null;
     value: ResearchItem[];
     entries: HistoryEntry[];
@@ -121,7 +212,7 @@ export class DataStore {
       ];
     });
 
-    const write = await this.write("items", nextItems);
+    const write = await this.write("items", nextItems, expectedUpdatedAt);
     if (entries.length > 0) {
       await this.write("history", [...history, ...entries]);
     }
@@ -132,6 +223,7 @@ export class DataStore {
     itemId: string,
     toStatus: ResearchStatus,
     note = "Moved from the kanban.",
+    expectedUpdatedAt?: string,
   ): Promise<{ item: ResearchItem; entry: HistoryEntry }> {
     if (!(ALL_STATUSES as readonly string[]).includes(toStatus)) {
       throw new Error(`Unknown status: ${toStatus}`);
@@ -167,7 +259,7 @@ export class DataStore {
       position === index ? item : value,
     );
 
-    await this.write("items", nextItems);
+    await this.write("items", nextItems, expectedUpdatedAt);
     await this.write("history", [...history, entry]);
 
     return { item, entry };

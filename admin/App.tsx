@@ -11,7 +11,7 @@ import { PublishPage } from "./pages/PublishPage";
 import { SourcesPage } from "./pages/SourcesPage";
 import { TasksPage } from "./pages/TasksPage";
 import { VenuesPage } from "./pages/VenuesPage";
-import { adminApi, hasToken, setToken } from "./lib/api";
+import { ApiError, adminApi, hasToken, setToken } from "./lib/api";
 import type { AdminData, AdminTab, Notify, SaveEntity } from "./lib/types";
 
 interface NavItem {
@@ -56,6 +56,7 @@ export default function App() {
   const [needsToken, setNeedsToken] = useState(!hasToken());
   const [tokenInput, setTokenInput] = useState("");
   const [data, setData] = useState<AdminData | null>(null);
+  const [versions, setVersions] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [tab, setTab] = useState<AdminTab>(() => {
@@ -74,6 +75,7 @@ export default function App() {
   const refresh = useCallback(async () => {
     const result = await adminApi.bootstrap();
     setData(result.data);
+    setVersions(result.updatedAt);
     setLoadError("");
   }, []);
 
@@ -89,6 +91,7 @@ export default function App() {
       .then((result) => {
         if (!active) return;
         setData(result.data);
+        setVersions(result.updatedAt);
         setLoadError("");
       })
       .catch((error: unknown) => {
@@ -132,10 +135,14 @@ export default function App() {
 
   async function saveEntity(entity: Parameters<SaveEntity>[0], value: unknown) {
     try {
-      const result = await adminApi.saveEntity(entity, value);
+      const result = await adminApi.saveEntity(entity, value, versions[entity]);
       await refresh();
       return result.backupPath;
     } catch (error) {
+      if (error instanceof ApiError && error.status === 409) {
+        await refresh();
+        throw new Error("Data changed elsewhere. The latest version was reloaded; review your edit before saving again.");
+      }
       if (error instanceof Error && error.message.includes("401")) {
         setNeedsToken(true);
       }
@@ -321,7 +328,7 @@ export default function App() {
             <ItemsPage data={data} saveEntity={saveEntity} notify={notify} />
           ) : null}
           {tab === "kanban" ? (
-            <KanbanPage data={data} refresh={refresh} notify={notify} />
+            <KanbanPage data={data} refresh={refresh} notify={notify} versions={versions} />
           ) : null}
           {tab === "assets" ? (
             <AssetsPage data={data} saveEntity={saveEntity} notify={notify} />

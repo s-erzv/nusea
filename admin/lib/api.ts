@@ -57,9 +57,9 @@ async function api<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const adminApi = {
   bootstrap: () =>
-    api<{ data: AdminData; serverTime: string }>("/api/bootstrap"),
+    api<{ data: AdminData; updatedAt: Record<EntityFile, string>; serverTime: string }>("/api/bootstrap"),
 
-  saveEntity: <K extends EntityFile>(entity: K, value: unknown) =>
+  saveEntity: <K extends EntityFile>(entity: K, value: unknown, expectedUpdatedAt?: string) =>
     api<{
       ok: true;
       value: unknown;
@@ -67,13 +67,13 @@ export const adminApi = {
       savedAt: string;
     }>(`/api/entities/${entity}`, {
       method: "PUT",
-      body: JSON.stringify({ value }),
+      body: JSON.stringify({ value, ...(expectedUpdatedAt ? { expected_updated_at: expectedUpdatedAt } : {}) }),
     }),
 
-  transition: (id: string, status: string, note?: string) =>
+  transition: (id: string, status: string, note?: string, expectedUpdatedAt?: string) =>
     api<{ ok: true; entry: unknown }>(`/api/items/${id}/status`, {
       method: "POST",
-      body: JSON.stringify({ status, note }),
+      body: JSON.stringify({ status, note, ...(expectedUpdatedAt ? { expected_updated_at: expectedUpdatedAt } : {}) }),
     }),
 
   checkLink: (url: string) =>
