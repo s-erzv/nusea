@@ -25,6 +25,8 @@ const FORBIDDEN_FIELD_NAMES = [
   "howVerified",
   "fileOnHand",
   "submitChecklist",
+  "advisors",
+  "progressPct",
 ];
 
 function collectStrings(value: unknown, into: Set<string>): void {

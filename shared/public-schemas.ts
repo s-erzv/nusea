@@ -51,14 +51,12 @@ export const publicItemSchema = z.object({
   abstract: z.string(),
   keywords: z.array(z.string()),
   authors: z.array(z.string()),
-  advisors: z.array(z.string()),
   venueId: z.string(),
   submittedAt: z.string(),
   decisionAt: z.string(),
   publishedAt: z.string(),
   doi: z.string(),
   publicUrl: z.string(),
-  progressPct: z.number(),
   pinned: z.boolean(),
 });
 
@@ -146,14 +144,12 @@ export function toPublicItem(item: ResearchItem): PublicItem {
     abstract: item.abstract,
     keywords: item.keywords,
     authors: item.authors,
-    advisors: item.advisors,
     venueId: item.venueId,
     submittedAt: item.submittedAt,
     decisionAt: item.decisionAt,
     publishedAt: item.publishedAt,
     doi: item.doi,
     publicUrl: item.publicUrl,
-    progressPct: item.progressPct,
     pinned: item.pinned,
   });
 }

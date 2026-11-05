@@ -41,6 +41,15 @@ describe("check:leak", () => {
     expect(findings.join("\n")).toContain('field/kata privat "notes"');
   });
 
+  it("menemukan field internal items (advisors, progressPct)", async () => {
+    const dist = await tempDist();
+    await writeFile(path.join(dist, "app.js"), 'const x={advisors:[],progressPct:10};', "utf8");
+    const findings = await findLeaks(dist, { items: [] });
+    for (const field of ["advisors", "progressPct"]) {
+      expect(findings.join("\n")).toContain(`field/kata privat "${field}"`);
+    }
+  });
+
   it("lolos bila dist bersih", async () => {
     const dist = await tempDist();
     await writeFile(path.join(dist, "app.js"), 'console.log("halo")', "utf8");

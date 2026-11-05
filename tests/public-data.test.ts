@@ -31,7 +31,6 @@ describe("allowlist data publik", () => {
     expect(Object.keys(item).sort()).toEqual(
       [
         "abstract",
-        "advisors",
         "authors",
         "createdAt",
         "decisionAt",
@@ -39,7 +38,6 @@ describe("allowlist data publik", () => {
         "id",
         "keywords",
         "pinned",
-        "progressPct",
         "publicUrl",
         "publishedAt",
         "status",
@@ -50,6 +48,8 @@ describe("allowlist data publik", () => {
         "venueId",
       ].sort(),
     );
+    expect(item).not.toHaveProperty("advisors");
+    expect(item).not.toHaveProperty("progressPct");
     expect(item).not.toHaveProperty("stageNote");
     expect(item).not.toHaveProperty("submitChecklist");
     expect(item).not.toHaveProperty("priority");

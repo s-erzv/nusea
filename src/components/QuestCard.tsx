@@ -18,7 +18,7 @@ interface QuestCardProps {
 
 export function QuestCard({ item, venue, variant }: QuestCardProps) {
   const level = isPipelineStatus(item.status) ? STATUS_NUMBERS[item.status] : null;
-  const progress = statusProgress(item.status, item.progressPct);
+  const progress = statusProgress(item.status);
   const date = item.publishedAt || item.submittedAt || item.updatedAt;
   const dateLabel = item.publishedAt ? "Published" : item.submittedAt ? "Submitted" : "Updated";
 

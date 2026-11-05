@@ -18,14 +18,12 @@
       "Sarah Fajriah Rahmah",
       "Evy Nurmiati"
     ],
-    "advisors": [],
     "venueId": "venue-jurnal-bisnistek",
     "submittedAt": "",
     "decisionAt": "",
     "publishedAt": "2026-05-01",
     "doi": "10.69533/nc9hfd44",
     "publicUrl": "https://ejournal.rizaniamedia.com/index.php/bisnistek/article/view/498",
-    "progressPct": 100,
     "pinned": true
   },
   {
@@ -45,14 +43,12 @@
     "authors": [
       "Sarah Fajriah Rahmah"
     ],
-    "advisors": [],
     "venueId": "",
     "submittedAt": "",
     "decisionAt": "",
     "publishedAt": "",
     "doi": "",
     "publicUrl": "",
-    "progressPct": 35,
     "pinned": false
   },
   {
@@ -74,14 +70,12 @@
       "Sarah Fajriah Rahmah",
       "Annazma Ghazalba"
     ],
-    "advisors": [],
     "venueId": "venue-jmti",
     "submittedAt": "2026-10-18",
     "decisionAt": "2026-10-28",
     "publishedAt": "2026-10-31",
     "doi": "10.59819/jmti.v6i2.7186",
     "publicUrl": "https://ojs.mahadewa.ac.id/index.php/jmti/article/view/7186",
-    "progressPct": 100,
     "pinned": false
   }
 ]

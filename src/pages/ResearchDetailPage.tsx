@@ -35,7 +35,7 @@ export function ResearchDetailPage() {
   }
 
   const venue = venueById.get(item.venueId);
-  const progress = statusProgress(item.status, item.progressPct);
+  const progress = statusProgress(item.status);
   const level = isPipelineStatus(item.status) ? STATUS_NUMBERS[item.status] : null;
   const links = [
     item.doi
@@ -88,15 +88,6 @@ export function ResearchDetailPage() {
             <br />
             {item.authors.length > 0 ? item.authors.join(", ") : "Not set"}
           </p>
-          {item.advisors.length > 0 ? (
-            <p className="mt-2 text-[19px] leading-snug">
-              <span className="font-pixel text-[12px] uppercase text-muted">
-                Advisors
-              </span>
-              <br />
-              {item.advisors.join(", ")}
-            </p>
-          ) : null}
 
           <div className="mt-5 border-[3px] border-line bg-paper p-3">
             <div className="flex flex-wrap items-center justify-between gap-2 text-[17px]">
