@@ -2,13 +2,16 @@ import { z } from "zod";
 import {
   ALL_STATUSES,
   ASSET_KINDS,
+  DATA_SOURCES,
   GRANT_CLUSTERS,
   GRANT_STAGES,
   IDEA_SCORE_KEYS,
   IDEA_STATUSES,
   INDEX_LEVELS,
+  ITEM_ROLES,
   ITEM_TYPES,
   PRIORITIES,
+  RESEARCH_KINDS,
   VERIFICATION_STATUSES,
   VISIBILITIES,
   VENUE_KINDS,
@@ -98,7 +101,33 @@ export const itemSchema = z.object({
     plagiarismChecked: z.boolean(),
     finalFileReady: z.boolean(),
   }),
+  trackerId: z.string(),
+  role: z.enum(ITEM_ROLES),
+  researchKind: z.enum(RESEARCH_KINDS),
+  targetVenue: z.string(),
+  targetDate: dateOrEmptySchema,
+  nextStep: z.string(),
+  dataSource: z.enum(DATA_SOURCES),
+  link: urlOrEmptySchema,
+  notes: z.string(),
 });
+
+const itemDefaults = {
+  trackerId: "",
+  role: "belum_dicatat",
+  researchKind: "belum_dicatat",
+  targetVenue: "",
+  targetDate: "",
+  nextStep: "",
+  dataSource: "belum_dicatat",
+  link: "",
+  notes: "",
+} satisfies Partial<Record<keyof z.infer<typeof itemSchema>, unknown>>;
+
+export const itemRecordSchema = z.preprocess((value) => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return value;
+  return { ...itemDefaults, ...(value as Record<string, unknown>) };
+}, itemSchema);
 
 export const assetSchema = z.object({
   ...baseRecordShape,
@@ -200,7 +229,7 @@ export type EntityName = keyof typeof recordSchemas;
 
 export const fileSchemas = {
   profile: profileSchema,
-  items: z.array(itemSchema),
+  items: z.array(itemRecordSchema),
   assets: z.array(assetSchema),
   venues: z.array(venueSchema),
   sources: z.array(sourceSchema),

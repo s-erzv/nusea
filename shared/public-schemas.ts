@@ -34,8 +34,6 @@ export const publicProfileSchema = z.object({
   tagline: z.string(),
   bio: z.string(),
   avatar: z.string(),
-  email: z.string(),
-  location: z.string(),
   socials: z.object({
     scholar: z.string(),
     orcid: z.string(),
@@ -83,8 +81,6 @@ export const publicGrantSchema = z.object({
   ...publicBaseShape,
   scheme: z.string(),
   cluster: z.enum(GRANT_CLUSTERS),
-  maxFundingIdr: z.number(),
-  piName: z.string(),
   proposalDeadline: z.string(),
   selectionStage: z.enum(GRANT_STAGES),
   requiredOutputs: z.array(z.string()),
@@ -127,8 +123,6 @@ export function toPublicProfile(profile: Profile): PublicProfile | null {
     tagline: profile.tagline,
     bio: profile.bio,
     avatar: profile.avatar,
-    email: profile.email,
-    location: profile.location,
     socials: profile.socials,
   });
 }
@@ -191,8 +185,6 @@ export function toPublicGrant(grant: Grant): PublicGrant {
     updatedAt: grant.updatedAt,
     scheme: grant.scheme,
     cluster: grant.cluster,
-    maxFundingIdr: grant.maxFundingIdr,
-    piName: grant.piName,
     proposalDeadline: grant.proposalDeadline,
     selectionStage: grant.selectionStage,
     requiredOutputs: grant.requiredOutputs,

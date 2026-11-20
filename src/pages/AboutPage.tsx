@@ -58,9 +58,6 @@ export function AboutPage() {
               {profile.studyProgram || "Program not set"}
             </p>
             <p className="text-[18px] text-muted">{profile.campus || "Campus not set"}</p>
-            {profile.location ? (
-              <p className="mt-1 text-[17px] text-muted">{profile.location}</p>
-            ) : null}
           </div>
         </div>
 
@@ -101,21 +98,8 @@ export function AboutPage() {
             <h2 id="kontak-title" className="text-[16px]">
               Contact
             </h2>
-            {profile.email || socials.length > 0 ? (
+            {socials.length > 0 ? (
               <ul className="mt-4 space-y-3">
-                {profile.email ? (
-                  <li>
-                    <p className="font-pixel text-[12px] uppercase leading-4 text-muted">
-                      Email
-                    </p>
-                    <a
-                      className="pixel-link break-all text-[18px]"
-                      href={`mailto:${profile.email}`}
-                    >
-                      {profile.email}
-                    </a>
-                  </li>
-                ) : null}
                 {socials.map((social) => (
                   <li key={social.key}>
                     <p className="font-pixel text-[12px] uppercase leading-4 text-muted">
@@ -134,7 +118,7 @@ export function AboutPage() {
               </ul>
             ) : (
               <p className="mt-3 text-[18px] text-muted">
-                Contact details are not set. Add an email or social link from the back office.
+                Contact details are not set. Add a social link from the back office.
               </p>
             )}
           </section>

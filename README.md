@@ -60,13 +60,40 @@ pnpm admin
 # http://127.0.0.1:5174
 ```
 
-When the admin starts, the terminal prints a random session token. Paste it into the admin gate. The token changes every time the admin server restarts and is never stored in the repo.
+When the admin starts locally, the terminal prints a random session token. Paste it into the admin gate. The token changes every time the admin server restarts and is never stored in the repo.
 
 Change the admin port if needed:
 
 ```bash
 ADMIN_PORT=5180 pnpm admin
 ```
+
+The **Tracker** tab is the day-to-day view: one row per paper, expandable fields, per-item document links, filters, and summary counts. It shares the same `items` data as Kanban and the public site.
+
+### Online admin
+
+The admin can run on a Node host (Render, Fly.io, Docker):
+
+```bash
+pnpm admin:hash            # prints ADMIN_PASSWORD_HASH + ADMIN_SESSION_SECRET
+NODE_ENV=production \
+ADMIN_PASSWORD_HASH=... ADMIN_SESSION_SECRET=... \
+DATABASE_URL=... pnpm admin
+```
+
+Online mode serves `admin/dist` (run `pnpm admin:build`), uses a password login with an HMAC-signed `httpOnly`/`secure`/`sameSite=strict` cookie, CSRF checks on writes, and login rate limiting. Publish uses `GITHUB_REPO`, `GITHUB_TOKEN`, `GITHUB_BRANCH`, and `NETLIFY_BUILD_HOOK` instead of local git.
+
+### Admin on Netlify Functions
+
+The admin is a separate Netlify site: **https://nuseamin.netlify.app**. Deploy it manually:
+
+```bash
+pnpm admin:build
+netlify deploy --prod --no-build \
+  --dir admin/dist --functions netlify/functions --site nuseamin
+```
+
+Required env on the admin site: `DATABASE_URL`, `ADMIN_PASSWORD_HASH`, `ADMIN_SESSION_SECRET`, `TRUST_PROXY=1`, `GITHUB_REPO`, `GITHUB_BRANCH`, `GITHUB_TOKEN`, `NETLIFY_BUILD_HOOK`. The public site stays separate.
 
 ## Design
 
@@ -77,20 +104,51 @@ All text uses Poppins. The pixel feel comes from hard borders, offset shadows, t
 | Command | Purpose |
 | --- | --- |
 | `pnpm dev` | Public site with Vite at `127.0.0.1:5173` |
-| `pnpm admin` | Local back office at `127.0.0.1:5174` |
+| `pnpm admin` | Back office at `127.0.0.1:5174` (local token) |
+| `pnpm admin:build` | Build the admin UI into `admin/dist` |
+| `pnpm admin:hash` | Generate password hash + session secret |
+| `pnpm import:tracker` | Dry-run tracker TSV import (diff only) |
+| `pnpm import:tracker:apply` | Apply tracker import with a backup |
 | `pnpm typecheck` | Typecheck the public site and admin |
 | `pnpm lint` | ESLint with zero warnings |
 | `pnpm test` | Full Vitest suite |
-| `pnpm publish:data` | Build `data/public/` from `data/private/` |
+| `pnpm db:setup` | Create `nusea` schema and seed missing documents from `data/private/` |
+| `pnpm publish:data` | Build `data/public/` from the private store (Neon or local JSON) |
 | `pnpm check:leak` | Scan `dist/` for private IDs, URLs, and fields |
 | `pnpm build` | Typecheck + production build + `check:leak` |
 | `pnpm preview` | Preview the production build at `127.0.0.1` |
+
+## Private store (Neon)
+
+The source of truth is Neon Postgres, in the **nuzas-office** project:
+
+- Schema: `nusea`
+- Tables: `nusea.documents` (one JSONB document per entity) and `nusea.document_backups`
+- Schema SQL: `db/nusea.sql`
+
+Copy the pooled connection string from `nuzas-office/.env` into `.env` here:
+
+```bash
+DATABASE_URL=postgresql://USER:PASSWORD@HOST/neondb?sslmode=require
+```
+
+Then create the schema and seed it from the current JSON files (existing rows are kept):
+
+```bash
+pnpm db:setup
+```
+
+Read-only consumers (for example `nupers-week`) should use the `nusea.public_*` views, not the base tables. Those views expose only public, published, allowlisted columns. The reader role `nusea_web` has `SELECT` on those views and no access to `nusea.documents`.
+
+Portfolio content (`projects`, `experience`, `skills`, `profile`) lives in `nusea.portfolio_*` and is written by Alden from `nuzas-office` after an explicit Telegram request. `nupers-week` reads it through `nusea.public_projects`, `public_experience`, `public_skills`, `public_profile`.
+
+Without `DATABASE_URL`, the admin and scripts fall back to `data/private/*.json`. The public build on Netlify never needs the database; it reads the committed `data/public/` files.
 
 ## Data structure
 
 ```text
 data/
-├── private/          # full source of truth, gitignored, local only
+├── private/          # seed + offline fallback (gitignored)
 │   ├── profile.json
 │   ├── items.json
 │   ├── assets.json
@@ -110,9 +168,9 @@ data/
 └── .backups/         # automatic backups, gitignored
 ```
 
-`data/private/` is the complete source and is intentionally gitignored. Keep it in a private backup, not in this repository. A fresh clone only needs `data/public/` to build the public site; restore your private files before running `pnpm admin`.
+`data/private/` is gitignored and only used to seed Neon or as an offline fallback. A fresh clone only needs `data/public/` to build the public site. Run `pnpm db:setup` before using the admin against Neon.
 
-Do not edit `data/public/` by hand; `pnpm publish:data` regenerates it.
+Do not edit `data/public/` by hand; `pnpm publish:data` regenerates it from the private store.
 
 ## Public boundary and leak checks
 
@@ -133,7 +191,7 @@ Documents are exported with `researchIds`, not raw `itemIds`. The builder filter
 
 The build must fail on any leak. Do not bypass this check.
 
-Without `data/private/` (for example on Netlify), the check still scans `dist/` for forbidden fields and private references. Locally, with the private store present, it also verifies that no private IDs or URLs leak.
+Without a private store (no `DATABASE_URL` and no `data/private/`, for example on Netlify), the check still scans `dist/` for forbidden fields and private references. Locally, with the private store present, it also verifies that no private IDs or URLs leak.
 
 The public site only imports `data/public/` and `shared/`; `src/` must not import `admin/`.
 
@@ -213,6 +271,7 @@ The back office is a local tool and must never be exposed to the internet.
 - The token is random per process and compared in constant time.
 - The admin is not built into `dist/`; the public build uses only `index.html` and `src/`.
 - `data/private/`, `data/.backups/`, and `assets-private/` are gitignored.
+- `.env` (which holds `DATABASE_URL`) is gitignored. The connection string bypasses RLS, so keep it on the admin machine only.
 - The admin commit flow stages only `data/public/`, never `data/private/`.
 
 Private data that is not in `data/public/` never reaches the public site. If a document is private, its URL is not listed on any public page — but link-sharing settings on Google Docs, Drive, or Figma still control who can open the raw URL.

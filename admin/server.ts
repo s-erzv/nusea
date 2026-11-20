@@ -1,383 +1,79 @@
 import { randomBytes } from "node:crypto";
-import { execFile } from "node:child_process";
 import http from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { promisify } from "node:util";
-import express, { type NextFunction, type Request, type Response } from "express";
 import { createServer as createViteServer } from "vite";
 import react from "@vitejs/plugin-react";
-import { ALL_STATUSES, type ResearchStatus } from "../shared/constants";
-import { itemSchema } from "../shared/schemas";
-import { accessGuard, isLoopbackAddress } from "./server/guard";
-import { createStore } from "./server/create-store";
-import { ConflictError, formatZodError, isEntityFile } from "./server/data-store";
+import { createAdminApp } from "./server/app";
 
-const execFileAsync = promisify(execFile);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const port = Number.parseInt(process.env.ADMIN_PORT ?? "5174", 10);
+const passwordHash = process.env.ADMIN_PASSWORD_HASH;
+const sessionSecret = process.env.ADMIN_SESSION_SECRET;
+const localMode =
+  process.env.ADMIN_LOCAL === "1" ||
+  (process.env.NODE_ENV !== "production" && !passwordHash);
 const token = randomBytes(32).toString("hex");
-const store = createStore(root);
-const storage = process.env.DATABASE_URL ? "Neon Postgres (nusea schema)" : "local JSON files";
-const pnpm = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
 
-type AsyncHandler = (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => Promise<void>;
-
-function asyncRoute(handler: AsyncHandler) {
-  return (req: Request, res: Response, next: NextFunction): void => {
-    handler(req, res, next).catch(next);
-  };
-}
-
-async function run(command: string, args: string[], timeout = 180_000) {
-  try {
-    const { stdout, stderr } = await execFileAsync(command, args, {
-      cwd: root,
-      timeout,
-      maxBuffer: 12 * 1024 * 1024,
-      env: { ...process.env, CI: "1", NODE_ENV: "production" },
-    });
-    return { ok: true as const, stdout, stderr, code: 0 };
-  } catch (error) {
-    const failed = error as {
-      stdout?: string;
-      stderr?: string;
-      code?: number;
-      message?: string;
-      killed?: boolean;
-    };
-    return {
-      ok: false as const,
-      stdout: failed.stdout ?? "",
-      stderr: failed.stderr ?? failed.message ?? "Command failed.",
-      code: failed.code ?? 1,
-      killed: failed.killed ?? false,
-    };
-  }
-}
-
-const app = express();
-
-app.disable("x-powered-by");
-app.use((req, res, next) => {
-  if (!isLoopbackAddress(req.socket.remoteAddress)) {
-    res.status(403).json({ error: "Back office is only available on 127.0.0.1." });
-    return;
-  }
-  next();
-});
-app.use(express.json({ limit: "4mb" }));
-app.use("/api", accessGuard(token));
-
-app.get("/api/health", (_req, res) => {
-  res.json({ ok: true, root });
+const { app, close } = await createAdminApp({
+  root,
+  mode: localMode ? "local" : "online",
+  ui: localMode ? "none" : "static",
+  token,
+  passwordHash,
+  sessionSecret,
 });
 
-app.get(
-  "/api/bootstrap",
-  asyncRoute(async (_req, res) => {
-    const [data, updatedAt] = await Promise.all([store.readAll(), store.versions()]);
-    res.json({ data, updatedAt, serverTime: new Date().toISOString() });
-  }),
-);
-
-app.get(
-  "/api/backups",
-  asyncRoute(async (_req, res) => {
-    res.json({ backups: await store.listBackups() });
-  }),
-);
-
-app.get(
-  "/api/backups/:name",
-  asyncRoute(async (req, res) => {
-    try {
-      const content = await store.readBackup(req.params.name);
-      res.type("application/json").send(content);
-    } catch (error) {
-      const invalid =
-        error instanceof Error && error.message === "Invalid backup name.";
-      res
-        .status(invalid ? 400 : 404)
-        .json({ error: invalid ? error.message : "Backup not found." });
-    }
-  }),
-);
-
-app.put(
-  "/api/entities/:entity",
-  asyncRoute(async (req, res) => {
-    const { entity } = req.params;
-    if (!isEntityFile(entity)) {
-      res.status(404).json({ error: `Unknown entity: ${entity}` });
-      return;
-    }
-    const body = req.body as { value?: unknown; expected_updated_at?: unknown } | undefined;
-    const value = body?.value;
-    if (value === undefined) {
-      res.status(400).json({ error: "Body must contain { value }." });
-      return;
-    }
-    const expected = typeof body?.expected_updated_at === "string" ? body.expected_updated_at : undefined;
-    try {
-      if (entity === "items") {
-        const done = await store.writeItemsWithHistory(
-          itemSchema.array().parse(value),
-          expected,
-        );
-        res.json({
-          ok: true,
-          value: done.value,
-          backupPath: done.backupPath,
-          historyEntries: done.entries.length,
-          savedAt: new Date().toISOString(),
-        });
-        return;
-      }
-      const result = await store.write(entity, value, expected);
-      res.json({
-        ok: true,
-        value: result.value,
-        backupPath: result.backupPath,
-        savedAt: new Date().toISOString(),
-      });
-    } catch (error) {
-      if (error instanceof ConflictError) {
-        res.status(409).json({ error: error.message, code: "conflict" });
-        return;
-      }
-      if (error instanceof Error && "issues" in error) {
-        res.status(400).json({
-          error: formatZodError(error as never),
-        });
-        return;
-      }
-      throw error;
-    }
-  }),
-);
-
-app.post(
-  "/api/items/:id/status",
-  asyncRoute(async (req, res) => {
-    const { status, note, expected_updated_at } = (req.body ?? {}) as {
-      status?: string;
-      note?: string;
-      expected_updated_at?: string;
-    };
-    if (!status || !(ALL_STATUSES as readonly string[]).includes(status)) {
-      res.status(400).json({ error: "Invalid status." });
-      return;
-    }
-    try {
-      const result = await store.transitionItemStatus(
-        req.params.id,
-        status as ResearchStatus,
-        typeof note === "string" && note.trim() ? note.trim() : undefined,
-        typeof expected_updated_at === "string" ? expected_updated_at : undefined,
-      );
-      res.json({ ok: true, ...result });
-    } catch (error) {
-      if (error instanceof ConflictError) {
-        res.status(409).json({ error: error.message, code: "conflict" });
-        return;
-      }
-      res.status(400).json({
-        error: error instanceof Error ? error.message : "Could not move status.",
-      });
-    }
-  }),
-);
-
-app.post(
-  "/api/check-link",
-  asyncRoute(async (req, res) => {
-    const { url } = (req.body ?? {}) as { url?: string };
-    if (!url) {
-      res.status(400).json({ error: "URL is required." });
-      return;
-    }
-    let parsed: URL;
-    try {
-      parsed = new URL(url);
-    } catch {
-      res.status(400).json({ error: "Invalid URL." });
-      return;
-    }
-    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-      res.status(400).json({ error: "Only http/https URLs are supported." });
-      return;
-    }
-
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 10_000);
-    try {
-      let response = await fetch(parsed, {
-        method: "HEAD",
-        redirect: "follow",
-        signal: controller.signal,
-      });
-      if (response.status === 405 || response.status === 403) {
-        response = await fetch(parsed, {
-          method: "GET",
-          redirect: "follow",
-          signal: controller.signal,
-          headers: { Range: "bytes=0-64" },
-        });
-      }
-      res.json({
-        ok: response.ok,
-        status: response.status,
-        finalUrl: response.url,
-        message: response.ok ? "Link responded." : "Link did not respond properly.",
-      });
-    } catch (error) {
-      res.json({
-        ok: false,
-        status: 0,
-        finalUrl: url,
-        message:
-          error instanceof Error && error.name === "AbortError"
-            ? "Link check timed out after 10 seconds."
-            : "Link could not be reached.",
-      });
-    } finally {
-      clearTimeout(timer);
-    }
-  }),
-);
-
-app.post(
-  "/api/publish/preview",
-  asyncRoute(async (_req, res) => {
-    const publish = await run(pnpm, ["run", "publish:data"]);
-    if (!publish.ok) {
-      res.status(500).json({
-        ok: false,
-        stage: "publish",
-        output: `${publish.stdout}\n${publish.stderr}`.trim(),
-        error: "publish:data failed.",
-      });
-      return;
-    }
-
-    const build = await run(pnpm, ["run", "build"]);
-    const diff = await run("git", ["diff", "--", "data/public"]);
-    const status = await run("git", ["status", "--short", "--", "data/public"]);
-    const stat = await run("git", ["diff", "--stat", "--", "data/public"]);
-
-    res.status(build.ok ? 200 : 422).json({
-      ok: build.ok,
-      stage: build.ok ? "done" : "build",
-      output: `${publish.stdout}\n${publish.stderr}\n${build.stdout}\n${build.stderr}`.trim(),
-      diff: build.ok ? diff.stdout : "",
-      status: status.stdout.trim(),
-      stat: stat.stdout.trim(),
-      error: build.ok
-        ? undefined
-        : "Build/check:leak failed. Fix it before publishing.",
-    });
-  }),
-);
-
-app.post(
-  "/api/publish/commit",
-  asyncRoute(async (req, res) => {
-    const { message } = (req.body ?? {}) as { message?: string };
-    const dirty = await run("git", ["status", "--porcelain", "--", "data/public"]);
-    if (!dirty.stdout.trim()) {
-      res.status(409).json({ error: "No public data changes to commit." });
-      return;
-    }
-    const add = await run("git", ["add", "--", "data/public"]);
-    if (!add.ok) {
-      res.status(500).json({ error: add.stderr || "git add failed." });
-      return;
-    }
-    const safeMessage =
-      typeof message === "string" && message.trim()
-        ? message.trim().slice(0, 160)
-        : `data: publish ${new Date().toISOString().slice(0, 10)}`;
-    const commit = await run("git", ["commit", "-m", safeMessage]);
-    res.status(commit.ok ? 200 : 500).json({
-      ok: commit.ok,
-      message: safeMessage,
-      output: `${commit.stdout}\n${commit.stderr}`.trim(),
-      error: commit.ok ? undefined : "git commit failed.",
-    });
-  }),
-);
-
-app.post(
-  "/api/publish/push",
-  asyncRoute(async (_req, res) => {
-    const push = await run("git", ["push"], 180_000);
-    res.status(push.ok ? 200 : 500).json({
-      ok: push.ok,
-      output: `${push.stdout}\n${push.stderr}`.trim(),
-      error: push.ok ? undefined : "git push failed.",
-    });
-  }),
-);
-
-app.use("/api", (_req, res) => {
-  res.status(404).json({ error: "Admin endpoint not found." });
-});
-
-app.use(
-  (error: unknown, _req: Request, res: Response, next: NextFunction) => {
-    void next;
-    const message = error instanceof Error ? error.message : "Server error.";
-    console.error("[admin]", error);
-    res.status(500).json({ error: message });
-  },
-);
-
-const vite = await createViteServer({
-  root: path.join(root, "admin"),
-  configFile: false,
-  publicDir: false,
-  appType: "spa",
-  plugins: [
-    react(),
-    {
-      name: "nusea-admin-session-token",
-      transformIndexHtml(html) {
-        return html.replace(
-          "</head>",
-          `<script>window.__NUSEA_ADMIN_TOKEN__=${JSON.stringify(token)}</script></head>`,
-        );
+let viteClose: (() => Promise<void>) | null = null;
+if (localMode) {
+  const vite = await createViteServer({
+    root: path.join(root, "admin"),
+    configFile: false,
+    publicDir: path.join(root, "admin", "public"),
+    appType: "spa",
+    plugins: [
+      react(),
+      {
+        name: "nusea-admin-session-token",
+        transformIndexHtml(html) {
+          return html.replace(
+            "</head>",
+            `<script>window.__NUSEA_ADMIN_TOKEN__=${JSON.stringify(token)}</script></head>`,
+          );
+        },
       },
+    ],
+    cacheDir: path.join(root, "node_modules", ".vite-admin"),
+    resolve: { dedupe: ["react", "react-dom"] },
+    server: {
+      middlewareMode: true,
+      hmr: false,
+      fs: { allow: [root] },
     },
-  ],
-  server: {
-    middlewareMode: true,
-    hmr: false,
-    fs: { allow: [root] },
-  },
-});
-
-app.use(vite.middlewares);
+  });
+  app.use(vite.middlewares);
+  viteClose = () => vite.close();
+}
 
 const server = http.createServer(app);
-server.listen(port, "127.0.0.1", () => {
+server.listen(port, localMode ? "127.0.0.1" : "0.0.0.0", () => {
   console.log("");
-  console.log("  NUSEA — BACK OFFICE (LOCAL)");
+  console.log(`  NUSEA — BACK OFFICE (${localMode ? "LOCAL" : "ONLINE"})`);
   console.log(`  URL   : http://127.0.0.1:${port}`);
-  console.log(`  TOKEN : ${token}`);
-  console.log(`  STORE : ${storage}`);
-  console.log("  Accepts connections from 127.0.0.1 only.");
+  if (localMode) console.log(`  TOKEN : ${token}`);
+  console.log(`  STORE : ${process.env.DATABASE_URL ? "Neon Postgres (nusea schema)" : "local JSON files"}`);
+  console.log(
+    localMode
+      ? "  Accepts connections from 127.0.0.1 only."
+      : "  Password login, secure cookie, CSRF, and rate limiting enabled.",
+  );
   console.log("");
 });
 
 function shutdown() {
   server.close(() => process.exit(0));
-  void vite.close();
-  void store.close();
+  void close();
+  if (viteClose) void viteClose();
 }
 
 process.on("SIGINT", shutdown);

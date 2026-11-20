@@ -5,13 +5,19 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build": "pnpm run typecheck && vite build && pnpm run check:leak",
+    "build": "pnpm run fetch:public && pnpm run typecheck && vite build && pnpm run check:leak",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p admin/tsconfig.json",
     "lint": "eslint . --max-warnings=0",
     "test": "vitest run",
+    "db:setup": "tsx scripts/db-setup.ts",
+    "fetch:public": "tsx scripts/fetch-public.ts",
     "publish:data": "tsx scripts/publish-data.ts",
     "check:leak": "tsx scripts/check-leak.ts",
     "admin": "tsx admin/server.ts",
+    "admin:build": "vite build --config vite.config.admin.ts",
+    "admin:hash": "tsx scripts/hash-admin-password.ts",
+    "import:tracker": "tsx scripts/import-tracker.ts",
+    "import:tracker:apply": "tsx scripts/import-tracker.ts --apply",
     "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {
@@ -21,6 +27,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.1.5",
+    "serverless-http": "^4.0.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {

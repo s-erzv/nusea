@@ -1,0 +1,9 @@
+node_modules
+admin/dist
+dist
+data/private
+data/.backups
+.env
+.env.local
+.git
+.codegraph

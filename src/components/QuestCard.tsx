@@ -13,7 +13,7 @@ import { XPBar } from "./XPBar";
 interface QuestCardProps {
   item: PublicItem;
   venue?: PublicVenue;
-  variant: "card" | "list";
+  variant: "card" | "list" | "featured";
 }
 
 export function QuestCard({ item, venue, variant }: QuestCardProps) {
@@ -21,6 +21,78 @@ export function QuestCard({ item, venue, variant }: QuestCardProps) {
   const progress = statusProgress(item.status);
   const date = item.publishedAt || item.submittedAt || item.updatedAt;
   const dateLabel = item.publishedAt ? "Published" : item.submittedAt ? "Submitted" : "Updated";
+
+  if (variant === "featured") {
+    return (
+      <Link
+        to={`/research/${item.id}`}
+        className="pixel-card-lg group grid gap-4 p-5 transition-transform duration-100 hover:-translate-y-0.5 sm:p-6 md:grid-cols-[1.55fr_1fr]"
+        aria-label={`Open research: ${item.title}`}
+      >
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="pixel-badge" data-tone="pinned">
+              FEATURED
+            </span>
+            <StatusBadge status={item.status} />
+            <span className="text-[13px] text-muted">
+              {ITEM_TYPE_LABELS[item.type]}
+            </span>
+          </div>
+          <h3 className="mt-3 text-balance text-[20px] font-semibold leading-[1.45] sm:text-[26px]">
+            {item.title}
+          </h3>
+          <p className="mt-2 line-clamp-2 text-[14px] leading-snug text-muted">
+            {item.authors.length > 0 ? item.authors.join(", ") : "Authors not set"}
+          </p>
+          <p className="mt-3 text-[15px] leading-[1.7] text-muted">
+            {excerpt(item.abstract, 260)}
+          </p>
+          <div className="mt-4 flex flex-wrap gap-1.5">
+            {item.keywords.slice(0, 5).map((keyword) => (
+              <span
+                key={keyword}
+                className="border-2 border-line bg-paper px-1.5 py-0.5 text-[12px] leading-tight"
+              >
+                {keyword}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex flex-col justify-between gap-4 border-[3px] border-line bg-paper p-4">
+          <dl className="space-y-3 text-[14px]">
+            <div>
+              <dt className="font-pixel text-[11px] uppercase leading-4 text-muted">
+                Venue
+              </dt>
+              <dd className="mt-0.5 leading-snug">
+                {venue ? venue.name : "Not set"}
+              </dd>
+            </div>
+            <div>
+              <dt className="font-pixel text-[11px] uppercase leading-4 text-muted">
+                {dateLabel}
+              </dt>
+              <dd className="mt-0.5 leading-snug">{formatDateShort(date)}</dd>
+            </div>
+            <div>
+              <dt className="flex items-center justify-between font-pixel text-[11px] uppercase leading-4 text-muted">
+                <span>Progress</span>
+                <span className="text-ink">{progress}%</span>
+              </dt>
+              <dd className="mt-1.5">
+                <XPBar value={progress} label={`Research progress: ${item.title}`} animate={false} />
+              </dd>
+            </div>
+          </dl>
+          <span className="inline-flex items-center justify-between border-2 border-line bg-card px-3 py-2 font-pixel text-[12px] transition-colors group-hover:bg-yellow group-hover:text-[#14213D]">
+            READ RESEARCH <span aria-hidden="true">&gt;</span>
+          </span>
+        </div>
+      </Link>
+    );
+  }
 
   if (variant === "list") {
     return (
@@ -39,7 +111,14 @@ export function QuestCard({ item, venue, variant }: QuestCardProps) {
             ) : null}
             <span className="text-[13px] text-muted">{ITEM_TYPE_LABELS[item.type]}</span>
           </div>
-          <h3 className="text-[16px] font-semibold leading-[1.5] sm:flex-1">{item.title}</h3>
+          <div className="sm:flex-1">
+            <h3 className="text-[16px] font-semibold leading-[1.5]">{item.title}</h3>
+            {item.authors.length > 0 ? (
+              <p className="mt-0.5 truncate text-[13px] text-muted">
+                {item.authors.join(", ")}
+              </p>
+            ) : null}
+          </div>
           <div className="flex shrink-0 items-center gap-3 text-[13px] text-muted">
             <span>{level ? `Stage ${level}` : "Archived"}</span>
             <span>{dateLabel} {formatDateShort(date)}</span>
@@ -73,6 +152,9 @@ export function QuestCard({ item, venue, variant }: QuestCardProps) {
         {ITEM_TYPE_LABELS[item.type]}
       </p>
       <h3 className="mt-2 text-[17px] font-semibold leading-[1.5]">{item.title}</h3>
+      <p className="mt-1.5 line-clamp-2 text-[13px] leading-snug text-muted">
+        {item.authors.length > 0 ? item.authors.join(", ") : "Authors not set"}
+      </p>
       <p className="mt-3 text-[14px] leading-[1.65] text-muted">
         {excerpt(item.abstract, 180)}
       </p>

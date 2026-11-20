@@ -83,11 +83,38 @@ export function ResearchDetailPage() {
           <h1 className="text-balance text-[22px] leading-[1.65] sm:text-[30px]">
             {item.title}
           </h1>
-          <p className="mt-4 text-[19px] leading-snug">
-            <span className="font-pixel text-[12px] uppercase text-muted">Authors</span>
-            <br />
-            {item.authors.length > 0 ? item.authors.join(", ") : "Not set"}
-          </p>
+          <dl className="mt-5 grid gap-3 border-y-2 border-dashed border-line py-4 text-[16px] sm:grid-cols-2">
+            <div>
+              <dt className="font-pixel text-[11px] uppercase leading-4 text-muted">
+                Authors
+              </dt>
+              <dd className="mt-1 leading-snug">
+                {item.authors.length > 0 ? item.authors.join(", ") : "Not set"}
+              </dd>
+            </div>
+            <div>
+              <dt className="font-pixel text-[11px] uppercase leading-4 text-muted">
+                Venue
+              </dt>
+              <dd className="mt-1 leading-snug">
+                {venue ? venue.name : "Not set"}
+              </dd>
+            </div>
+            <div>
+              <dt className="font-pixel text-[11px] uppercase leading-4 text-muted">
+                {item.publishedAt ? "Published" : item.submittedAt ? "Submitted" : "Updated"}
+              </dt>
+              <dd className="mt-1 leading-snug">
+                {formatDate(item.publishedAt || item.submittedAt || item.updatedAt)}
+              </dd>
+            </div>
+            <div>
+              <dt className="font-pixel text-[11px] uppercase leading-4 text-muted">
+                Type
+              </dt>
+              <dd className="mt-1 leading-snug">{ITEM_TYPE_LABELS[item.type]}</dd>
+            </div>
+          </dl>
 
           <div className="mt-5 border-[3px] border-line bg-paper p-3">
             <div className="flex flex-wrap items-center justify-between gap-2 text-[17px]">
@@ -130,7 +157,7 @@ export function ResearchDetailPage() {
           </div>
         </section>
 
-        <div className="space-y-5">
+        <div className="space-y-5 lg:sticky lg:top-24 lg:self-start">
           {documents.length > 0 ? (
             <section className="pixel-card p-5" aria-labelledby="documents-title">
               <h2 id="documents-title" className="text-[15px]">
@@ -140,13 +167,14 @@ export function ResearchDetailPage() {
                 {documents.map((document) => (
                   <li key={document.id}>
                     <a
-                      className="pixel-btn w-full"
+                      className="flex items-center justify-between gap-3 border-2 border-line bg-paper px-3 py-2 text-[15px] font-semibold leading-snug hover:bg-yellow hover:text-[#14213D]"
                       href={document.url}
                       target="_blank"
                       rel="noreferrer"
                       aria-label={`Open document: ${document.label}`}
                     >
-                      {document.label.toUpperCase()}
+                      <span>{document.label}</span>
+                      <span aria-hidden="true">↗</span>
                     </a>
                     <p className="mt-1 text-[16px] text-muted">
                       {ASSET_KIND_LABELS[document.kind]}
@@ -206,12 +234,13 @@ export function ResearchDetailPage() {
                 {links.map((link) => (
                   <li key={link.label}>
                     <a
-                      className="pixel-btn w-full"
+                      className="flex items-center justify-between gap-3 border-2 border-line bg-paper px-3 py-2 text-[15px] font-semibold leading-snug hover:bg-yellow hover:text-[#14213D]"
                       href={link.href}
                       target="_blank"
                       rel="noreferrer"
                     >
-                      {link.label.toUpperCase()}
+                      <span>{link.label}</span>
+                      <span aria-hidden="true">↗</span>
                     </a>
                     <p className="mt-1 break-all text-[16px] text-muted">{link.value}</p>
                   </li>

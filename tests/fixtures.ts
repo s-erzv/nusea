@@ -54,6 +54,15 @@ export function makeItem(overrides: Partial<ResearchItem> = {}): ResearchItem {
     progressPct: 40,
     pinned: false,
     submitChecklist: { plagiarismChecked: true, finalFileReady: false },
+    trackerId: "",
+    role: "belum_dicatat",
+    researchKind: "belum_dicatat",
+    targetVenue: "",
+    targetDate: "",
+    nextStep: "",
+    dataSource: "belum_dicatat",
+    link: "",
+    notes: "",
     ...overrides,
   };
 }

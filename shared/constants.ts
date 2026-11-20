@@ -265,3 +265,63 @@ export function ideaTotalScore(scores: Record<IdeaScoreKey, number>): number {
 
 export const VISIBILITIES = ["public", "private"] as const;
 export type Visibility = (typeof VISIBILITIES)[number];
+
+export const ITEM_ROLES = [
+  "penulis_1",
+  "penulis_2",
+  "penulis_3",
+  "penulis_tunggal",
+  "belum_dicatat",
+] as const;
+
+export type ItemRole = (typeof ITEM_ROLES)[number];
+
+export const ITEM_ROLE_LABELS: Record<ItemRole, string> = {
+  penulis_1: "Penulis 1",
+  penulis_2: "Penulis 2",
+  penulis_3: "Penulis 3",
+  penulis_tunggal: "Penulis tunggal",
+  belum_dicatat: "Belum dicatat",
+};
+
+export const RESEARCH_KINDS = [
+  "slr",
+  "arsitektur",
+  "analisis",
+  "rancang_bangun",
+  "proposal_hibah",
+  "tugas_kuliah",
+  "tugas_akhir",
+  "lainnya",
+  "belum_dicatat",
+] as const;
+
+export type ResearchKind = (typeof RESEARCH_KINDS)[number];
+
+export const RESEARCH_KIND_LABELS: Record<ResearchKind, string> = {
+  slr: "SLR",
+  arsitektur: "Arsitektur",
+  analisis: "Analisis",
+  rancang_bangun: "Rancang bangun",
+  proposal_hibah: "Proposal hibah",
+  tugas_kuliah: "Tugas kuliah",
+  tugas_akhir: "Tugas akhir",
+  lainnya: "Lainnya",
+  belum_dicatat: "Belum dicatat",
+};
+
+export const DATA_SOURCES = [
+  "terverifikasi_publik",
+  "catatan_obrolan",
+  "perlu_dicek",
+  "belum_dicatat",
+] as const;
+
+export type DataSource = (typeof DATA_SOURCES)[number];
+
+export const DATA_SOURCE_LABELS: Record<DataSource, string> = {
+  terverifikasi_publik: "Terverifikasi (publik)",
+  catatan_obrolan: "Catatan obrolan",
+  perlu_dicek: "Perlu dicek",
+  belum_dicatat: "Belum dicatat",
+};

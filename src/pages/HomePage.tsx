@@ -21,6 +21,7 @@ import { cn } from "../lib/format";
 type TypeFilter = ItemType | "all";
 type StatusFilter = ResearchStatus | "all";
 type ViewMode = "card" | "list";
+type SortMode = "recent" | "oldest" | "title" | "published";
 
 export function HomePage() {
   useDocumentTitle("Research");
@@ -28,6 +29,7 @@ export function HomePage() {
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [view, setView] = useState<ViewMode>("card");
+  const [sortMode, setSortMode] = useState<SortMode>("recent");
 
   const fuse = useMemo(
     () =>
@@ -62,9 +64,16 @@ export function HomePage() {
       .filter((item) => statusFilter === "all" || item.status === statusFilter)
       .sort((a, b) => {
         if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+        if (sortMode === "title") return a.title.localeCompare(b.title, "en");
+        if (sortMode === "oldest") return a.updatedAt.localeCompare(b.updatedAt);
+        if (sortMode === "published") {
+          return (b.publishedAt || b.updatedAt).localeCompare(
+            a.publishedAt || a.updatedAt,
+          );
+        }
         return b.updatedAt.localeCompare(a.updatedAt);
       });
-  }, [fuse, query, statusFilter, typeFilter]);
+  }, [fuse, query, statusFilter, typeFilter, sortMode]);
 
   const hasFilters =
     query.trim() !== "" || typeFilter !== "all" || statusFilter !== "all";
@@ -78,6 +87,12 @@ export function HomePage() {
   function scrollToResearch() {
     document.getElementById("research")?.scrollIntoView({ behavior: "smooth" });
   }
+
+  const featured =
+    view === "card" ? filtered.find((item) => item.pinned) : undefined;
+  const rest = featured
+    ? filtered.filter((item) => item.id !== featured.id)
+    : filtered;
 
   const tagline =
     profile?.tagline || "Independent research on digital identity, information systems, and Web3.";
@@ -201,6 +216,27 @@ export function HomePage() {
                 </select>
               </div>
               <div>
+                <label
+                  htmlFor="research-sort"
+                  className="mb-1 block font-pixel text-[12px] uppercase leading-4"
+                >
+                  Sort
+                </label>
+                <select
+                  id="research-sort"
+                  className="pixel-input min-w-[150px]"
+                  value={sortMode}
+                  onChange={(event) =>
+                    setSortMode(event.target.value as SortMode)
+                  }
+                >
+                  <option value="recent">Recently updated</option>
+                  <option value="published">Recently published</option>
+                  <option value="oldest">Oldest first</option>
+                  <option value="title">Title A–Z</option>
+                </select>
+              </div>
+              <div>
                 <span className="mb-1 block font-pixel text-[12px] uppercase leading-4">
                   View
                 </span>
@@ -297,15 +333,25 @@ export function HomePage() {
               }
             />
           ) : view === "card" ? (
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {filtered.map((item) => (
+            <div className="space-y-4">
+              {featured ? (
                 <QuestCard
-                  key={item.id}
-                  item={item}
-                  venue={venueById.get(item.venueId)}
-                  variant="card"
+                  key={featured.id}
+                  item={featured}
+                  venue={venueById.get(featured.venueId)}
+                  variant="featured"
                 />
-              ))}
+              ) : null}
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {rest.map((item) => (
+                  <QuestCard
+                    key={item.id}
+                    item={item}
+                    venue={venueById.get(item.venueId)}
+                    variant="card"
+                  />
+                ))}
+              </div>
             </div>
           ) : (
             <div className="grid gap-3">

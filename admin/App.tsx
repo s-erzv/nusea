@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { AssetsPage } from "./pages/AssetsPage";
 import { DashboardPage } from "./pages/DashboardPage";
-import { DataPage } from "./pages/DataPage";
 import { GrantsPage } from "./pages/GrantsPage";
 import { IdeasPage } from "./pages/IdeasPage";
 import { ItemsPage } from "./pages/ItemsPage";
@@ -10,8 +9,15 @@ import { ProfilePage } from "./pages/ProfilePage";
 import { PublishPage } from "./pages/PublishPage";
 import { SourcesPage } from "./pages/SourcesPage";
 import { TasksPage } from "./pages/TasksPage";
-import { VenuesPage } from "./pages/VenuesPage";
-import { ApiError, adminApi, hasToken, setToken } from "./lib/api";
+import { TrackerPage } from "./pages/TrackerPage";
+import {
+  ApiError,
+  adminApi,
+  fetchSession,
+  login,
+  logout,
+  setToken,
+} from "./lib/api";
 import type { AdminData, AdminTab, Notify, SaveEntity } from "./lib/types";
 
 interface NavItem {
@@ -28,17 +34,16 @@ const NAV: Array<{ group: string; items: NavItem[] }> = [
   {
     group: "Research",
     items: [
+      { tab: "tracker", label: "Tracker", mark: "T" },
       { tab: "items", label: "Research", mark: "R" },
       { tab: "kanban", label: "Pipeline", mark: "K" },
       { tab: "assets", label: "Documents", mark: "D" },
-      { tab: "venues", label: "Venues", mark: "V" },
     ],
   },
   {
     group: "System",
     items: [
       { tab: "profile", label: "Profile", mark: "P" },
-      { tab: "data", label: "Data", mark: "F" },
       { tab: "publish", label: "Publish", mark: "!" },
     ],
   },
@@ -53,15 +58,21 @@ interface Toast {
 }
 
 export default function App() {
-  const [needsToken, setNeedsToken] = useState(!hasToken());
+  const [gate, setGate] = useState<"checking" | "login" | "token" | "ready">(
+    "checking",
+  );
+  const [online, setOnline] = useState(false);
   const [tokenInput, setTokenInput] = useState("");
+  const [passwordInput, setPasswordInput] = useState("");
+  const [authError, setAuthError] = useState("");
+  const [authBusy, setAuthBusy] = useState(false);
   const [data, setData] = useState<AdminData | null>(null);
   const [versions, setVersions] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [tab, setTab] = useState<AdminTab>(() => {
     const hash = window.location.hash.slice(1);
-    return (ALL_TABS as string[]).includes(hash) ? (hash as AdminTab) : "dashboard";
+    return (ALL_TABS as string[]).includes(hash) ? (hash as AdminTab) : "tracker";
   });
   const [toast, setToast] = useState<Toast | null>(null);
   const [dark, setDark] = useState(() =>
@@ -80,10 +91,24 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (needsToken) {
-      setLoading(false);
-      return;
-    }
+    let active = true;
+    void fetchSession().then((session) => {
+      if (!active) return;
+      setOnline(session.online);
+      if (session.authenticated) {
+        setGate("ready");
+      } else {
+        setGate(session.online ? "login" : "token");
+        setLoading(false);
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (gate !== "ready") return;
     let active = true;
     setLoading(true);
     adminApi
@@ -98,7 +123,7 @@ export default function App() {
         if (!active) return;
         const message = error instanceof Error ? error.message : "Could not load data.";
         if (message.includes("401") || message.includes("Token")) {
-          setNeedsToken(true);
+          setGate(online ? "login" : "token");
         }
         setLoadError(message);
       })
@@ -108,7 +133,7 @@ export default function App() {
     return () => {
       active = false;
     };
-  }, [needsToken]);
+  }, [gate, online]);
 
   useEffect(() => {
     if (!toast) return;
@@ -144,32 +169,88 @@ export default function App() {
         throw new Error("Data changed elsewhere. The latest version was reloaded; review your edit before saving again.");
       }
       if (error instanceof Error && error.message.includes("401")) {
-        setNeedsToken(true);
+        void fetchSession().then((session) =>
+          setGate(session.online ? "login" : "token"),
+        );
       }
       throw error;
     }
   }
 
-  if (needsToken) {
+  async function submitLogin(event: FormEvent) {
+    event.preventDefault();
+    setAuthError("");
+    setAuthBusy(true);
+    try {
+      await login(passwordInput);
+      setPasswordInput("");
+      setGate("ready");
+    } catch (error) {
+      setAuthError(error instanceof Error ? error.message : "Sign in failed.");
+    } finally {
+      setAuthBusy(false);
+    }
+  }
+
+  function submitLocalToken(event: FormEvent) {
+    event.preventDefault();
+    if (!tokenInput.trim()) return;
+    setToken(tokenInput.trim());
+    setGate("ready");
+  }
+
+  if (gate === "login") {
     return (
       <div className="admin-token-screen">
-        <form
-          className="admin-token-card"
-          onSubmit={(event) => {
-            event.preventDefault();
-            if (!tokenInput.trim()) return;
-            setToken(tokenInput.trim());
-            setNeedsToken(false);
-            setLoading(true);
-          }}
-        >
+        <form className="admin-token-card" onSubmit={(event) => void submitLogin(event)}>
+          <img className="admin-auth-logo" src="/favicon.svg" alt="" width={56} height={56} />
+          <p className="font-pixel text-[12px] uppercase leading-5 text-orange">
+            Nusea / Back Office
+          </p>
+          <h1 className="mt-3 text-[22px] leading-relaxed">Masuk ke admin</h1>
+          <p className="mt-2 text-[17px] leading-snug text-muted">
+            Data penelitian ini privat. Masukkan password admin untuk membuka
+            tracker.
+          </p>
+          <label className="mt-5 block font-pixel text-[12px] uppercase leading-4" htmlFor="password">
+            Password
+          </label>
+          <input
+            id="password"
+            type="password"
+            className="pixel-input admin-input mt-1"
+            value={passwordInput}
+            onChange={(event) => setPasswordInput(event.target.value)}
+            autoFocus
+            autoComplete="current-password"
+          />
+          {authError || loadError ? (
+            <p className="admin-warning mt-3">{authError || loadError}</p>
+          ) : null}
+          <button
+            type="submit"
+            className="pixel-btn mt-4"
+            disabled={authBusy || !passwordInput}
+          >
+            {authBusy ? "MEMBUKA…" : "MASUK"}
+          </button>
+        </form>
+      </div>
+    );
+  }
+
+  if (gate === "token") {
+    return (
+      <div className="admin-token-screen">
+        <form className="admin-token-card" onSubmit={submitLocalToken}>
+          <img className="admin-auth-logo" src="/favicon.svg" alt="" width={56} height={56} />
           <p className="font-pixel text-[12px] uppercase leading-5 text-orange">
             Nusea / Back Office
           </p>
           <h1 className="mt-3 text-[22px] leading-relaxed">Session token required</h1>
           <p className="mt-2 text-[17px] leading-snug text-muted">
-            The token is printed in the terminal when you run <code>pnpm run admin</code>.
-            Do not share it; the server only accepts connections from 127.0.0.1.
+            Token dicetak di terminal saat <code>pnpm run admin</code>. Server
+            lokal hanya menerima koneksi dari 127.0.0.1.
           </p>
           <label className="mt-5 block font-pixel text-[12px] uppercase leading-4" htmlFor="token">
             Admin token
@@ -192,10 +273,11 @@ export default function App() {
     );
   }
 
-  if (loading && !data) {
+  if (gate === "checking" || (loading && !data)) {
     return (
       <div className="admin-token-screen">
         <div className="admin-token-card">
+          <img className="admin-auth-logo" src="/favicon.svg" alt="" width={56} height={56} />
           <p className="font-pixel text-[12px] uppercase leading-5 text-orange">
             Nusea / Back Office
           </p>
@@ -215,7 +297,6 @@ export default function App() {
             type="button"
             className="pixel-btn mt-4"
             onClick={() => {
-              setNeedsToken(false);
               setLoading(true);
               void refresh()
                 .catch((error: unknown) =>
@@ -239,11 +320,11 @@ export default function App() {
     <div className="admin-shell">
       <aside className="admin-sidebar">
         <div className="admin-brand">
-          <span className="admin-brand-block">N</span>
+          <img className="admin-brand-logo" src="/favicon.svg" alt="" width={44} height={44} />
           <div>
             <p className="font-pixel text-[13px] leading-4">NUSEA</p>
             <p className="font-pixel text-[10px] uppercase leading-4 text-muted">
-              Back Office / Local
+              Back Office
             </p>
           </div>
         </div>
@@ -280,16 +361,18 @@ export default function App() {
             {data.profile.name || "Nusea"}
           </p>
           <p className="text-[15px] leading-snug text-muted">
-            Local data · 20 backups · no Supabase
+            {online ? "Online · Neon · auto backup" : "Local · Neon · auto backup"}
           </p>
-          <a
-            href="http://127.0.0.1:5173"
-            target="_blank"
-            rel="noreferrer"
-            className="pixel-link mt-2 inline-block text-[15px]"
-          >
-            Open public site ↗
-          </a>
+          {online ? null : (
+            <a
+              href="http://127.0.0.1:5173"
+              target="_blank"
+              rel="noreferrer"
+              className="pixel-link mt-2 inline-block text-[15px]"
+            >
+              Open public site ↗
+            </a>
+          )}
         </div>
       </aside>
 
@@ -304,7 +387,9 @@ export default function App() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="admin-local-badge">127.0.0.1</span>
+            <span className="admin-local-badge">
+              {online ? "ONLINE" : "LOCAL"}
+            </span>
             <button
               type="button"
               className="pixel-btn pixel-btn-ghost admin-topbar-btn"
@@ -312,6 +397,20 @@ export default function App() {
             >
               {dark ? "LIGHT" : "DARK"}
             </button>
+            {online ? (
+              <button
+                type="button"
+                className="pixel-btn pixel-btn-ghost admin-topbar-btn"
+                onClick={() => {
+                  void logout().then(() => {
+                    setData(null);
+                    setGate("login");
+                  });
+                }}
+              >
+                KELUAR
+              </button>
+            ) : null}
             <button
               type="button"
               className="pixel-btn pixel-btn-ghost admin-topbar-btn"
@@ -326,6 +425,15 @@ export default function App() {
           {tab === "dashboard" ? <DashboardPage data={data} onNavigate={navigate} /> : null}
           {tab === "items" ? (
             <ItemsPage data={data} saveEntity={saveEntity} notify={notify} />
+          ) : null}
+          {tab === "tracker" ? (
+            <TrackerPage
+              data={data}
+              refresh={refresh}
+              notify={notify}
+              versions={versions}
+              saveEntity={saveEntity}
+            />
           ) : null}
           {tab === "kanban" ? (
             <KanbanPage data={data} refresh={refresh} notify={notify} versions={versions} />
@@ -345,25 +453,14 @@ export default function App() {
           {tab === "tasks" ? (
             <TasksPage data={data} saveEntity={saveEntity} notify={notify} />
           ) : null}
-          {tab === "venues" ? (
-            <VenuesPage data={data} saveEntity={saveEntity} notify={notify} />
-          ) : null}
           {tab === "profile" ? (
             <ProfilePage data={data} saveEntity={saveEntity} notify={notify} />
-          ) : null}
-          {tab === "data" ? (
-            <DataPage
-              data={data}
-              saveEntity={saveEntity}
-              notify={notify}
-              refresh={refresh}
-            />
           ) : null}
           {tab === "publish" ? <PublishPage notify={notify} refresh={refresh} /> : null}
         </main>
 
         <footer className="admin-footer">
-          NUSEA · local-only admin · {new Date().getFullYear()}
+          NUSEA · back office · {new Date().getFullYear()}
         </footer>
       </div>
 

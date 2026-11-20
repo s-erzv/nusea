@@ -72,6 +72,15 @@ export function ItemsPage({ data, saveEntity, notify }: ItemsPageProps) {
       progressPct: 0,
       pinned: false,
       submitChecklist: { plagiarismChecked: false, finalFileReady: false },
+      trackerId: "",
+      role: "belum_dicatat",
+      researchKind: "belum_dicatat",
+      targetVenue: "",
+      targetDate: "",
+      nextStep: "",
+      dataSource: "belum_dicatat",
+      link: "",
+      notes: "",
     });
     setIsNew(true);
   }

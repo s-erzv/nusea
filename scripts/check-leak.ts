@@ -1,5 +1,6 @@
 import path from "node:path";
 import { readdir, readFile } from "node:fs/promises";
+import { createStore } from "../admin/server/create-store";
 
 const TEXT_EXTENSIONS = new Set([
   ".html",
@@ -189,30 +190,19 @@ async function loadJson(filePath: string): Promise<unknown> {
 
 async function main() {
   const root = process.cwd();
-  const privateDir = path.join(root, "data", "private");
   const publicDir = path.join(root, "data", "public");
   const distDir = path.resolve(root, process.env.NUSEA_DIST ?? "dist");
 
-  let privateSnapshot: PrivateSnapshot | null = {};
-  for (const entity of [
-    "profile",
-    "items",
-    "assets",
-    "venues",
-    "grants",
-    "ideas",
-    "sources",
-    "tasks",
-    "history",
-  ] as const) {
+  let privateSnapshot: PrivateSnapshot | null = null;
+  try {
+    const store = createStore(root);
     try {
-      (privateSnapshot as Record<string, unknown>)[entity] = await loadJson(
-        path.join(privateDir, `${entity}.json`),
-      );
-    } catch {
-      privateSnapshot = null;
-      break;
+      privateSnapshot = await store.readAll();
+    } finally {
+      await store.close();
     }
+  } catch {
+    privateSnapshot = null;
   }
   if (!privateSnapshot) {
     console.warn(

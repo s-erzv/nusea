@@ -53,6 +53,15 @@ const ITEM_COLUMNS = [
   "abstract",
   "plagiarismChecked",
   "finalFileReady",
+  "trackerId",
+  "role",
+  "researchKind",
+  "targetVenue",
+  "targetDate",
+  "nextStep",
+  "dataSource",
+  "link",
+  "notes",
 ];
 
 const GRANT_COLUMNS = [
@@ -128,6 +137,18 @@ export function DataPage({ data, saveEntity, notify, refresh }: DataPageProps) {
       `nusea-${FILE_LABELS[entity]}`,
       `${JSON.stringify(data[entity], null, 2)}\n`,
     );
+  }
+
+  async function exportAllJson() {
+    try {
+      const text = await adminApi.exportAll();
+      download(`nusea-backup-${todayIso()}.json`, text);
+    } catch (error) {
+      notify(
+        error instanceof Error ? error.message : "Could not export JSON.",
+        "error",
+      );
+    }
   }
 
   async function uploadJson(file: File) {
@@ -220,6 +241,19 @@ export function DataPage({ data, saveEntity, notify, refresh }: DataPageProps) {
             ? parseBoolean(record.finalFileReady)
             : existing?.submitChecklist.finalFileReady ?? false,
       },
+      trackerId: record.trackerId ?? existing?.trackerId ?? "",
+      role: (record.role || existing?.role || "belum_dicatat") as ResearchItem["role"],
+      researchKind: (record.researchKind ||
+        existing?.researchKind ||
+        "belum_dicatat") as ResearchItem["researchKind"],
+      targetVenue: record.targetVenue ?? existing?.targetVenue ?? "",
+      targetDate: record.targetDate ?? existing?.targetDate ?? "",
+      nextStep: record.nextStep ?? existing?.nextStep ?? "",
+      dataSource: (record.dataSource ||
+        existing?.dataSource ||
+        "belum_dicatat") as ResearchItem["dataSource"],
+      link: record.link ?? existing?.link ?? "",
+      notes: record.notes ?? existing?.notes ?? "",
     };
   }
 
@@ -326,10 +360,21 @@ export function DataPage({ data, saveEntity, notify, refresh }: DataPageProps) {
       <PageHeader
         kicker="Data / Raw"
         title="Data and backups"
-        description="Raw JSON files in data/private plus the latest 20 backups. All operations stay local."
+        description="Private data in Neon (schema nusea), exported as JSON, plus the latest 20 backups."
       />
 
-      <Panel title="Raw JSON files">
+      <Panel
+        title="Private documents (JSON view)"
+        actions={
+          <button
+            type="button"
+            className="admin-mini-btn"
+            onClick={() => void exportAllJson()}
+          >
+            EXPORT ALL JSON
+          </button>
+        }
+      >
         <div className="admin-table-wrap">
           <table className="admin-table">
             <thead>
@@ -462,7 +507,7 @@ export function DataPage({ data, saveEntity, notify, refresh }: DataPageProps) {
           {backupError ? <p className="admin-warning">{backupError}</p> : null}
           {backups.length === 0 ? (
             <AdminEmpty>
-              No backups yet. A backup is created when a file is first written.
+              No backups yet. A backup is created when a document is first written.
             </AdminEmpty>
           ) : (
             <div className="admin-table-wrap">

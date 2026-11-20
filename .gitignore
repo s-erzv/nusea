@@ -5,7 +5,13 @@ assets-private/
 data/private/
 data/.backups/
 .env*
+!.env.example
 *.local
 coverage/
 .codegraph/
 *.tsbuildinfo
+data/public/*.json
+
+admin/dist
+netlify/functions/.netlify
+.netlify

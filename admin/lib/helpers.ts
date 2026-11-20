@@ -1,6 +1,8 @@
 import {
   ASSET_KINDS,
   ASSET_KIND_LABELS,
+  DATA_SOURCES,
+  DATA_SOURCE_LABELS,
   GRANT_CLUSTERS,
   GRANT_STAGES,
   GRANT_STAGE_LABELS,
@@ -10,11 +12,15 @@ import {
   IDEA_STATUS_LABELS,
   INDEX_LEVELS,
   INDEX_LEVEL_LABELS,
+  ITEM_ROLES,
+  ITEM_ROLE_LABELS,
   ITEM_TYPES,
   ITEM_TYPE_LABELS,
   PIPELINE_STATUSES,
   PRIORITIES,
   PRIORITY_LABELS,
+  RESEARCH_KINDS,
+  RESEARCH_KIND_LABELS,
   STATUS_LABELS,
   TERMINAL_STATUSES,
   VERIFICATION_STATUSES,
@@ -164,3 +170,18 @@ export const visibilityOptions = [
   { value: "private", label: "Private" },
   { value: "public", label: "Public" },
 ];
+
+export const roleOptions = ITEM_ROLES.map((role) => ({
+  value: role,
+  label: ITEM_ROLE_LABELS[role],
+}));
+
+export const researchKindOptions = RESEARCH_KINDS.map((kind) => ({
+  value: kind,
+  label: RESEARCH_KIND_LABELS[kind],
+}));
+
+export const dataSourceOptions = DATA_SOURCES.map((source) => ({
+  value: source,
+  label: DATA_SOURCE_LABELS[source],
+}));

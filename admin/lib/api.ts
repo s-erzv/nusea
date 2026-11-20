@@ -17,6 +17,9 @@ let token =
     : null) ??
   "";
 
+let onlineMode = false;
+let csrfToken = "";
+
 export function hasToken(): boolean {
   return token.length > 0;
 }
@@ -24,6 +27,59 @@ export function hasToken(): boolean {
 export function setToken(value: string): void {
   token = value.trim();
   localStorage.setItem(TOKEN_KEY, token);
+}
+
+export function isOnlineMode(): boolean {
+  return onlineMode;
+}
+
+export async function fetchSession(): Promise<{
+  online: boolean;
+  authenticated: boolean;
+}> {
+  try {
+    const response = await fetch("/api/auth/session", {
+      credentials: "same-origin",
+    });
+    if (response.status === 404) {
+      onlineMode = false;
+      return { online: false, authenticated: hasToken() };
+    }
+    const body = (await response.json().catch(() => null)) as
+      | { authenticated?: boolean; csrfToken?: string | null }
+      | null;
+    onlineMode = true;
+    csrfToken = body?.csrfToken ?? "";
+    return { online: true, authenticated: Boolean(body?.authenticated) };
+  } catch {
+    onlineMode = false;
+    return { online: false, authenticated: hasToken() };
+  }
+}
+
+export async function login(password: string): Promise<void> {
+  const response = await fetch("/api/auth/login", {
+    method: "POST",
+    credentials: "same-origin",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ password }),
+  });
+  const body = (await response.json().catch(() => null)) as
+    | { error?: string; csrfToken?: string }
+    | null;
+  if (!response.ok) {
+    throw new ApiError(body?.error ?? "Sign in failed.", response.status);
+  }
+  onlineMode = true;
+  csrfToken = body?.csrfToken ?? "";
+}
+
+export async function logout(): Promise<void> {
+  await fetch("/api/auth/logout", {
+    method: "POST",
+    credentials: "same-origin",
+  });
+  csrfToken = "";
 }
 
 export class ApiError extends Error {
@@ -37,12 +93,17 @@ export class ApiError extends Error {
 }
 
 async function api<T>(path: string, init?: RequestInit): Promise<T> {
-  if (!token) throw new ApiError("Session token is missing.", 401);
+  if (!onlineMode && !token) {
+    throw new ApiError("Session token is missing.", 401);
+  }
   const response = await fetch(path, {
     ...init,
+    credentials: "same-origin",
     headers: {
       "content-type": "application/json",
-      "x-nusea-token": token,
+      ...(onlineMode
+        ? { "x-csrf-token": csrfToken }
+        : { "x-nusea-token": token }),
       ...(init?.headers ?? {}),
     },
   });
@@ -84,10 +145,23 @@ export const adminApi = {
 
   backups: () => api<{ backups: BackupEntry[] }>("/api/backups"),
 
+  exportAll: async () => {
+    if (!onlineMode && !token) throw new ApiError("Session token is missing.", 401);
+    const response = await fetch("/api/export", {
+      credentials: "same-origin",
+      headers: onlineMode ? {} : { "x-nusea-token": token },
+    });
+    if (!response.ok) {
+      throw new ApiError("Could not export JSON.", response.status);
+    }
+    return response.text();
+  },
+
   backupText: async (name: string) => {
-    if (!token) throw new ApiError("Session token is missing.", 401);
+    if (!onlineMode && !token) throw new ApiError("Session token is missing.", 401);
     const response = await fetch(`/api/backups/${encodeURIComponent(name)}`, {
-      headers: { "x-nusea-token": token },
+      credentials: "same-origin",
+      headers: onlineMode ? {} : { "x-nusea-token": token },
     });
     if (!response.ok) {
       throw new ApiError("Could not download backup.", response.status);

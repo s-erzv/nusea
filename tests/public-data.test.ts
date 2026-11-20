@@ -54,6 +54,19 @@ describe("allowlist data publik", () => {
     expect(item).not.toHaveProperty("submitChecklist");
     expect(item).not.toHaveProperty("priority");
     expect(item).not.toHaveProperty("visibility");
+    for (const field of [
+      "trackerId",
+      "role",
+      "researchKind",
+      "targetVenue",
+      "targetDate",
+      "nextStep",
+      "dataSource",
+      "link",
+      "notes",
+    ]) {
+      expect(item).not.toHaveProperty(field);
+    }
     expect(JSON.stringify(bundle)).not.toContain("item-private");
   });
 
@@ -101,9 +114,18 @@ describe("allowlist data publik", () => {
 
     expect(bundle.grants.map((grant) => grant.id)).toEqual(["grant-public"]);
     expect(bundle.grants[0]).not.toHaveProperty("editionNote");
+    expect(bundle.grants[0]).not.toHaveProperty("maxFundingIdr");
+    expect(bundle.grants[0]).not.toHaveProperty("piName");
     expect(bundle.ideas.map((idea) => idea.id)).toEqual(["idea-public"]);
     expect(JSON.stringify(bundle)).not.toContain("catatan edisi rahasia");
     expect(JSON.stringify(bundle)).not.toContain("catatan venue rahasia");
+  });
+
+  it("profil publik tidak mengekspor email atau location", () => {
+    const bundle = buildPublicData(makePrivateSnapshot({ profile: makeProfile({ visibility: "public" }) }));
+    expect(bundle.profile).not.toBeNull();
+    expect(bundle.profile).not.toHaveProperty("email");
+    expect(bundle.profile).not.toHaveProperty("location");
   });
 
   it("profil privat menghasilkan null", () => {

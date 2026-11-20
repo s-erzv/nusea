@@ -47,7 +47,7 @@ export function PublishPage({ notify, refresh }: PublishPageProps) {
     if (!preview?.ok) return;
     if (
       !window.confirm(
-        "Commit changes in data/public to git? Make sure you have reviewed the public diff.",
+        "Commit public data? Make sure you have reviewed the diff.",
       )
     ) {
       return;
@@ -68,7 +68,7 @@ export function PublishPage({ notify, refresh }: PublishPageProps) {
   async function runPush() {
     if (
       !window.confirm(
-        "Push the commit to the remote? Netlify will rebuild the site from this commit.",
+        "Trigger the Netlify build hook now?",
       )
     ) {
       return;
@@ -92,15 +92,15 @@ export function PublishPage({ notify, refresh }: PublishPageProps) {
       <PageHeader
         kicker="Publish / Gate"
         title="Publish data"
-        description="Preview runs publish:data, a production build, and check:leak. Commit and push are separate and always require confirmation."
+        description="Preview builds the public bundle and checks for leaks. Online mode commits data/public through the GitHub API, then triggers the Netlify build hook."
       />
 
       <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {[
           ["1", "Export", "Only public items are copied"],
-          ["2", "Build + leak", "Failure blocks the commit"],
-          ["3", "Commit", "data/public only"],
-          ["4", "Push", "Triggers the Netlify build"],
+          ["2", "Leak check", "Failure blocks the commit"],
+          ["3", "Commit", "GitHub data/public only"],
+          ["4", "Deploy", "Triggers the Netlify hook"],
         ].map(([number, title, detail]) => (
           <div key={number} className="border-[3px] border-line bg-card p-3">
             <p className="font-pixel text-[13px] text-orange">{number}</p>
@@ -121,7 +121,7 @@ export function PublishPage({ notify, refresh }: PublishPageProps) {
             {step === "previewing" ? "RUNNING…" : "RUN PREVIEW"}
           </button>
           <p className="text-[15px] text-muted">
-            This can take 1–3 minutes because it runs typecheck, build, and leak check.
+            Online mode compares the generated bundle with GitHub. Local mode runs the full build and leak check.
           </p>
         </div>
 
@@ -187,10 +187,10 @@ export function PublishPage({ notify, refresh }: PublishPageProps) {
             disabled={!preview?.ok || step === "committing" || step === "pushing" || step === "committed" || step === "done"}
             onClick={() => void runCommit()}
           >
-            {step === "committing" ? "COMMIT…" : "COMMIT DATA"}
+            {step === "committing" ? "COMMIT…" : "COMMIT PUBLIC DATA"}
           </button>
           <p className="mt-2 text-[15px] text-muted">
-            Only public data is staged and committed. Private data stays on this machine.
+            Only public data is committed. Private fields never leave the allowlist.
           </p>
           {commitResult ? (
             <pre className="admin-pre mt-3">{commitResult.output}</pre>
@@ -206,10 +206,10 @@ export function PublishPage({ notify, refresh }: PublishPageProps) {
             disabled={!commitResult?.ok || step === "pushing" || step === "done"}
             onClick={() => void runPush()}
           >
-            {step === "pushing" ? "PUSH…" : "PUSH COMMIT"}
+            {step === "pushing" ? "PUSH…" : "TRIGGER DEPLOY"}
           </button>
           <p className="mt-2 text-[15px] text-muted">
-            Push triggers a Netlify deploy. Do not push until you have reviewed the public diff.
+            The hook starts a Netlify deploy from the committed public data.
           </p>
           {pushResult ? <pre className="admin-pre mt-3">{pushResult.output}</pre> : null}
         </Panel>

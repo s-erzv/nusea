@@ -33,15 +33,14 @@ export interface AdminData {
 export type AdminTab =
   | "dashboard"
   | "items"
+  | "tracker"
   | "kanban"
   | "assets"
   | "sources"
   | "grants"
   | "ideas"
   | "tasks"
-  | "venues"
   | "profile"
-  | "data"
   | "publish";
 
 export interface BackupEntry {
@@ -64,6 +63,11 @@ export interface PublishPreview {
   diff: string;
   status: string;
   stat: string;
+  files?: Array<{
+    path: string;
+    status: "added" | "modified" | "unchanged";
+    sha?: string;
+  }>;
   error?: string;
 }
 

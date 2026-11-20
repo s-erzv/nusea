@@ -1,27 +1,27 @@
 import path from "node:path";
-import { readFile } from "node:fs/promises";
-import { fileSchemas } from "../shared/schemas";
+import { createStore } from "../admin/server/create-store";
 import { buildPublicData, type PrivateSnapshot } from "../shared/public-data";
 import { atomicWriteJson } from "./lib/io";
 
-const privateDir = path.join(process.cwd(), "data", "private");
+process.env.NUSEA_APP_NAME = process.env.NUSEA_APP_NAME ?? "nusea-publish";
+
 const publicDir = path.join(process.cwd(), "data", "public");
 
-async function readPrivateFile(name: keyof typeof fileSchemas): Promise<unknown> {
-  const raw = await readFile(path.join(privateDir, `${name}.json`), "utf8");
-  return fileSchemas[name].parse(JSON.parse(raw));
-}
-
 export async function readPrivateSnapshot(): Promise<PrivateSnapshot> {
-  const [profile, items, assets, venues, grants, ideas] = await Promise.all([
-    readPrivateFile("profile"),
-    readPrivateFile("items"),
-    readPrivateFile("assets"),
-    readPrivateFile("venues"),
-    readPrivateFile("grants"),
-    readPrivateFile("ideas"),
-  ]);
-  return { profile, items, assets, venues, grants, ideas } as PrivateSnapshot;
+  const store = createStore(process.cwd());
+  try {
+    const all = await store.readAll();
+    return {
+      profile: all.profile,
+      items: all.items,
+      assets: all.assets,
+      venues: all.venues,
+      grants: all.grants,
+      ideas: all.ideas,
+    };
+  } finally {
+    await store.close();
+  }
 }
 
 async function main() {
