@@ -1145,3 +1145,103 @@ a.tracker-link-chip:hover,
 .sheet-doc-btn {
   border-radius: 6px;
 }
+
+.sheet th:nth-child(13),
+.sheet td:nth-child(13) {
+  width: 96px;
+}
+
+.sheet-del-btn {
+  width: 100%;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--danger);
+  padding: 3px 4px;
+  font-family: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.sheet-del-btn:hover:not(:disabled) {
+  background: var(--danger);
+  color: #ffffff;
+}
+
+.sheet-del-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.admin-icon-btn {
+  display: inline-flex;
+  width: 42px;
+  min-width: 42px;
+  height: 42px;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.admin-icon-btn svg {
+  flex: 0 0 auto;
+}
+
+.sheet-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 1px;
+}
+
+.sheet-icon-btn {
+  display: inline-flex;
+  min-width: 30px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+  padding: 0 3px;
+  cursor: pointer;
+}
+
+.sheet-icon-btn span {
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.sheet-icon-btn:hover:not(:disabled),
+.sheet-icon-btn[data-open="true"] {
+  border-color: var(--line);
+  background: var(--yellow);
+  color: #14213d;
+}
+
+.sheet-icon-btn.is-danger {
+  color: var(--danger);
+}
+
+.sheet-icon-btn.is-danger:hover:not(:disabled) {
+  border-color: var(--danger);
+  background: var(--danger);
+  color: #ffffff;
+}
+
+.sheet-icon-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.sheet th:nth-child(13),
+.sheet td:nth-child(13) {
+  width: 82px;
+}

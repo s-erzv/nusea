@@ -15,6 +15,7 @@ import {
 } from "../../shared/constants";
 import type { Asset, ResearchItem } from "../../shared/schemas";
 import { AdminEmpty, PageHeader } from "../components/layout";
+import { PaperclipIcon, PlusIcon, TrashIcon } from "../components/icons";
 import { adminApi, ApiError } from "../lib/api";
 import type { AdminData, Notify, SaveEntity } from "../lib/types";
 import { formatDate, nowIso, uid } from "../lib/helpers";
@@ -133,7 +134,7 @@ const COLUMNS = [
   "Link",
   "Sumber data",
   "Catatan",
-  "Dokumen",
+  "Aksi",
 ];
 
 export function TrackerPage({
@@ -193,6 +194,88 @@ export function TrackerPage({
     sortKey,
     sortDir,
   ]);
+
+  async function addItem() {
+    if (busy) return;
+    const now = nowIso();
+    const numbers = data.items
+      .map((item) => /^T(\d+)$/.exec(item.trackerId)?.[1])
+      .filter((value): value is string => Boolean(value))
+      .map(Number);
+    const nextNumber = String(Math.max(0, ...numbers) + 1).padStart(2, "0");
+    const item: ResearchItem = {
+      id: uid("riset"),
+      createdAt: now,
+      updatedAt: now,
+      visibility: "private",
+      title: "Penelitian baru",
+      type: "paper_jurnal",
+      status: "ide",
+      stageNote: "",
+      abstract: "",
+      keywords: [],
+      authors: data.profile.name ? [data.profile.name] : [],
+      advisors: [],
+      venueId: "",
+      submittedAt: "",
+      decisionAt: "",
+      publishedAt: "",
+      doi: "",
+      publicUrl: "",
+      priority: "medium",
+      progressPct: 0,
+      pinned: false,
+      submitChecklist: { plagiarismChecked: false, finalFileReady: false },
+      trackerId: `T${nextNumber}`,
+      role: "penulis_1",
+      researchKind: "belum_dicatat",
+      targetVenue: "",
+      targetDate: "",
+      nextStep: "",
+      dataSource: "belum_dicatat",
+      link: "",
+      notes: "",
+    };
+    setBusy(item.id);
+    try {
+      await saveEntity("items", [...data.items, item]);
+      setOpenId(item.id);
+      notify("Penelitian baru dibuat. Ganti judul dan isi kolomnya.");
+    } catch (error) {
+      notify(
+        error instanceof Error ? error.message : "Gagal menambah penelitian.",
+        "error",
+      );
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function removeItem(item: ResearchItem) {
+    if (
+      !window.confirm(
+        `Hapus "${item.title}"? Backup data tetap dibuat di Neon.`,
+      )
+    ) {
+      return;
+    }
+    setBusy(item.id);
+    try {
+      await saveEntity(
+        "items",
+        data.items.filter((entry) => entry.id !== item.id),
+      );
+      if (openId === item.id) setOpenId(null);
+      notify("Penelitian dihapus.");
+    } catch (error) {
+      notify(
+        error instanceof Error ? error.message : "Gagal menghapus penelitian.",
+        "error",
+      );
+    } finally {
+      setBusy(null);
+    }
+  }
 
   function assetsFor(itemId: string): Asset[] {
     return data.assets.filter((asset) => asset.itemIds.includes(itemId));
@@ -311,7 +394,18 @@ export function TrackerPage({
         title="Tracker penelitian"
         description="Spreadsheet semua paper. Klik sel untuk edit, Enter untuk simpan. Tombol Dokumen membuka link dan file tiap baris."
         actions={
-          <div className="tracker-view-toggle">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              className="admin-icon-btn"
+              onClick={() => void addItem()}
+              disabled={Boolean(busy)}
+              aria-label="Tambah penelitian"
+              title="Tambah penelitian"
+            >
+              <PlusIcon size={20} />
+            </button>
+            <div className="tracker-view-toggle">
             <button
               type="button"
               data-active={view === "sheet"}
@@ -326,6 +420,7 @@ export function TrackerPage({
             >
               KANBAN
             </button>
+          </div>
           </div>
         }
       />
@@ -614,15 +709,30 @@ export function TrackerPage({
                             />
                           </td>
                           <td className="sheet-col-docs">
-                            <button
-                              type="button"
-                              className="sheet-doc-btn"
-                              data-open={isOpen}
-                              onClick={() => setOpenId(isOpen ? null : item.id)}
-                              aria-expanded={isOpen}
-                            >
-                              📎 {linkCount}
-                            </button>
+                            <div className="sheet-actions">
+                              <button
+                                type="button"
+                                className="sheet-icon-btn"
+                                data-open={isOpen}
+                                onClick={() => setOpenId(isOpen ? null : item.id)}
+                                aria-expanded={isOpen}
+                                aria-label={`Dokumen ${item.title}`}
+                                title="Dokumen dan link"
+                              >
+                                <PaperclipIcon />
+                                <span>{linkCount}</span>
+                              </button>
+                              <button
+                                type="button"
+                                className="sheet-icon-btn is-danger"
+                                onClick={() => void removeItem(item)}
+                                disabled={busy === item.id}
+                                aria-label={`Hapus ${item.title}`}
+                                title="Hapus penelitian"
+                              >
+                                <TrashIcon />
+                              </button>
+                            </div>
                           </td>
                         </tr>
 
@@ -746,12 +856,14 @@ export function TrackerPage({
                                   </select>
                                   <button
                                     type="submit"
-                                    className="pixel-btn"
+                                    className="pixel-btn admin-icon-btn"
                                     disabled={
                                       busy === item.id || !assetDraft.url.trim()
                                     }
+                                    aria-label="Tambah dokumen"
+                                    title="Tambah dokumen"
                                   >
-                                    + TAMBAH
+                                    <PlusIcon size={20} />
                                   </button>
                                 </form>
                               </div>
