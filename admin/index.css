@@ -655,7 +655,7 @@ body {
 
 @media (min-width: 1100px) {
   .sheet-toolbar {
-    grid-template-columns: minmax(200px, 2fr) repeat(4, minmax(115px, 1fr)) minmax(125px, 1fr) auto;
+    grid-template-columns: minmax(200px, 2fr) repeat(3, minmax(115px, 1fr)) minmax(125px, 1fr) auto;
   }
 }
 
@@ -732,21 +732,21 @@ body {
 .sheet th:nth-child(5),
 .sheet td:nth-child(5) { width: 112px; }
 .sheet th:nth-child(6),
-.sheet td:nth-child(6) { width: 220px; }
+.sheet td:nth-child(6) { width: 136px; }
 .sheet th:nth-child(7),
-.sheet td:nth-child(7) { width: 210px; }
+.sheet td:nth-child(7) { width: 220px; }
 .sheet th:nth-child(8),
-.sheet td:nth-child(8) { width: 124px; }
+.sheet td:nth-child(8) { width: 210px; }
 .sheet th:nth-child(9),
-.sheet td:nth-child(9) { width: 220px; }
+.sheet td:nth-child(9) { width: 124px; }
 .sheet th:nth-child(10),
-.sheet td:nth-child(10) { width: 210px; }
+.sheet td:nth-child(10) { width: 220px; }
 .sheet th:nth-child(11),
-.sheet td:nth-child(11) { width: 126px; }
+.sheet td:nth-child(11) { width: 210px; }
 .sheet th:nth-child(12),
 .sheet td:nth-child(12) { width: 280px; }
 .sheet th:nth-child(13),
-.sheet td:nth-child(13) { width: 72px; }
+.sheet td:nth-child(13) { width: 82px; }
 
 .sheet-sticky {
   position: sticky;
@@ -839,22 +839,6 @@ select.sheet-input {
 
 .sheet-col-docs {
   text-align: center;
-}
-
-.sheet-doc-btn {
-  min-height: 30px;
-  width: 100%;
-  border: 0;
-  background: transparent;
-  color: var(--ink);
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.sheet-doc-btn:hover,
-.sheet-doc-btn[data-open="true"] {
-  background: var(--yellow);
-  color: #14213d;
 }
 
 .sheet-detail-row > td {
@@ -1140,39 +1124,6 @@ a.tracker-link-chip:hover,
 .pixel-btn,
 .admin-mini-btn {
   border-radius: 6px;
-}
-
-.sheet-doc-btn {
-  border-radius: 6px;
-}
-
-.sheet th:nth-child(13),
-.sheet td:nth-child(13) {
-  width: 96px;
-}
-
-.sheet-del-btn {
-  width: 100%;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--danger);
-  padding: 3px 4px;
-  font-family: "Poppins", ui-sans-serif, system-ui, sans-serif;
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  cursor: pointer;
-}
-
-.sheet-del-btn:hover:not(:disabled) {
-  background: var(--danger);
-  color: #ffffff;
-}
-
-.sheet-del-btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
 }
 
 .admin-icon-btn {

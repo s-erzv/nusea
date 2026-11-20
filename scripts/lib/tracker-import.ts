@@ -1,6 +1,7 @@
 import {
   type DataSource,
   type ItemRole,
+  type ResearchCategory,
   type ResearchKind,
   type ResearchStatus,
 } from "../../shared/constants";
@@ -216,10 +217,19 @@ export function buildAuthors(
   return self ? [self, ...co] : co;
 }
 
+function inferCategory(kind: ResearchKind): ResearchCategory {
+  if (kind === "proposal_hibah") return "hibah";
+  if (kind === "tugas_kuliah") return "tugas_kuliah";
+  if (kind === "tugas_akhir") return "tugas_akhir";
+  if (kind === "belum_dicatat") return "belum_dicatat";
+  return "penelitian_pribadi";
+}
+
 export function mapRow(row: TrackerRow, profileName: string): {
   status: ResearchStatus;
   role: ItemRole;
   researchKind: ResearchKind;
+  researchCategory: ResearchCategory;
   dataSource: DataSource;
   authors: string[];
 } {
@@ -234,6 +244,7 @@ export function mapRow(row: TrackerRow, profileName: string): {
     status,
     role,
     researchKind,
+    researchCategory: inferCategory(researchKind),
     dataSource,
     authors: buildAuthors(role, parseCoAuthors(row.coAuthorsRaw), profileName),
   };
@@ -284,6 +295,7 @@ function buildNewItem(
     trackerId: row.sheetId,
     role: mapped.role,
     researchKind: mapped.researchKind,
+    researchCategory: mapped.researchCategory,
     targetVenue: row.targetVenue,
     targetDate,
     nextStep: row.nextStep,
@@ -329,6 +341,7 @@ export function buildTrackerPlan(
       trackerId: row.sheetId,
       role: mapped.role,
       researchKind: mapped.researchKind,
+      researchCategory: mapped.researchCategory,
       targetVenue: row.targetVenue,
       targetDate: normalizeTrackerDate(row.dateRaw),
       nextStep: row.nextStep,
@@ -375,6 +388,7 @@ const TRACKED_FIELDS: Array<keyof ResearchItem> = [
   "trackerId",
   "role",
   "researchKind",
+  "researchCategory",
   "targetVenue",
   "targetDate",
   "nextStep",

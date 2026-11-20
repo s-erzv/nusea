@@ -71,11 +71,13 @@ describe("impor tracker", () => {
       status: "published",
       role: "penulis_1",
       researchKind: "slr",
+      researchCategory: "penelitian_pribadi",
       dataSource: "terverifikasi_publik",
     });
     const t03 = plan.next.find((item) => item.id === "t03-cobit-2019-audit-prioritas");
     expect(t03).toMatchObject({
       status: "ide",
+      researchCategory: "penelitian_pribadi",
       dataSource: "perlu_dicek",
       visibility: "private",
     });

@@ -3,10 +3,10 @@ import {
   ALL_STATUSES,
   ASSET_KINDS,
   ASSET_KIND_LABELS,
-  DATA_SOURCE_LABELS,
-  DATA_SOURCES,
   ITEM_ROLES,
   ITEM_ROLE_LABELS,
+  RESEARCH_CATEGORIES,
+  RESEARCH_CATEGORY_LABELS,
   RESEARCH_KINDS,
   RESEARCH_KIND_LABELS,
   STATUS_LABELS,
@@ -127,12 +127,12 @@ const COLUMNS = [
   "Peran saya",
   "Status",
   "Jenis",
+  "Kategori",
   "Target jurnal / venue",
   "Co-author (urutan)",
   "Terbit / tenggat",
   "Langkah berikutnya",
   "Link",
-  "Sumber data",
   "Catatan",
   "Aksi",
 ];
@@ -149,7 +149,6 @@ export function TrackerPage({
   const [statusFilter, setStatusFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
   const [kindFilter, setKindFilter] = useState("all");
-  const [sourceFilter, setSourceFilter] = useState("all");
   const [sortKey, setSortKey] = useState<SortKey>("trackerId");
   const [sortDir, setSortDir] = useState<1 | -1>(1);
   const [openId, setOpenId] = useState<string | null>(null);
@@ -175,9 +174,6 @@ export function TrackerPage({
       .filter(
         (item) => kindFilter === "all" || item.researchKind === kindFilter,
       )
-      .filter(
-        (item) => sourceFilter === "all" || item.dataSource === sourceFilter,
-      )
       .sort(
         (a, b) =>
           sortValue(a, sortKey).localeCompare(sortValue(b, sortKey), "id", {
@@ -190,7 +186,6 @@ export function TrackerPage({
     statusFilter,
     roleFilter,
     kindFilter,
-    sourceFilter,
     sortKey,
     sortDir,
   ]);
@@ -229,6 +224,7 @@ export function TrackerPage({
       trackerId: `T${nextNumber}`,
       role: "penulis_1",
       researchKind: "belum_dicatat",
+      researchCategory: "belum_dicatat",
       targetVenue: "",
       targetDate: "",
       nextStep: "",
@@ -484,19 +480,6 @@ export function TrackerPage({
             </select>
             <select
               className="pixel-input admin-input"
-              value={sourceFilter}
-              onChange={(event) => setSourceFilter(event.target.value)}
-              aria-label="Filter sumber data"
-            >
-              <option value="all">Semua sumber</option>
-              {DATA_SOURCES.map((source) => (
-                <option key={source} value={source}>
-                  {DATA_SOURCE_LABELS[source]}
-                </option>
-              ))}
-            </select>
-            <select
-              className="pixel-input admin-input"
               value={sortKey}
               onChange={(event) => setSortKey(event.target.value as SortKey)}
               aria-label="Urutkan"
@@ -535,10 +518,7 @@ export function TrackerPage({
                     const linkCount = assets.length + (item.link ? 1 : 0);
                     return (
                       <Fragment key={item.id}>
-                        <tr
-                          data-unverified={item.dataSource === "perlu_dicek"}
-                          data-busy={busy === item.id}
-                        >
+                        <tr data-busy={busy === item.id}>
                           <td
                             className="sheet-sticky sheet-col-id"
                             title={item.trackerId || item.id}
@@ -618,6 +598,27 @@ export function TrackerPage({
                             </select>
                           </td>
                           <td>
+                            <select
+                              className="sheet-input"
+                              data-value={item.researchCategory}
+                              value={item.researchCategory}
+                              disabled={busy === item.id}
+                              onChange={(event) =>
+                                void saveFields(item, {
+                                  researchCategory: event.target
+                                    .value as ResearchItem["researchCategory"],
+                                })
+                              }
+                              aria-label={`Kategori ${item.title}`}
+                            >
+                              {RESEARCH_CATEGORIES.map((category) => (
+                                <option key={category} value={category}>
+                                  {RESEARCH_CATEGORY_LABELS[category]}
+                                </option>
+                              ))}
+                            </select>
+                          </td>
+                          <td>
                             <CellInput
                               value={item.targetVenue}
                               onCommit={(next) =>
@@ -678,27 +679,6 @@ export function TrackerPage({
                                 buka ↗
                               </a>
                             ) : null}
-                          </td>
-                          <td>
-                            <select
-                              className="sheet-input"
-                              data-value={item.dataSource}
-                              value={item.dataSource}
-                              disabled={busy === item.id}
-                              onChange={(event) =>
-                                void saveFields(item, {
-                                  dataSource: event.target
-                                    .value as ResearchItem["dataSource"],
-                                })
-                              }
-                              aria-label={`Sumber data ${item.title}`}
-                            >
-                              {DATA_SOURCES.map((source) => (
-                                <option key={source} value={source}>
-                                  {DATA_SOURCE_LABELS[source]}
-                                </option>
-                              ))}
-                            </select>
                           </td>
                           <td>
                             <CellArea

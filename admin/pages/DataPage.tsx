@@ -56,10 +56,10 @@ const ITEM_COLUMNS = [
   "trackerId",
   "role",
   "researchKind",
+  "researchCategory",
   "targetVenue",
   "targetDate",
   "nextStep",
-  "dataSource",
   "link",
   "notes",
 ];
@@ -246,6 +246,9 @@ export function DataPage({ data, saveEntity, notify, refresh }: DataPageProps) {
       researchKind: (record.researchKind ||
         existing?.researchKind ||
         "belum_dicatat") as ResearchItem["researchKind"],
+      researchCategory: (record.researchCategory ||
+        existing?.researchCategory ||
+        "belum_dicatat") as ResearchItem["researchCategory"],
       targetVenue: record.targetVenue ?? existing?.targetVenue ?? "",
       targetDate: record.targetDate ?? existing?.targetDate ?? "",
       nextStep: record.nextStep ?? existing?.nextStep ?? "",

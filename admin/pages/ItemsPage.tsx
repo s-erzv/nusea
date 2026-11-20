@@ -75,6 +75,7 @@ export function ItemsPage({ data, saveEntity, notify }: ItemsPageProps) {
       trackerId: "",
       role: "belum_dicatat",
       researchKind: "belum_dicatat",
+      researchCategory: "belum_dicatat",
       targetVenue: "",
       targetDate: "",
       nextStep: "",

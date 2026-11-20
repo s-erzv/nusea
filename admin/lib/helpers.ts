@@ -19,6 +19,8 @@ import {
   PIPELINE_STATUSES,
   PRIORITIES,
   PRIORITY_LABELS,
+  RESEARCH_CATEGORIES,
+  RESEARCH_CATEGORY_LABELS,
   RESEARCH_KINDS,
   RESEARCH_KIND_LABELS,
   STATUS_LABELS,
@@ -179,6 +181,11 @@ export const roleOptions = ITEM_ROLES.map((role) => ({
 export const researchKindOptions = RESEARCH_KINDS.map((kind) => ({
   value: kind,
   label: RESEARCH_KIND_LABELS[kind],
+}));
+
+export const researchCategoryOptions = RESEARCH_CATEGORIES.map((category) => ({
+  value: category,
+  label: RESEARCH_CATEGORY_LABELS[category],
 }));
 
 export const dataSourceOptions = DATA_SOURCES.map((source) => ({

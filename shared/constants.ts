@@ -310,6 +310,28 @@ export const RESEARCH_KIND_LABELS: Record<ResearchKind, string> = {
   belum_dicatat: "Belum dicatat",
 };
 
+export const RESEARCH_CATEGORIES = [
+  "tugas_kuliah",
+  "penelitian_pribadi",
+  "hibah",
+  "tugas_akhir",
+  "kolaborasi",
+  "lainnya",
+  "belum_dicatat",
+] as const;
+
+export type ResearchCategory = (typeof RESEARCH_CATEGORIES)[number];
+
+export const RESEARCH_CATEGORY_LABELS: Record<ResearchCategory, string> = {
+  tugas_kuliah: "Tugas kuliah",
+  penelitian_pribadi: "Penelitian pribadi",
+  hibah: "Hibah",
+  tugas_akhir: "Tugas akhir",
+  kolaborasi: "Kolaborasi",
+  lainnya: "Lainnya",
+  belum_dicatat: "Belum dicatat",
+};
+
 export const DATA_SOURCES = [
   "terverifikasi_publik",
   "catatan_obrolan",

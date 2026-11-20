@@ -57,6 +57,7 @@ export function makeItem(overrides: Partial<ResearchItem> = {}): ResearchItem {
     trackerId: "",
     role: "belum_dicatat",
     researchKind: "belum_dicatat",
+    researchCategory: "belum_dicatat",
     targetVenue: "",
     targetDate: "",
     nextStep: "",
