@@ -1,8 +1,9 @@
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import {
   ALL_STATUSES,
   ASSET_KINDS,
   ASSET_KIND_LABELS,
+  DEFAULT_PUBLIC_ITEM_FIELDS,
   ITEM_ROLES,
   ITEM_ROLE_LABELS,
   RESEARCH_CATEGORIES,
@@ -13,9 +14,12 @@ import {
   type AssetKind,
   type ResearchStatus,
 } from "../../shared/constants";
-import type { Asset, ResearchItem } from "../../shared/schemas";
+import { itemSchema, type Asset, type ResearchItem } from "../../shared/schemas";
 import { AdminEmpty, PageHeader } from "../components/layout";
-import { PaperclipIcon, PlusIcon, TrashIcon } from "../components/icons";
+import { Modal } from "../components/Modal";
+import { SchemaForm } from "../components/SchemaForm";
+import { PencilIcon, PaperclipIcon, PlusIcon, TrashIcon } from "../components/icons";
+import { itemFields } from "../forms/fields";
 import { adminApi, ApiError } from "../lib/api";
 import type { AdminData, Notify, SaveEntity } from "../lib/types";
 import { formatDate, nowIso, uid } from "../lib/helpers";
@@ -29,14 +33,27 @@ interface TrackerPageProps {
   saveEntity: SaveEntity;
 }
 
-type SortKey = "trackerId" | "title" | "status" | "targetDate" | "updatedAt";
+type SortKey =
+  | "manual"
+  | "trackerId"
+  | "title"
+  | "status"
+  | "targetDate"
+  | "updatedAt";
 
 function sortValue(item: ResearchItem, key: SortKey): string {
+  if (key === "manual") return "";
   if (key === "trackerId") return item.trackerId || item.id;
   if (key === "title") return item.title;
   if (key === "status") return String(ALL_STATUSES.indexOf(item.status));
   if (key === "targetDate") return item.targetDate;
   return item.updatedAt;
+}
+
+const BOTTOM_STATUSES = new Set<ResearchStatus>(["ditinggalkan", "diabaikan"]);
+
+function bottomRank(item: ResearchItem): number {
+  return BOTTOM_STATUSES.has(item.status) ? 1 : 0;
 }
 
 function splitAuthors(value: string): string[] {
@@ -63,18 +80,24 @@ function CellInput({
   value,
   onCommit,
   placeholder,
+  disabled,
 }: {
   value: string;
   onCommit: (next: string) => void;
   placeholder?: string;
+  disabled?: boolean;
 }) {
   const [draft, setDraft] = useState(value);
+  useEffect(() => {
+    setDraft(value);
+  }, [value]);
   return (
     <input
       className="sheet-input"
       value={draft}
       placeholder={placeholder}
       title={value}
+      disabled={disabled}
       onChange={(event) => setDraft(event.target.value)}
       onBlur={() => {
         if (draft.trim() !== value) onCommit(draft.trim());
@@ -93,17 +116,23 @@ function CellInput({
 function CellArea({
   value,
   onCommit,
+  disabled,
 }: {
   value: string;
   onCommit: (next: string) => void;
+  disabled?: boolean;
 }) {
   const [draft, setDraft] = useState(value);
+  useEffect(() => {
+    setDraft(value);
+  }, [value]);
   return (
     <textarea
       className="sheet-input sheet-area"
       rows={2}
       value={draft}
       title={value}
+      disabled={disabled}
       onChange={(event) => setDraft(event.target.value)}
       onBlur={() => {
         if (draft.trim() !== value) onCommit(draft.trim());
@@ -149,7 +178,7 @@ export function TrackerPage({
   const [statusFilter, setStatusFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
   const [kindFilter, setKindFilter] = useState("all");
-  const [sortKey, setSortKey] = useState<SortKey>("trackerId");
+  const [sortKey, setSortKey] = useState<SortKey>("manual");
   const [sortDir, setSortDir] = useState<1 | -1>(1);
   const [openId, setOpenId] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -158,6 +187,19 @@ export function TrackerPage({
     url: "",
     kind: "drive" as AssetKind,
   });
+  const [editDraft, setEditDraft] = useState<ResearchItem | null>(null);
+  const [editErrors, setEditErrors] = useState<Record<string, string>>({});
+  const [editSaving, setEditSaving] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<ResearchItem | null>(null);
+  const [pendingAssetDelete, setPendingAssetDelete] = useState<Asset | null>(
+    null,
+  );
+  const [deleteBusy, setDeleteBusy] = useState(false);
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [dropHint, setDropHint] = useState<{
+    id: string;
+    after: boolean;
+  } | null>(null);
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -174,12 +216,15 @@ export function TrackerPage({
       .filter(
         (item) => kindFilter === "all" || item.researchKind === kindFilter,
       )
-      .sort(
-        (a, b) =>
+      .sort((a, b) => {
+        const bottom = bottomRank(a) - bottomRank(b);
+        if (bottom !== 0) return bottom;
+        return (
           sortValue(a, sortKey).localeCompare(sortValue(b, sortKey), "id", {
             numeric: true,
-          }) * sortDir,
-      );
+          }) * sortDir
+        );
+      });
   }, [
     data.items,
     query,
@@ -189,6 +234,8 @@ export function TrackerPage({
     sortKey,
     sortDir,
   ]);
+
+  const locked = Boolean(busy) || deleteBusy || editSaving;
 
   async function addItem() {
     if (busy) return;
@@ -231,6 +278,8 @@ export function TrackerPage({
       dataSource: "belum_dicatat",
       link: "",
       notes: "",
+      detail: "",
+      publicFields: [...DEFAULT_PUBLIC_ITEM_FIELDS],
     };
     setBusy(item.id);
     try {
@@ -247,14 +296,14 @@ export function TrackerPage({
     }
   }
 
-  async function removeItem(item: ResearchItem) {
-    if (
-      !window.confirm(
-        `Hapus "${item.title}"? Backup data tetap dibuat di Neon.`,
-      )
-    ) {
-      return;
-    }
+  function removeItem(item: ResearchItem) {
+    setPendingDelete(item);
+  }
+
+  async function confirmRemoveItem() {
+    if (!pendingDelete || deleteBusy) return;
+    const item = pendingDelete;
+    setDeleteBusy(true);
     setBusy(item.id);
     try {
       await saveEntity(
@@ -262,13 +311,83 @@ export function TrackerPage({
         data.items.filter((entry) => entry.id !== item.id),
       );
       if (openId === item.id) setOpenId(null);
-      notify("Penelitian dihapus.");
+      setPendingDelete(null);
+      notify("Penelitian dihapus. Backup tetap dibuat di Neon.");
     } catch (error) {
       notify(
         error instanceof Error ? error.message : "Gagal menghapus penelitian.",
         "error",
       );
     } finally {
+      setDeleteBusy(false);
+      setBusy(null);
+    }
+  }
+
+  function startEdit(item: ResearchItem) {
+    setEditErrors({});
+    setEditDraft({ ...item });
+  }
+
+  async function reorderItems(
+    movedId: string,
+    targetId: string,
+    after: boolean,
+  ) {
+    if (busy || deleteBusy || editSaving || movedId === targetId) return;
+    const next = [...data.items];
+    const from = next.findIndex((entry) => entry.id === movedId);
+    if (from === -1) return;
+    const [moved] = next.splice(from, 1);
+    const targetIndex = next.findIndex((entry) => entry.id === targetId);
+    if (!moved || targetIndex === -1) return;
+    next.splice(targetIndex + (after ? 1 : 0), 0, moved);
+
+    setSortKey("manual");
+    setBusy(movedId);
+    try {
+      await saveEntity("items", next);
+      notify("Urutan penelitian disimpan.");
+    } catch (error) {
+      notify(
+        error instanceof Error ? error.message : "Gagal menyimpan urutan.",
+        "error",
+      );
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function saveEdit() {
+    if (!editDraft || editSaving || busy) return;
+    const candidate = { ...editDraft, updatedAt: nowIso() };
+    const parsed = itemSchema.safeParse(candidate);
+    if (!parsed.success) {
+      const errors: Record<string, string> = {};
+      for (const issue of parsed.error.issues) {
+        errors[issue.path.join(".")] = issue.message;
+      }
+      setEditErrors(errors);
+      notify("Ada isian yang belum valid. Cek kolom yang ditandai.", "error");
+      return;
+    }
+    setEditSaving(true);
+    setBusy(parsed.data.id);
+    try {
+      const next = data.items.map((entry) =>
+        entry.id === parsed.data.id ? parsed.data : entry,
+      );
+      await saveEntity("items", next);
+      setEditDraft(null);
+      setEditErrors({});
+      notify("Perubahan penelitian disimpan.");
+    } catch (error) {
+      notify(
+        error instanceof Error ? error.message : "Gagal menyimpan perubahan.",
+        "error",
+      );
+    } finally {
+      setEditSaving(false);
       setBusy(null);
     }
   }
@@ -365,21 +484,28 @@ export function TrackerPage({
     }
   }
 
-  async function removeAsset(asset: Asset) {
-    if (!window.confirm(`Hapus dokumen "${asset.label}"? Backup tetap dibuat.`)) {
-      return;
-    }
+  function removeAsset(asset: Asset) {
+    setPendingAssetDelete(asset);
+  }
+
+  async function confirmRemoveAsset() {
+    if (!pendingAssetDelete || deleteBusy) return;
+    const asset = pendingAssetDelete;
+    setDeleteBusy(true);
     try {
       await saveEntity(
         "assets",
         data.assets.filter((entry) => entry.id !== asset.id),
       );
-      notify("Dokumen dihapus.");
+      setPendingAssetDelete(null);
+      notify("Dokumen dihapus. Backup tetap dibuat.");
     } catch (error) {
       notify(
         error instanceof Error ? error.message : "Gagal menghapus dokumen.",
         "error",
       );
+    } finally {
+      setDeleteBusy(false);
     }
   }
 
@@ -484,6 +610,7 @@ export function TrackerPage({
               onChange={(event) => setSortKey(event.target.value as SortKey)}
               aria-label="Urutkan"
             >
+              <option value="manual">Urut: Manual (drag)</option>
               <option value="trackerId">Urut: ID</option>
               <option value="title">Urut: Judul</option>
               <option value="status">Urut: Status</option>
@@ -494,6 +621,12 @@ export function TrackerPage({
               type="button"
               className="pixel-btn pixel-btn-ghost admin-topbar-btn"
               onClick={() => setSortDir((dir) => (dir === 1 ? -1 : 1))}
+              disabled={sortKey === "manual"}
+              title={
+                sortKey === "manual"
+                  ? "Urutan manual diatur lewat drag and drop"
+                  : undefined
+              }
             >
               {sortDir === 1 ? "A→Z" : "Z→A"}
             </button>
@@ -518,16 +651,89 @@ export function TrackerPage({
                     const linkCount = assets.length + (item.link ? 1 : 0);
                     return (
                       <Fragment key={item.id}>
-                        <tr data-busy={busy === item.id}>
+                        <tr
+                          data-busy={busy === item.id}
+                          data-drag={dragId === item.id ? "true" : undefined}
+                          data-drop={
+                            dropHint?.id === item.id
+                              ? dropHint.after
+                                ? "after"
+                                : "before"
+                              : undefined
+                          }
+                          onDragOver={(event) => {
+                            if (!dragId || dragId === item.id) return;
+                            event.preventDefault();
+                            const rect =
+                              event.currentTarget.getBoundingClientRect();
+                            const after =
+                              event.clientY > rect.top + rect.height / 2;
+                            if (
+                              dropHint?.id !== item.id ||
+                              dropHint.after !== after
+                            ) {
+                              setDropHint({ id: item.id, after });
+                            }
+                          }}
+                          onDragLeave={(event) => {
+                            if (
+                              event.currentTarget.contains(
+                                event.relatedTarget as Node | null,
+                              )
+                            ) {
+                              return;
+                            }
+                            if (dropHint?.id === item.id) setDropHint(null);
+                          }}
+                          onDrop={(event) => {
+                            event.preventDefault();
+                            const rect =
+                              event.currentTarget.getBoundingClientRect();
+                            const after =
+                              event.clientY > rect.top + rect.height / 2;
+                            const source =
+                              dragId ??
+                              event.dataTransfer.getData("text/plain");
+                            setDragId(null);
+                            setDropHint(null);
+                            if (source) {
+                              void reorderItems(source, item.id, after);
+                            }
+                          }}
+                        >
                           <td
                             className="sheet-sticky sheet-col-id"
                             title={item.trackerId || item.id}
                           >
-                            <span className="sheet-id">{rowIndex + 1}</span>
+                            <div className="sheet-id-cell">
+                              <button
+                                type="button"
+                                className="sheet-drag"
+                                draggable
+                                onDragStart={(event) => {
+                                  setDragId(item.id);
+                                  event.dataTransfer.effectAllowed = "move";
+                                  event.dataTransfer.setData(
+                                    "text/plain",
+                                    item.id,
+                                  );
+                                }}
+                                onDragEnd={() => {
+                                  setDragId(null);
+                                  setDropHint(null);
+                                }}
+                                aria-label={`Geser urutan ${item.title}`}
+                                title="Drag untuk atur urutan"
+                              >
+                                ⠿
+                              </button>
+                              <span className="sheet-id">{rowIndex + 1}</span>
+                            </div>
                           </td>
                           <td className="sheet-sticky sheet-col-title">
                             <CellArea
                               value={item.title}
+                              disabled={locked}
                               onCommit={(next) =>
                                 next && next !== item.title
                                   ? void saveFields(item, { title: next })
@@ -540,7 +746,7 @@ export function TrackerPage({
                               className="sheet-input"
                               data-value={item.role}
                               value={item.role}
-                              disabled={busy === item.id}
+                              disabled={locked}
                               onChange={(event) =>
                                 void saveFields(item, {
                                   role: event.target.value as ResearchItem["role"],
@@ -560,7 +766,7 @@ export function TrackerPage({
                               className="sheet-input"
                               data-value={item.status}
                               value={item.status}
-                              disabled={busy === item.id}
+                              disabled={locked}
                               onChange={(event) =>
                                 void changeStatus(
                                   item,
@@ -581,7 +787,7 @@ export function TrackerPage({
                               className="sheet-input"
                               data-value={item.researchKind}
                               value={item.researchKind}
-                              disabled={busy === item.id}
+                              disabled={locked}
                               onChange={(event) =>
                                 void saveFields(item, {
                                   researchKind: event.target
@@ -602,7 +808,7 @@ export function TrackerPage({
                               className="sheet-input"
                               data-value={item.researchCategory}
                               value={item.researchCategory}
-                              disabled={busy === item.id}
+                              disabled={locked}
                               onChange={(event) =>
                                 void saveFields(item, {
                                   researchCategory: event.target
@@ -621,6 +827,7 @@ export function TrackerPage({
                           <td>
                             <CellInput
                               value={item.targetVenue}
+                              disabled={locked}
                               onCommit={(next) =>
                                 void saveFields(item, { targetVenue: next })
                               }
@@ -629,6 +836,7 @@ export function TrackerPage({
                           <td>
                             <CellInput
                               value={item.authors.join("; ")}
+                              disabled={locked}
                               onCommit={(next) =>
                                 void saveFields(item, {
                                   authors: splitAuthors(next),
@@ -641,7 +849,7 @@ export function TrackerPage({
                               type="date"
                               className="sheet-input"
                               value={item.targetDate}
-                              disabled={busy === item.id}
+                              disabled={locked}
                               onChange={(event) =>
                                 void saveFields(item, {
                                   targetDate: event.target.value,
@@ -656,6 +864,7 @@ export function TrackerPage({
                           <td>
                             <CellArea
                               value={item.nextStep}
+                              disabled={locked}
                               onCommit={(next) =>
                                 void saveFields(item, { nextStep: next })
                               }
@@ -664,6 +873,7 @@ export function TrackerPage({
                           <td>
                             <CellInput
                               value={item.link}
+                              disabled={locked}
                               placeholder="https://…"
                               onCommit={(next) =>
                                 void saveFields(item, { link: next })
@@ -683,6 +893,7 @@ export function TrackerPage({
                           <td>
                             <CellArea
                               value={item.notes}
+                              disabled={locked}
                               onCommit={(next) =>
                                 void saveFields(item, { notes: next })
                               }
@@ -690,6 +901,16 @@ export function TrackerPage({
                           </td>
                           <td className="sheet-col-docs">
                             <div className="sheet-actions">
+                              <button
+                                type="button"
+                                className="sheet-icon-btn"
+                                onClick={() => startEdit(item)}
+                                disabled={locked}
+                                aria-label={`Edit ${item.title}`}
+                                title="Edit penelitian"
+                              >
+                                <PencilIcon />
+                              </button>
                               <button
                                 type="button"
                                 className="sheet-icon-btn"
@@ -706,7 +927,7 @@ export function TrackerPage({
                                 type="button"
                                 className="sheet-icon-btn is-danger"
                                 onClick={() => void removeItem(item)}
-                                disabled={busy === item.id}
+                                disabled={locked}
                                 aria-label={`Hapus ${item.title}`}
                                 title="Hapus penelitian"
                               >
@@ -771,6 +992,7 @@ export function TrackerPage({
                                         type="button"
                                         className="tracker-link-remove"
                                         onClick={() => void removeAsset(asset)}
+                                        disabled={locked}
                                         aria-label={`Hapus ${asset.label}`}
                                       >
                                         ×
@@ -783,6 +1005,27 @@ export function TrackerPage({
                                       atau isi kolom Link.
                                     </p>
                                   ) : null}
+                                </div>
+
+                                <div className="tracker-story">
+                                  <div>
+                                    <p className="tracker-story-title">
+                                      Detail penelitian
+                                    </p>
+                                    <p className="tracker-muted">
+                                      {item.detail.trim()
+                                        ? `${item.detail.trim().length} karakter · tampil publik hanya kalau penelitian ini public.`
+                                        : "Belum ada cerita atau detail tambahan. Tulis lewat tombol edit."}
+                                    </p>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    className="admin-mini-btn"
+                                    onClick={() => startEdit(item)}
+                                    disabled={locked}
+                                  >
+                                    EDIT DETAIL
+                                  </button>
                                 </div>
 
                                 <form
@@ -838,7 +1081,7 @@ export function TrackerPage({
                                     type="submit"
                                     className="pixel-btn admin-icon-btn"
                                     disabled={
-                                      busy === item.id || !assetDraft.url.trim()
+                                      locked || !assetDraft.url.trim()
                                     }
                                     aria-label="Tambah dokumen"
                                     title="Tambah dokumen"
@@ -859,6 +1102,126 @@ export function TrackerPage({
           )}
         </>
       )}
+
+      <Modal
+        open={Boolean(editDraft)}
+        title={editDraft ? `Edit: ${editDraft.title || "Penelitian"}` : "Edit penelitian"}
+        size="lg"
+        onClose={() => {
+          if (editSaving) return;
+          setEditDraft(null);
+          setEditErrors({});
+        }}
+        footer={
+          <>
+            <button
+              type="button"
+              className="pixel-btn pixel-btn-ghost"
+              onClick={() => {
+                if (editSaving) return;
+                setEditDraft(null);
+                setEditErrors({});
+              }}
+              disabled={editSaving}
+            >
+              BATAL
+            </button>
+            <button
+              type="button"
+              className="pixel-btn"
+              onClick={() => void saveEdit()}
+              disabled={editSaving || Boolean(busy)}
+            >
+              {editSaving ? "MENYIMPAN…" : "SIMPAN"}
+            </button>
+          </>
+        }
+      >
+        {editDraft ? (
+          <SchemaForm
+            fields={itemFields(data, false)}
+            value={editDraft}
+            onChange={(next) => setEditDraft(next)}
+            errors={editErrors}
+            disabled={editSaving}
+            idPrefix="tracker-edit"
+          />
+        ) : null}
+      </Modal>
+
+      <Modal
+        open={Boolean(pendingDelete)}
+        title="Hapus penelitian?"
+        onClose={() => {
+          if (deleteBusy) return;
+          setPendingDelete(null);
+        }}
+        footer={
+          <>
+            <button
+              type="button"
+              className="pixel-btn pixel-btn-ghost"
+              onClick={() => setPendingDelete(null)}
+              disabled={deleteBusy}
+            >
+              BATAL
+            </button>
+            <button
+              type="button"
+              className="pixel-btn admin-btn-danger"
+              onClick={() => void confirmRemoveItem()}
+              disabled={deleteBusy}
+            >
+              {deleteBusy ? "MENGHAPUS…" : "HAPUS"}
+            </button>
+          </>
+        }
+      >
+        <p>
+          Yakin hapus <strong>{pendingDelete?.title}</strong>?
+        </p>
+        <p className="mt-2 text-[16px] text-muted">
+          Backup otomatis tetap dibuat di Neon, jadi masih bisa dipulihkan lewat
+          halaman Data.
+        </p>
+      </Modal>
+
+      <Modal
+        open={Boolean(pendingAssetDelete)}
+        title="Hapus dokumen?"
+        onClose={() => {
+          if (deleteBusy) return;
+          setPendingAssetDelete(null);
+        }}
+        footer={
+          <>
+            <button
+              type="button"
+              className="pixel-btn pixel-btn-ghost"
+              onClick={() => setPendingAssetDelete(null)}
+              disabled={deleteBusy}
+            >
+              BATAL
+            </button>
+            <button
+              type="button"
+              className="pixel-btn admin-btn-danger"
+              onClick={() => void confirmRemoveAsset()}
+              disabled={deleteBusy}
+            >
+              {deleteBusy ? "MENGHAPUS…" : "HAPUS"}
+            </button>
+          </>
+        }
+      >
+        <p>
+          Yakin hapus dokumen{" "}
+          <strong>{pendingAssetDelete?.label}</strong>?
+        </p>
+        <p className="mt-2 text-[16px] text-muted">
+          Link dokumen dilepas dari penelitian ini. Backup dibuat otomatis.
+        </p>
+      </Modal>
     </div>
   );
 }

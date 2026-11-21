@@ -1,13 +1,14 @@
 import { useEffect } from "react";
 import { Navigate, Route, Routes, useLocation, useParams } from "react-router-dom";
+import { CommandPalette } from "./components/CommandPalette";
 import { SiteFooter } from "./components/SiteFooter";
 import { SiteHeader } from "./components/SiteHeader";
-import { AboutPage } from "./pages/AboutPage";
 import { AssetsPage } from "./pages/AssetsPage";
 import { HomePage } from "./pages/HomePage";
 import { MapPage } from "./pages/MapPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { ResearchDetailPage } from "./pages/ResearchDetailPage";
+import { ResearchStoryPage } from "./pages/ResearchStoryPage";
 
 function LegacyResearchRedirect() {
   const { slug } = useParams();
@@ -33,17 +34,19 @@ export function App() {
       </a>
       <ScrollToTop />
       <SiteHeader />
+      <CommandPalette />
       <main id="content" className="flex-1">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/research/:slug" element={<ResearchDetailPage />} />
+          <Route path="/research/:slug/detail" element={<ResearchStoryPage />} />
           <Route path="/documents" element={<AssetsPage />} />
           <Route path="/pipeline" element={<MapPage />} />
-          <Route path="/about" element={<AboutPage />} />
+          <Route path="/about" element={<Navigate to="/" replace />} />
           <Route path="/database" element={<Navigate to="/documents" replace />} />
           <Route path="/aset" element={<Navigate to="/documents" replace />} />
           <Route path="/peta" element={<Navigate to="/pipeline" replace />} />
-          <Route path="/tentang" element={<Navigate to="/about" replace />} />
+          <Route path="/tentang" element={<Navigate to="/" replace />} />
           <Route path="/riset/:slug" element={<LegacyResearchRedirect />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

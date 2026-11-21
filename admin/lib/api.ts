@@ -41,13 +41,17 @@ export async function fetchSession(): Promise<{
     const response = await fetch("/api/auth/session", {
       credentials: "same-origin",
     });
-    if (response.status === 404) {
+    const body = (await response.json().catch(() => null)) as
+      | {
+          online?: boolean;
+          authenticated?: boolean;
+          csrfToken?: string | null;
+        }
+      | null;
+    if (response.status === 404 || body?.online === false) {
       onlineMode = false;
       return { online: false, authenticated: hasToken() };
     }
-    const body = (await response.json().catch(() => null)) as
-      | { authenticated?: boolean; csrfToken?: string | null }
-      | null;
     onlineMode = true;
     csrfToken = body?.csrfToken ?? "";
     return { online: true, authenticated: Boolean(body?.authenticated) };

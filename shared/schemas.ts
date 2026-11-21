@@ -3,6 +3,7 @@ import {
   ALL_STATUSES,
   ASSET_KINDS,
   DATA_SOURCES,
+  DEFAULT_PUBLIC_ITEM_FIELDS,
   GRANT_CLUSTERS,
   GRANT_STAGES,
   IDEA_SCORE_KEYS,
@@ -11,6 +12,7 @@ import {
   ITEM_ROLES,
   ITEM_TYPES,
   PRIORITIES,
+  PUBLIC_ITEM_FIELDS,
   RESEARCH_CATEGORIES,
   RESEARCH_KINDS,
   VERIFICATION_STATUSES,
@@ -112,6 +114,8 @@ export const itemSchema = z.object({
   dataSource: z.enum(DATA_SOURCES),
   link: urlOrEmptySchema,
   notes: z.string(),
+  detail: z.string(),
+  publicFields: z.array(z.enum(PUBLIC_ITEM_FIELDS)),
 });
 
 const itemDefaults = {
@@ -125,6 +129,8 @@ const itemDefaults = {
   dataSource: "belum_dicatat",
   link: "",
   notes: "",
+  detail: "",
+  publicFields: [...DEFAULT_PUBLIC_ITEM_FIELDS],
 } satisfies Partial<Record<keyof z.infer<typeof itemSchema>, unknown>>;
 
 export const itemRecordSchema = z.preprocess((value) => {

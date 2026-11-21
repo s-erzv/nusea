@@ -1,5 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { profileSchema, type Profile } from "../../shared/schemas";
+import {
+  AVATAR_PRESETS,
+  DEFAULT_AVATAR,
+  GLASSES_LABELS,
+  GLASSES_STYLES,
+  parseAvatar,
+  serializeAvatar,
+  type AvatarConfig,
+} from "../../shared/avatar";
+import { PixelAvatar } from "../../src/components/PixelAvatar";
 import { profileFields } from "../forms/fields";
 import { PageHeader, Panel } from "../components/layout";
 import { SchemaEditor } from "../components/SchemaEditor";
@@ -14,7 +24,41 @@ interface ProfilePageProps {
 
 export function ProfilePage({ data, saveEntity, notify }: ProfilePageProps) {
   const [editing, setEditing] = useState(false);
+  const [avatarBusy, setAvatarBusy] = useState(false);
   const profile = data.profile;
+  const initialAvatar = parseAvatar(profile.avatar);
+  const [avatar, setAvatar] = useState<AvatarConfig>(
+    initialAvatar.kind === "pixel" ? initialAvatar.config : DEFAULT_AVATAR,
+  );
+  const [avatarImage, setAvatarImage] = useState(
+    initialAvatar.kind === "image" ? initialAvatar.url : "",
+  );
+
+  useEffect(() => {
+    const parsed = parseAvatar(profile.avatar);
+    setAvatar(parsed.kind === "pixel" ? parsed.config : DEFAULT_AVATAR);
+    setAvatarImage(parsed.kind === "image" ? parsed.url : "");
+  }, [profile.avatar]);
+
+  async function saveAvatar(value: string) {
+    if (avatarBusy) return;
+    setAvatarBusy(true);
+    try {
+      await saveEntity("profile", {
+        ...profile,
+        avatar: value,
+        updatedAt: nowIso(),
+      });
+      notify("Character updated.");
+    } catch (error) {
+      notify(
+        error instanceof Error ? error.message : "Could not update character.",
+        "error",
+      );
+    } finally {
+      setAvatarBusy(false);
+    }
+  }
 
   async function save(value: Profile) {
     const next: Profile = { ...value, id: "profile", updatedAt: nowIso() };
@@ -99,6 +143,116 @@ export function ProfilePage({ data, saveEntity, notify }: ProfilePageProps) {
               <p className="mt-1 text-[18px] leading-tight">{profile.name}</p>
               <p className="mt-2 text-[16px] leading-snug text-muted">{profile.tagline}</p>
             </div>
+          </Panel>
+
+          <Panel title="Character">
+            <div className="mx-auto max-w-[220px]">
+              <PixelAvatar value={avatarImage || serializeAvatar(avatar)} />
+            </div>
+
+            <p className="mt-3 font-pixel text-[10px] uppercase text-muted">
+              Presets
+            </p>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              {AVATAR_PRESETS.map((preset) => (
+                <button
+                  key={preset.id}
+                  type="button"
+                  className="admin-mini-btn"
+                  data-active={
+                    serializeAvatar(avatar) === serializeAvatar(preset.config)
+                  }
+                  onClick={() => {
+                    setAvatar(preset.config);
+                    setAvatarImage("");
+                  }}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+
+            <p className="mt-3 font-pixel text-[10px] uppercase text-muted">
+              Colors
+            </p>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              {(
+                [
+                  ["hijab", "Hijab"],
+                  ["hijabDark", "Hijab shade"],
+                  ["shirt", "Shirt"],
+                  ["skin", "Skin"],
+                  ["accent", "Accent"],
+                ] as const
+              ).map(([key, label]) => (
+                <label
+                  key={key}
+                  className="flex items-center justify-between gap-2 border-2 border-line bg-paper px-2 py-1 text-[13px]"
+                >
+                  <span>{label}</span>
+                  <input
+                    type="color"
+                    value={avatar[key]}
+                    onChange={(event) =>
+                      setAvatar((current) => ({
+                        ...current,
+                        [key]: event.target.value,
+                      }))
+                    }
+                    className="h-7 w-9 cursor-pointer border border-line bg-transparent p-0"
+                    aria-label={label}
+                  />
+                </label>
+              ))}
+            </div>
+
+            <p className="mt-3 font-pixel text-[10px] uppercase text-muted">
+              Glasses
+            </p>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              {GLASSES_STYLES.map((style) => (
+                <button
+                  key={style}
+                  type="button"
+                  className="admin-mini-btn"
+                  style={
+                    avatar.glasses === style
+                      ? { background: "var(--yellow)", color: "#14213D" }
+                      : undefined
+                  }
+                  onClick={() =>
+                    setAvatar((current) => ({ ...current, glasses: style }))
+                  }
+                >
+                  {GLASSES_LABELS[style]}
+                </button>
+              ))}
+            </div>
+
+            <p className="mt-3 font-pixel text-[10px] uppercase text-muted">
+              Or image URL
+            </p>
+            <input
+              className="pixel-input admin-input mt-1"
+              placeholder="https://… (optional)"
+              value={avatarImage}
+              onChange={(event) => setAvatarImage(event.target.value)}
+            />
+
+            <button
+              type="button"
+              className="pixel-btn mt-3 w-full"
+              disabled={avatarBusy}
+              onClick={() =>
+                void saveAvatar(
+                  avatarImage.trim()
+                    ? avatarImage.trim()
+                    : serializeAvatar(avatar),
+                )
+              }
+            >
+              {avatarBusy ? "SAVING…" : "SAVE CHARACTER"}
+            </button>
           </Panel>
 
           <Panel title="Export status">

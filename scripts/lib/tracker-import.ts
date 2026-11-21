@@ -1,4 +1,5 @@
 import {
+  DEFAULT_PUBLIC_ITEM_FIELDS,
   type DataSource,
   type ItemRole,
   type ResearchCategory,
@@ -98,10 +99,19 @@ const KIND_MAP: Record<string, ResearchKind> = {
   Arsitektur: "arsitektur",
   Analisis: "analisis",
   "Rancang bangun": "rancang_bangun",
+  Eksperimen: "eksperimen",
+  Survei: "survei",
+  "Studi kasus": "studi_kasus",
   "Proposal hibah": "proposal_hibah",
+  "Tugas kuliah": "lainnya",
+  "Tugas akhir": "lainnya",
+  Lainnya: "lainnya",
+};
+
+const CATEGORY_BY_KIND_LABEL: Partial<Record<string, ResearchCategory>> = {
+  "Proposal hibah": "hibah",
   "Tugas kuliah": "tugas_kuliah",
   "Tugas akhir": "tugas_akhir",
-  Lainnya: "lainnya",
 };
 
 const KIND_TO_TYPE: Record<ResearchKind, ResearchItem["type"]> = {
@@ -109,9 +119,10 @@ const KIND_TO_TYPE: Record<ResearchKind, ResearchItem["type"]> = {
   arsitektur: "paper_jurnal",
   analisis: "paper_jurnal",
   rancang_bangun: "paper_jurnal",
+  eksperimen: "paper_jurnal",
+  survei: "paper_jurnal",
+  studi_kasus: "paper_jurnal",
   proposal_hibah: "hibah",
-  tugas_kuliah: "tugas_kuliah",
-  tugas_akhir: "skripsi",
   lainnya: "lainnya",
   belum_dicatat: "lainnya",
 };
@@ -217,10 +228,12 @@ export function buildAuthors(
   return self ? [self, ...co] : co;
 }
 
-function inferCategory(kind: ResearchKind): ResearchCategory {
-  if (kind === "proposal_hibah") return "hibah";
-  if (kind === "tugas_kuliah") return "tugas_kuliah";
-  if (kind === "tugas_akhir") return "tugas_akhir";
+function inferCategory(
+  kindLabel: string,
+  kind: ResearchKind,
+): ResearchCategory {
+  const byLabel = CATEGORY_BY_KIND_LABEL[kindLabel];
+  if (byLabel) return byLabel;
   if (kind === "belum_dicatat") return "belum_dicatat";
   return "penelitian_pribadi";
 }
@@ -244,7 +257,7 @@ export function mapRow(row: TrackerRow, profileName: string): {
     status,
     role,
     researchKind,
-    researchCategory: inferCategory(researchKind),
+    researchCategory: inferCategory(row.kindRaw, researchKind),
     dataSource,
     authors: buildAuthors(role, parseCoAuthors(row.coAuthorsRaw), profileName),
   };
@@ -302,6 +315,8 @@ function buildNewItem(
     dataSource: mapped.dataSource,
     link: row.link,
     notes: row.notes,
+    detail: "",
+    publicFields: [...DEFAULT_PUBLIC_ITEM_FIELDS],
   };
 }
 

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { AssetsPage } from "./pages/AssetsPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { GrantsPage } from "./pages/GrantsPage";
@@ -6,7 +6,6 @@ import { IdeasPage } from "./pages/IdeasPage";
 import { ItemsPage } from "./pages/ItemsPage";
 import { KanbanPage } from "./pages/KanbanPage";
 import { ProfilePage } from "./pages/ProfilePage";
-import { PublishPage } from "./pages/PublishPage";
 import { SourcesPage } from "./pages/SourcesPage";
 import { TasksPage } from "./pages/TasksPage";
 import { TrackerPage } from "./pages/TrackerPage";
@@ -44,7 +43,6 @@ const NAV: Array<{ group: string; items: NavItem[] }> = [
     group: "System",
     items: [
       { tab: "profile", label: "Profile", mark: "P" },
-      { tab: "publish", label: "Publish", mark: "!" },
     ],
   },
 ];
@@ -68,6 +66,7 @@ export default function App() {
   const [authBusy, setAuthBusy] = useState(false);
   const [data, setData] = useState<AdminData | null>(null);
   const [versions, setVersions] = useState<Record<string, string>>({});
+  const versionsRef = useRef<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [tab, setTab] = useState<AdminTab>(() => {
@@ -87,6 +86,7 @@ export default function App() {
     const result = await adminApi.bootstrap();
     setData(result.data);
     setVersions(result.updatedAt);
+    versionsRef.current = result.updatedAt;
     setLoadError("");
   }, []);
 
@@ -117,6 +117,7 @@ export default function App() {
         if (!active) return;
         setData(result.data);
         setVersions(result.updatedAt);
+    versionsRef.current = result.updatedAt;
         setLoadError("");
       })
       .catch((error: unknown) => {
@@ -160,7 +161,7 @@ export default function App() {
 
   async function saveEntity(entity: Parameters<SaveEntity>[0], value: unknown) {
     try {
-      const result = await adminApi.saveEntity(entity, value, versions[entity]);
+      const result = await adminApi.saveEntity(entity, value, versionsRef.current[entity]);
       await refresh();
       return result.backupPath;
     } catch (error) {
@@ -411,13 +412,6 @@ export default function App() {
                 KELUAR
               </button>
             ) : null}
-            <button
-              type="button"
-              className="pixel-btn pixel-btn-ghost admin-topbar-btn"
-              onClick={() => navigate("publish")}
-            >
-              PUBLISH
-            </button>
           </div>
         </header>
 
@@ -456,7 +450,6 @@ export default function App() {
           {tab === "profile" ? (
             <ProfilePage data={data} saveEntity={saveEntity} notify={notify} />
           ) : null}
-          {tab === "publish" ? <PublishPage notify={notify} refresh={refresh} /> : null}
         </main>
 
         <footer className="admin-footer">

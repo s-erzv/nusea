@@ -224,11 +224,16 @@ async function main() {
         path.join(publicDir, `${entity}.json`),
       );
     } catch {
-      throw new Error(`Missing public file: data/public/${entity}.json`);
+      // The public site now reads live from the database, so committed public
+      // JSON is optional. Leak checks still work from the private snapshot.
     }
   }
 
-  const findings = await findLeaks(distDir, privateSnapshot ?? {}, publicSnapshot);
+  const findings = await findLeaks(
+    distDir,
+    privateSnapshot ?? {},
+    Object.keys(publicSnapshot).length > 0 ? publicSnapshot : undefined,
+  );
   if (findings.length > 0) {
     console.error("CHECK LEAK GAGAL:");
     findings.slice(0, 40).forEach((finding) => console.error(`- ${finding}`));

@@ -3,7 +3,7 @@ import path from "node:path";
 import { promisify } from "node:util";
 import express, { type NextFunction, type Request, type Response } from "express";
 import { ALL_STATUSES, type ResearchStatus } from "../../shared/constants";
-import { itemSchema } from "../../shared/schemas";
+import { itemRecordSchema } from "../../shared/schemas";
 import { accessGuard, isLoopbackAddress } from "./guard";
 import { createStore } from "./create-store";
 import { ConflictError, formatZodError, isEntityFile } from "./data-store";
@@ -167,7 +167,7 @@ export async function createAdminApp(options: AppOptions): Promise<AdminApp> {
     });
   } else {
     app.get("/api/auth/session", (_req, res) => {
-      res.status(404).json({ error: "Online auth is not enabled in local mode." });
+      res.json({ online: false, authenticated: true, csrfToken: null });
     });
     app.use("/api", accessGuard(options.token ?? ""));
   }
@@ -243,7 +243,7 @@ export async function createAdminApp(options: AppOptions): Promise<AdminApp> {
       try {
         if (entity === "items") {
           const done = await store.writeItemsWithHistory(
-            itemSchema.array().parse(value),
+            itemRecordSchema.array().parse(value),
             expected,
           );
           res.json({
@@ -469,7 +469,10 @@ export async function createAdminApp(options: AppOptions): Promise<AdminApp> {
     (error: unknown, _req: Request, res: Response, next: NextFunction) => {
       void next;
       const message = error instanceof Error ? error.message : "Server error.";
-      console.error("[admin]", error);
+      console.error(
+        "[admin]",
+        error instanceof Error ? error.stack ?? error.message : String(error),
+      );
       res.status(500).json({ error: message });
     },
   );

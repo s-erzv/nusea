@@ -6,7 +6,6 @@ const links = [
   { to: "/", label: "Research", end: true },
   { to: "/documents", label: "Documents" },
   { to: "/pipeline", label: "Pipeline" },
-  { to: "/about", label: "About" },
 ];
 
 export function SiteHeader() {
@@ -34,7 +33,19 @@ export function SiteHeader() {
 
         <button
           type="button"
-          className="pixel-btn pixel-btn-ghost pixel-btn-small order-2 ml-auto sm:order-3 sm:ml-2"
+          className="order-2 ml-auto flex min-h-10 items-center gap-2 border-2 border-line bg-card px-2 font-pixel text-[11px] shadow-hard-sm hover:bg-yellow hover:text-[#14213D] sm:order-3 sm:ml-2"
+          onClick={() => window.dispatchEvent(new Event("nusea:command"))}
+          aria-label="Open search and commands"
+        >
+          <span>SEARCH</span>
+          <kbd className="border border-line bg-paper px-1 text-[10px] text-muted">
+            ⌘K
+          </kbd>
+        </button>
+
+        <button
+          type="button"
+          className="pixel-btn pixel-btn-ghost pixel-btn-small order-2 ml-2 sm:order-3"
           onClick={toggleTheme}
           aria-pressed={theme === "dark"}
           aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}

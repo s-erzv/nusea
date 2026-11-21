@@ -7,6 +7,7 @@ import {
   ideaStatusOptions,
   indexOptions,
   priorityOptions,
+  publicFieldOptions,
   researchCategoryOptions,
   researchKindOptions,
   roleOptions,
@@ -61,11 +62,11 @@ export function itemFields(data: AdminData, isNew: boolean): FieldDef[] {
     {
       key: "venueId",
       label: "Venue",
-      type: "select",
-      options: [
-        { value: "", label: "— No venue —" },
-        ...data.venues.map((venue) => ({ value: venue.id, label: venue.name })),
-      ],
+      type: "text",
+      placeholder: data.venues[0]?.name
+        ? `e.g. ${data.venues[0].name}`
+        : "Nama jurnal / konferensi / hibah",
+      help: "Tulis bebas. Kalau namanya cocok dengan venue tersimpan, otomatis terhubung.",
     },
     { key: "submittedAt", label: "Submission date", type: "date" },
     { key: "decisionAt", label: "Decision date", type: "date" },
@@ -105,6 +106,20 @@ export function itemFields(data: AdminData, isNew: boolean): FieldDef[] {
     { key: "nextStep", label: "Next step", type: "textarea", rows: 2 },
     { key: "link", label: "Tracker link", type: "url", help: "Private. Not exported." },
     { key: "notes", label: "Private notes", type: "textarea", rows: 4 },
+    {
+      key: "detail",
+      label: "Detail penelitian (public story)",
+      type: "textarea",
+      rows: 14,
+      help: "Long-form story or extra detail that does not fit in the paper. Only exported when the research is public. Markdown: ## heading, - list, **bold**, [link](https://…).",
+    },
+    {
+      key: "publicFields",
+      label: "Field yang dipublikasikan",
+      type: "checks",
+      options: publicFieldOptions,
+      help: "Judul, status, dan jenis selalu tampil publik. Field lain hanya muncul di web kalau dicentang. Minimal: Authors, Progress, Detail penelitian.",
+    },
     visibilityField,
     {
       key: "submitChecklist.plagiarismChecked",

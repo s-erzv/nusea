@@ -32,6 +32,14 @@ export function PaperclipIcon({ size = 16 }: IconProps) {
   );
 }
 
+export function PencilIcon({ size = 15 }: IconProps) {
+  return (
+    <svg {...base(size)}>
+      <path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4zM13 7l4 4" />
+    </svg>
+  );
+}
+
 export function TrashIcon({ size = 15 }: IconProps) {
   return (
     <svg {...base(size)}>

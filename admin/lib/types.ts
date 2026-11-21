@@ -40,8 +40,7 @@ export type AdminTab =
   | "grants"
   | "ideas"
   | "tasks"
-  | "profile"
-  | "publish";
+  | "profile";
 
 export interface BackupEntry {
   name: string;

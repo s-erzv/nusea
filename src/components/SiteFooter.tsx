@@ -25,9 +25,6 @@ export function SiteFooter() {
           <Link to="/documents" className="pixel-link">
             Documents
           </Link>
-          <Link to="/about" className="pixel-link">
-            About
-          </Link>
           <Link to="/pipeline" className="pixel-link">
             Pipeline
           </Link>

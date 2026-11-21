@@ -34,10 +34,13 @@ describe("allowlist data publik", () => {
         "authors",
         "createdAt",
         "decisionAt",
+        "detail",
         "doi",
         "id",
         "keywords",
         "pinned",
+        "progress",
+        "publicFields",
         "publicUrl",
         "publishedAt",
         "status",
@@ -68,6 +71,33 @@ describe("allowlist data publik", () => {
       expect(item).not.toHaveProperty(field);
     }
     expect(JSON.stringify(bundle)).not.toContain("item-private");
+  });
+
+  it("field yang tidak dipilih tidak ikut terekspor", () => {
+    const bundle = buildPublicData(
+      makePrivateSnapshot({
+        items: [
+          makeItem({
+            publicFields: ["authors", "progress", "detail"],
+            abstract: "abstrak rahasia",
+            keywords: ["kata rahasia"],
+            detail: "cerita publik",
+            doi: "10.1234/rahasia",
+            venueId: "venue-rahasia",
+          }),
+        ],
+      }),
+    );
+    const item = bundle.items[0];
+
+    expect(item.authors).toEqual(["Nusea"]);
+    expect(item.progress).toBe(40);
+    expect(item.detail).toBe("cerita publik");
+    expect(item.abstract).toBe("");
+    expect(item.keywords).toEqual([]);
+    expect(item.doi).toBe("");
+    expect(item.venueId).toBe("");
+    expect(item.submittedAt).toBe("");
   });
 
   it("aset privat, localPath, itemIds, dan note tidak pernah keluar", () => {

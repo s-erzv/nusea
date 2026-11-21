@@ -64,6 +64,8 @@ export function makeItem(overrides: Partial<ResearchItem> = {}): ResearchItem {
     dataSource: "belum_dicatat",
     link: "",
     notes: "",
+    detail: "",
+    publicFields: ["authors", "progress", "detail"],
     ...overrides,
   };
 }

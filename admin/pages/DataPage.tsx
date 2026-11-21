@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { DEFAULT_PUBLIC_ITEM_FIELDS } from "../../shared/constants";
 import type { EntityFile, Grant, ResearchItem } from "../../shared/schemas";
 import { AdminEmpty, PageHeader, Panel } from "../components/layout";
 import { adminApi } from "../lib/api";
@@ -62,6 +63,8 @@ const ITEM_COLUMNS = [
   "nextStep",
   "link",
   "notes",
+  "detail",
+  "publicFields",
 ];
 
 const GRANT_COLUMNS = [
@@ -257,6 +260,11 @@ export function DataPage({ data, saveEntity, notify, refresh }: DataPageProps) {
         "belum_dicatat") as ResearchItem["dataSource"],
       link: record.link ?? existing?.link ?? "",
       notes: record.notes ?? existing?.notes ?? "",
+      detail: record.detail ?? existing?.detail ?? "",
+      publicFields:
+        record.publicFields !== undefined
+          ? (parseList(record.publicFields) as ResearchItem["publicFields"])
+          : existing?.publicFields ?? [...DEFAULT_PUBLIC_ITEM_FIELDS],
     };
   }
 

@@ -8,6 +8,7 @@ import {
   IDEA_STATUSES,
   INDEX_LEVELS,
   ITEM_TYPES,
+  PUBLIC_ITEM_FIELDS,
   VENUE_KINDS,
 } from "./constants";
 import type {
@@ -49,6 +50,7 @@ export const publicItemSchema = z.object({
   abstract: z.string(),
   keywords: z.array(z.string()),
   authors: z.array(z.string()),
+  detail: z.string(),
   venueId: z.string(),
   submittedAt: z.string(),
   decisionAt: z.string(),
@@ -56,6 +58,8 @@ export const publicItemSchema = z.object({
   doi: z.string(),
   publicUrl: z.string(),
   pinned: z.boolean(),
+  progress: z.number().int().min(0).max(100).nullable(),
+  publicFields: z.array(z.enum(PUBLIC_ITEM_FIELDS)),
 });
 
 export const publicAssetSchema = z.object({
@@ -110,6 +114,13 @@ export type PublicVenue = z.infer<typeof publicVenueSchema>;
 export type PublicGrant = z.infer<typeof publicGrantSchema>;
 export type PublicIdea = z.infer<typeof publicIdeaSchema>;
 
+export function hasPublicField(
+  item: PublicItem,
+  field: (typeof PUBLIC_ITEM_FIELDS)[number],
+): boolean {
+  return item.publicFields.includes(field);
+}
+
 export function toPublicProfile(profile: Profile): PublicProfile | null {
   if (profile.visibility !== "public") return null;
   return publicProfileSchema.parse({
@@ -128,6 +139,8 @@ export function toPublicProfile(profile: Profile): PublicProfile | null {
 }
 
 export function toPublicItem(item: ResearchItem): PublicItem {
+  const has = (field: (typeof PUBLIC_ITEM_FIELDS)[number]) =>
+    item.publicFields.includes(field);
   return publicItemSchema.parse({
     id: item.id,
     createdAt: item.createdAt,
@@ -135,16 +148,19 @@ export function toPublicItem(item: ResearchItem): PublicItem {
     title: item.title,
     type: item.type,
     status: item.status,
-    abstract: item.abstract,
-    keywords: item.keywords,
-    authors: item.authors,
-    venueId: item.venueId,
-    submittedAt: item.submittedAt,
-    decisionAt: item.decisionAt,
-    publishedAt: item.publishedAt,
-    doi: item.doi,
-    publicUrl: item.publicUrl,
+    abstract: has("abstract") ? item.abstract : "",
+    keywords: has("keywords") ? item.keywords : [],
+    authors: has("authors") ? item.authors : [],
+    detail: has("detail") ? item.detail : "",
+    venueId: has("venue") ? item.venueId : "",
+    submittedAt: has("dates") ? item.submittedAt : "",
+    decisionAt: has("dates") ? item.decisionAt : "",
+    publishedAt: has("dates") ? item.publishedAt : "",
+    doi: has("links") ? item.doi : "",
+    publicUrl: has("links") ? item.publicUrl : "",
     pinned: item.pinned,
+    progress: has("progress") ? item.progressPct : null,
+    publicFields: item.publicFields,
   });
 }
 

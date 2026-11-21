@@ -11,7 +11,14 @@ export const PIPELINE_STATUSES = [
   "published",
 ] as const;
 
-export const TERMINAL_STATUSES = ["ditolak", "ditarik", "ditunda"] as const;
+export const TERMINAL_STATUSES = [
+  "ditolak",
+  "ditarik",
+  "ditunda",
+  "selesai",
+  "ditinggalkan",
+  "diabaikan",
+] as const;
 
 export const ALL_STATUSES = [...PIPELINE_STATUSES, ...TERMINAL_STATUSES] as const;
 
@@ -32,6 +39,9 @@ export const STATUS_LABELS: Record<ResearchStatus, string> = {
   ditolak: "Rejected",
   ditarik: "Withdrawn",
   ditunda: "On Hold",
+  diabaikan: "Ignored",
+  ditinggalkan: "Abandoned",
+  selesai: "Completed",
 };
 
 export const PUBLIC_STATUS_LABELS: Record<ResearchStatus, string> = {
@@ -48,6 +58,9 @@ export const PUBLIC_STATUS_LABELS: Record<ResearchStatus, string> = {
   ditolak: "Archived",
   ditarik: "Withdrawn",
   ditunda: "On hold",
+  diabaikan: "Archived",
+  ditinggalkan: "Archived",
+  selesai: "Completed",
 };
 
 export const STATUS_NUMBERS: Record<PipelineStatus, number> = {
@@ -266,6 +279,36 @@ export function ideaTotalScore(scores: Record<IdeaScoreKey, number>): number {
 export const VISIBILITIES = ["public", "private"] as const;
 export type Visibility = (typeof VISIBILITIES)[number];
 
+export const PUBLIC_ITEM_FIELDS = [
+  "authors",
+  "abstract",
+  "keywords",
+  "venue",
+  "dates",
+  "links",
+  "progress",
+  "detail",
+  "documents",
+] as const;
+
+export type PublicItemField = (typeof PUBLIC_ITEM_FIELDS)[number];
+
+export const PUBLIC_ITEM_FIELD_LABELS: Record<PublicItemField, string> = {
+  authors: "Authors",
+  abstract: "Abstract",
+  keywords: "Keywords",
+  venue: "Venue",
+  dates: "Dates (submitted / decision / published)",
+  links: "DOI & public links",
+  progress: "Progress",
+  detail: "Detail penelitian",
+  documents: "Dokumen & link dokumen",
+};
+
+export const DEFAULT_PUBLIC_ITEM_FIELDS: PublicItemField[] = [
+  ...PUBLIC_ITEM_FIELDS,
+];
+
 export const ITEM_ROLES = [
   "penulis_1",
   "penulis_2",
@@ -289,9 +332,10 @@ export const RESEARCH_KINDS = [
   "arsitektur",
   "analisis",
   "rancang_bangun",
+  "eksperimen",
+  "survei",
+  "studi_kasus",
   "proposal_hibah",
-  "tugas_kuliah",
-  "tugas_akhir",
   "lainnya",
   "belum_dicatat",
 ] as const;
@@ -303,9 +347,10 @@ export const RESEARCH_KIND_LABELS: Record<ResearchKind, string> = {
   arsitektur: "Arsitektur",
   analisis: "Analisis",
   rancang_bangun: "Rancang bangun",
+  eksperimen: "Eksperimen",
+  survei: "Survei",
+  studi_kasus: "Studi kasus",
   proposal_hibah: "Proposal hibah",
-  tugas_kuliah: "Tugas kuliah",
-  tugas_akhir: "Tugas akhir",
   lainnya: "Lainnya",
   belum_dicatat: "Belum dicatat",
 };
@@ -324,7 +369,7 @@ export type ResearchCategory = (typeof RESEARCH_CATEGORIES)[number];
 
 export const RESEARCH_CATEGORY_LABELS: Record<ResearchCategory, string> = {
   tugas_kuliah: "Tugas kuliah",
-  penelitian_pribadi: "Penelitian pribadi",
+  penelitian_pribadi: "Penelitian mandiri (independent)",
   hibah: "Hibah",
   tugas_akhir: "Tugas akhir",
   kolaborasi: "Kolaborasi",

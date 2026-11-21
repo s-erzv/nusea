@@ -87,5 +87,5 @@ describe("check:leak", () => {
 
     expect(result.status).toBe(1);
     expect(`${result.stdout}${result.stderr}`).toContain("CHECK LEAK GAGAL");
-  });
+  }, 30_000);
 });

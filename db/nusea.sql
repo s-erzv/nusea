@@ -42,6 +42,20 @@ revoke all on all sequences in schema nusea from anon, authenticated;
 -- public-visibility records and allowlisted columns leave the private store.
 drop view if exists nusea.public_research;
 create or replace view nusea.public_research with (security_invoker = false) as
+with base as (
+  select
+    item,
+    coalesce(
+      item -> 'publicFields',
+      '["authors", "abstract", "keywords", "venue", "dates", "links", "progress", "detail", "documents"]'::jsonb
+    ) as fields
+  from nusea.documents d
+  cross join lateral jsonb_array_elements(
+    case when jsonb_typeof(d.value) = 'array' then d.value else '[]'::jsonb end
+  ) as item
+  where d.entity = 'items'
+    and item ->> 'visibility' = 'public'
+)
 select
   item ->> 'id' as id,
   nullif(item ->> 'createdAt', '') as created_at,
@@ -49,22 +63,24 @@ select
   item ->> 'title' as title,
   item ->> 'type' as type,
   item ->> 'status' as status,
-  item ->> 'abstract' as abstract,
-  item -> 'keywords' as keywords,
-  item -> 'authors' as authors,
-  item ->> 'venueId' as venue_id,
-  nullif(item ->> 'submittedAt', '') as submitted_at,
-  nullif(item ->> 'decisionAt', '') as decision_at,
-  nullif(item ->> 'publishedAt', '') as published_at,
-  nullif(item ->> 'doi', '') as doi,
-  nullif(item ->> 'publicUrl', '') as public_url,
-  coalesce((item ->> 'pinned')::boolean, false) as pinned
-from nusea.documents d
-cross join lateral jsonb_array_elements(
-  case when jsonb_typeof(d.value) = 'array' then d.value else '[]'::jsonb end
-) as item
-where d.entity = 'items'
-  and item ->> 'visibility' = 'public';
+  case when fields ? 'abstract' then coalesce(item ->> 'abstract', '') else '' end as abstract,
+  case when fields ? 'keywords' then coalesce(item -> 'keywords', '[]'::jsonb) else '[]'::jsonb end as keywords,
+  case when fields ? 'authors' then coalesce(item -> 'authors', '[]'::jsonb) else '[]'::jsonb end as authors,
+  case when fields ? 'detail' then coalesce(item ->> 'detail', '') else '' end as detail,
+  case when fields ? 'venue' then coalesce(item ->> 'venueId', '') else '' end as venue_id,
+  case when fields ? 'dates' then nullif(item ->> 'submittedAt', '') else null end as submitted_at,
+  case when fields ? 'dates' then nullif(item ->> 'decisionAt', '') else null end as decision_at,
+  case when fields ? 'dates' then nullif(item ->> 'publishedAt', '') else null end as published_at,
+  case when fields ? 'links' then nullif(item ->> 'doi', '') else null end as doi,
+  case when fields ? 'links' then nullif(item ->> 'publicUrl', '') else null end as public_url,
+  coalesce((item ->> 'pinned')::boolean, false) as pinned,
+  case
+    when fields ? 'progress' and (item ->> 'progressPct') ~ '^[0-9]+$'
+      then (item ->> 'progressPct')::integer
+    else null
+  end as progress,
+  fields as public_fields
+from base;
 
 drop view if exists nusea.public_venues;
 create or replace view nusea.public_venues with (security_invoker = false) as

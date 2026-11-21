@@ -19,6 +19,8 @@ import {
   PIPELINE_STATUSES,
   PRIORITIES,
   PRIORITY_LABELS,
+  PUBLIC_ITEM_FIELDS,
+  PUBLIC_ITEM_FIELD_LABELS,
   RESEARCH_CATEGORIES,
   RESEARCH_CATEGORY_LABELS,
   RESEARCH_KINDS,
@@ -172,6 +174,11 @@ export const visibilityOptions = [
   { value: "private", label: "Private" },
   { value: "public", label: "Public" },
 ];
+
+export const publicFieldOptions = PUBLIC_ITEM_FIELDS.map((field) => ({
+  value: field,
+  label: PUBLIC_ITEM_FIELD_LABELS[field],
+}));
 
 export const roleOptions = ITEM_ROLES.map((role) => ({
   value: role,

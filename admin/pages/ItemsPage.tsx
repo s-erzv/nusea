@@ -1,6 +1,10 @@
 import { useMemo, useState } from "react";
 import { itemSchema, type ResearchItem } from "../../shared/schemas";
-import { ITEM_TYPE_LABELS, STATUS_LABELS } from "../../shared/constants";
+import {
+  DEFAULT_PUBLIC_ITEM_FIELDS,
+  ITEM_TYPE_LABELS,
+  STATUS_LABELS,
+} from "../../shared/constants";
 import { itemFields } from "../forms/fields";
 import { AdminEmpty, PageHeader, Panel } from "../components/layout";
 import { SchemaEditor } from "../components/SchemaEditor";
@@ -82,6 +86,8 @@ export function ItemsPage({ data, saveEntity, notify }: ItemsPageProps) {
       dataSource: "belum_dicatat",
       link: "",
       notes: "",
+      detail: "",
+      publicFields: [...DEFAULT_PUBLIC_ITEM_FIELDS],
     });
     setIsNew(true);
   }

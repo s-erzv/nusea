@@ -6,6 +6,11 @@
   NODE_VERSION = "22"
 
 [[redirects]]
+  from = "/api/public-data"
+  to = "/.netlify/functions/public-data"
+  status = 200
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
