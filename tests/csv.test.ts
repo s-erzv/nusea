@@ -8,7 +8,7 @@ import {
 } from "../admin/lib/csv";
 
 describe("CSV admin", () => {
-  it("menulis dan membaca kembali nilai dengan koma, kutip, dan baris baru", () => {
+  it("round-trips values with commas, quotes and newlines", () => {
     const text = serializeCsv(
       ["id", "title", "tags"],
       [{ id: "satu", title: 'Judul, "kutip"\nbaris dua', tags: ["a", "b"] }],
@@ -19,7 +19,7 @@ describe("CSV admin", () => {
     expect(parseList(records[0].tags)).toEqual(["a", "b"]);
   });
 
-  it("mengubah boolean, angka, dan daftar dengan aman", () => {
+  it("safely converts booleans, numbers and lists", () => {
     expect(parseBoolean("ya")).toBe(true);
     expect(parseBoolean("false")).toBe(false);
     expect(parseNumber("12")).toBe(12);

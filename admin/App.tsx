@@ -208,10 +208,10 @@ export default function App() {
           <p className="font-pixel text-[12px] uppercase leading-5 text-orange">
             Nusea / Back Office
           </p>
-          <h1 className="mt-3 text-[22px] leading-relaxed">Masuk ke admin</h1>
+          <h1 className="mt-3 text-[22px] leading-relaxed">Sign in to admin</h1>
           <p className="mt-2 text-[17px] leading-snug text-muted">
-            Data penelitian ini privat. Masukkan password admin untuk membuka
-            tracker.
+            This research data is private. Enter the admin password to open
+            the tracker.
           </p>
           <label className="mt-5 block font-pixel text-[12px] uppercase leading-4" htmlFor="password">
             Password
@@ -233,7 +233,7 @@ export default function App() {
             className="pixel-btn mt-4"
             disabled={authBusy || !passwordInput}
           >
-            {authBusy ? "MEMBUKA…" : "MASUK"}
+            {authBusy ? "OPENING…" : "SIGN IN"}
           </button>
         </form>
       </div>
@@ -250,8 +250,9 @@ export default function App() {
           </p>
           <h1 className="mt-3 text-[22px] leading-relaxed">Session token required</h1>
           <p className="mt-2 text-[17px] leading-snug text-muted">
-            Token dicetak di terminal saat <code>pnpm run admin</code>. Server
-            lokal hanya menerima koneksi dari 127.0.0.1.
+            The token is printed in the terminal when you run{" "}
+            <code>pnpm run admin</code>. The local server only accepts
+            connections from 127.0.0.1.
           </p>
           <label className="mt-5 block font-pixel text-[12px] uppercase leading-4" htmlFor="token">
             Admin token
@@ -409,7 +410,7 @@ export default function App() {
                   });
                 }}
               >
-                KELUAR
+                SIGN OUT
               </button>
             ) : null}
           </div>

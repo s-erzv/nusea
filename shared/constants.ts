@@ -301,8 +301,8 @@ export const PUBLIC_ITEM_FIELD_LABELS: Record<PublicItemField, string> = {
   dates: "Dates (submitted / decision / published)",
   links: "DOI & public links",
   progress: "Progress",
-  detail: "Detail penelitian",
-  documents: "Dokumen & link dokumen",
+  detail: "Research detail",
+  documents: "Documents & document links",
 };
 
 export const DEFAULT_PUBLIC_ITEM_FIELDS: PublicItemField[] = [
@@ -320,11 +320,11 @@ export const ITEM_ROLES = [
 export type ItemRole = (typeof ITEM_ROLES)[number];
 
 export const ITEM_ROLE_LABELS: Record<ItemRole, string> = {
-  penulis_1: "Penulis 1",
-  penulis_2: "Penulis 2",
-  penulis_3: "Penulis 3",
-  penulis_tunggal: "Penulis tunggal",
-  belum_dicatat: "Belum dicatat",
+  penulis_1: "First author",
+  penulis_2: "Second author",
+  penulis_3: "Third author",
+  penulis_tunggal: "Sole author",
+  belum_dicatat: "Not recorded",
 };
 
 export const RESEARCH_KINDS = [
@@ -344,15 +344,15 @@ export type ResearchKind = (typeof RESEARCH_KINDS)[number];
 
 export const RESEARCH_KIND_LABELS: Record<ResearchKind, string> = {
   slr: "SLR",
-  arsitektur: "Arsitektur",
-  analisis: "Analisis",
-  rancang_bangun: "Rancang bangun",
-  eksperimen: "Eksperimen",
-  survei: "Survei",
-  studi_kasus: "Studi kasus",
-  proposal_hibah: "Proposal hibah",
-  lainnya: "Lainnya",
-  belum_dicatat: "Belum dicatat",
+  arsitektur: "Architecture",
+  analisis: "Analysis",
+  rancang_bangun: "Design & build",
+  eksperimen: "Experiment",
+  survei: "Survey",
+  studi_kasus: "Case study",
+  proposal_hibah: "Grant proposal",
+  lainnya: "Other",
+  belum_dicatat: "Not recorded",
 };
 
 export const RESEARCH_CATEGORIES = [
@@ -368,13 +368,13 @@ export const RESEARCH_CATEGORIES = [
 export type ResearchCategory = (typeof RESEARCH_CATEGORIES)[number];
 
 export const RESEARCH_CATEGORY_LABELS: Record<ResearchCategory, string> = {
-  tugas_kuliah: "Tugas kuliah",
-  penelitian_pribadi: "Penelitian mandiri (independent)",
-  hibah: "Hibah",
-  tugas_akhir: "Tugas akhir",
-  kolaborasi: "Kolaborasi",
-  lainnya: "Lainnya",
-  belum_dicatat: "Belum dicatat",
+  tugas_kuliah: "Coursework",
+  penelitian_pribadi: "Independent research",
+  hibah: "Grant",
+  tugas_akhir: "Thesis",
+  kolaborasi: "Collaboration",
+  lainnya: "Other",
+  belum_dicatat: "Not recorded",
 };
 
 export const DATA_SOURCES = [
@@ -387,8 +387,8 @@ export const DATA_SOURCES = [
 export type DataSource = (typeof DATA_SOURCES)[number];
 
 export const DATA_SOURCE_LABELS: Record<DataSource, string> = {
-  terverifikasi_publik: "Terverifikasi (publik)",
-  catatan_obrolan: "Catatan obrolan",
-  perlu_dicek: "Perlu dicek",
-  belum_dicatat: "Belum dicatat",
+  terverifikasi_publik: "Verified (public)",
+  catatan_obrolan: "Chat notes",
+  perlu_dicek: "Needs checking",
+  belum_dicatat: "Not recorded",
 };

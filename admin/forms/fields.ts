@@ -65,8 +65,8 @@ export function itemFields(data: AdminData, isNew: boolean): FieldDef[] {
       type: "text",
       placeholder: data.venues[0]?.name
         ? `e.g. ${data.venues[0].name}`
-        : "Nama jurnal / konferensi / hibah",
-      help: "Tulis bebas. Kalau namanya cocok dengan venue tersimpan, otomatis terhubung.",
+        : "Journal / conference / grant name",
+      help: "Free text. If the name matches a saved venue, it links automatically.",
     },
     { key: "submittedAt", label: "Submission date", type: "date" },
     { key: "decisionAt", label: "Decision date", type: "date" },
@@ -108,17 +108,17 @@ export function itemFields(data: AdminData, isNew: boolean): FieldDef[] {
     { key: "notes", label: "Private notes", type: "textarea", rows: 4 },
     {
       key: "detail",
-      label: "Detail penelitian (public story)",
+      label: "Research detail (public story)",
       type: "textarea",
       rows: 14,
       help: "Long-form story or extra detail that does not fit in the paper. Only exported when the research is public. Markdown: ## heading, - list, **bold**, [link](https://…).",
     },
     {
       key: "publicFields",
-      label: "Field yang dipublikasikan",
+      label: "Published fields",
       type: "checks",
       options: publicFieldOptions,
-      help: "Judul, status, dan jenis selalu tampil publik. Field lain hanya muncul di web kalau dicentang. Minimal: Authors, Progress, Detail penelitian.",
+      help: "Title, status and type are always public. Other fields only appear on the site when checked. Suggested minimum: Authors, Progress, Research detail.",
     },
     visibilityField,
     {

@@ -152,18 +152,18 @@ function CellArea({
 
 const COLUMNS = [
   "#",
-  "Judul",
-  "Peran saya",
+  "Title",
+  "My role",
   "Status",
-  "Jenis",
-  "Kategori",
-  "Target jurnal / venue",
-  "Co-author (urutan)",
-  "Terbit / tenggat",
-  "Langkah berikutnya",
+  "Type",
+  "Category",
+  "Target journal / venue",
+  "Co-authors (order)",
+  "Published / due",
+  "Next step",
   "Link",
-  "Catatan",
-  "Aksi",
+  "Notes",
+  "Actions",
 ];
 
 export function TrackerPage({
@@ -250,7 +250,7 @@ export function TrackerPage({
       createdAt: now,
       updatedAt: now,
       visibility: "private",
-      title: "Penelitian baru",
+      title: "New research",
       type: "paper_jurnal",
       status: "ide",
       stageNote: "",
@@ -285,10 +285,10 @@ export function TrackerPage({
     try {
       await saveEntity("items", [...data.items, item]);
       setOpenId(item.id);
-      notify("Penelitian baru dibuat. Ganti judul dan isi kolomnya.");
+      notify("New research created. Rename it and fill in the columns.");
     } catch (error) {
       notify(
-        error instanceof Error ? error.message : "Gagal menambah penelitian.",
+        error instanceof Error ? error.message : "Could not add research.",
         "error",
       );
     } finally {
@@ -312,10 +312,10 @@ export function TrackerPage({
       );
       if (openId === item.id) setOpenId(null);
       setPendingDelete(null);
-      notify("Penelitian dihapus. Backup tetap dibuat di Neon.");
+      notify("Research deleted. A backup was still saved in Neon.");
     } catch (error) {
       notify(
-        error instanceof Error ? error.message : "Gagal menghapus penelitian.",
+        error instanceof Error ? error.message : "Could not delete research.",
         "error",
       );
     } finally {
@@ -347,10 +347,10 @@ export function TrackerPage({
     setBusy(movedId);
     try {
       await saveEntity("items", next);
-      notify("Urutan penelitian disimpan.");
+      notify("Research order saved.");
     } catch (error) {
       notify(
-        error instanceof Error ? error.message : "Gagal menyimpan urutan.",
+        error instanceof Error ? error.message : "Could not save the order.",
         "error",
       );
     } finally {
@@ -368,7 +368,7 @@ export function TrackerPage({
         errors[issue.path.join(".")] = issue.message;
       }
       setEditErrors(errors);
-      notify("Ada isian yang belum valid. Cek kolom yang ditandai.", "error");
+      notify("Some fields are not valid yet. Check the highlighted fields.", "error");
       return;
     }
     setEditSaving(true);
@@ -380,10 +380,10 @@ export function TrackerPage({
       await saveEntity("items", next);
       setEditDraft(null);
       setEditErrors({});
-      notify("Perubahan penelitian disimpan.");
+      notify("Research changes saved.");
     } catch (error) {
       notify(
-        error instanceof Error ? error.message : "Gagal menyimpan perubahan.",
+        error instanceof Error ? error.message : "Could not save changes.",
         "error",
       );
     } finally {
@@ -399,7 +399,7 @@ export function TrackerPage({
   async function saveFields(
     item: ResearchItem,
     patch: Partial<ResearchItem>,
-    message = "Tersimpan.",
+    message = "Saved.",
   ) {
     if (busy) return;
     setBusy(item.id);
@@ -413,7 +413,7 @@ export function TrackerPage({
       notify(message);
     } catch (error) {
       notify(
-        error instanceof Error ? error.message : "Gagal menyimpan baris ini.",
+        error instanceof Error ? error.message : "Could not save this row.",
         "error",
       );
     } finally {
@@ -436,10 +436,10 @@ export function TrackerPage({
     } catch (error) {
       if (error instanceof ApiError && error.status === 409) {
         await refresh();
-        notify("Data berubah di tempat lain. Sudah dimuat ulang.", "error");
+        notify("Data changed elsewhere. It has been reloaded.", "error");
       } else {
         notify(
-          error instanceof Error ? error.message : "Gagal mengubah status.",
+          error instanceof Error ? error.message : "Could not change the status.",
           "error",
         );
       }
@@ -451,7 +451,7 @@ export function TrackerPage({
   async function addAsset(item: ResearchItem) {
     const url = assetDraft.url.trim();
     if (!url) {
-      notify("URL dokumen wajib diisi.", "error");
+      notify("Document URL is required.", "error");
       return;
     }
     setBusy(item.id);
@@ -473,10 +473,10 @@ export function TrackerPage({
       };
       await saveEntity("assets", [...data.assets, asset]);
       setAssetDraft({ label: "", url: "", kind: "drive" });
-      notify("Dokumen ditambahkan ke baris ini.");
+      notify("Document added to this row.");
     } catch (error) {
       notify(
-        error instanceof Error ? error.message : "Gagal menambah dokumen.",
+        error instanceof Error ? error.message : "Could not add the document.",
         "error",
       );
     } finally {
@@ -498,10 +498,10 @@ export function TrackerPage({
         data.assets.filter((entry) => entry.id !== asset.id),
       );
       setPendingAssetDelete(null);
-      notify("Dokumen dihapus. Backup tetap dibuat.");
+      notify("Document removed. A backup was still saved.");
     } catch (error) {
       notify(
-        error instanceof Error ? error.message : "Gagal menghapus dokumen.",
+        error instanceof Error ? error.message : "Could not remove the document.",
         "error",
       );
     } finally {
@@ -513,8 +513,8 @@ export function TrackerPage({
     <div>
       <PageHeader
         kicker="Research / Tracker"
-        title="Tracker penelitian"
-        description="Spreadsheet semua paper. Klik sel untuk edit, Enter untuk simpan. Tombol Dokumen membuka link dan file tiap baris."
+        title="Research tracker"
+        description="Spreadsheet of every paper. Click a cell to edit, press Enter to save. The Documents button opens each row's links and files."
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <button
@@ -522,8 +522,8 @@ export function TrackerPage({
               className="admin-icon-btn"
               onClick={() => void addItem()}
               disabled={Boolean(busy)}
-              aria-label="Tambah penelitian"
-              title="Tambah penelitian"
+              aria-label="Add research"
+              title="Add research"
             >
               <PlusIcon size={20} />
             </button>
@@ -560,10 +560,10 @@ export function TrackerPage({
             <input
               type="search"
               className="pixel-input admin-input tracker-search"
-              placeholder="Cari judul, ID, venue, catatan…"
+              placeholder="Search title, ID, venue, notes…"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              aria-label="Cari tracker"
+              aria-label="Search tracker"
             />
             <select
               className="pixel-input admin-input"
@@ -571,7 +571,7 @@ export function TrackerPage({
               onChange={(event) => setStatusFilter(event.target.value)}
               aria-label="Filter status"
             >
-              <option value="all">Semua status</option>
+              <option value="all">All statuses</option>
               {ALL_STATUSES.map((status) => (
                 <option key={status} value={status}>
                   {STATUS_LABELS[status]}
@@ -584,7 +584,7 @@ export function TrackerPage({
               onChange={(event) => setRoleFilter(event.target.value)}
               aria-label="Filter peran"
             >
-              <option value="all">Semua peran</option>
+              <option value="all">All roles</option>
               {ITEM_ROLES.map((role) => (
                 <option key={role} value={role}>
                   {ITEM_ROLE_LABELS[role]}
@@ -595,9 +595,9 @@ export function TrackerPage({
               className="pixel-input admin-input"
               value={kindFilter}
               onChange={(event) => setKindFilter(event.target.value)}
-              aria-label="Filter jenis"
+              aria-label="Filter by type"
             >
-              <option value="all">Semua jenis</option>
+              <option value="all">All types</option>
               {RESEARCH_KINDS.map((kind) => (
                 <option key={kind} value={kind}>
                   {RESEARCH_KIND_LABELS[kind]}
@@ -610,12 +610,12 @@ export function TrackerPage({
               onChange={(event) => setSortKey(event.target.value as SortKey)}
               aria-label="Urutkan"
             >
-              <option value="manual">Urut: Manual (drag)</option>
-              <option value="trackerId">Urut: ID</option>
-              <option value="title">Urut: Judul</option>
-              <option value="status">Urut: Status</option>
-              <option value="targetDate">Urut: Tanggal</option>
-              <option value="updatedAt">Urut: Diubah</option>
+              <option value="manual">Sort: Manual (drag)</option>
+              <option value="trackerId">Sort: ID</option>
+              <option value="title">Sort: Title</option>
+              <option value="status">Sort: Status</option>
+              <option value="targetDate">Sort: Date</option>
+              <option value="updatedAt">Sort: Last edited</option>
             </select>
             <button
               type="button"
@@ -624,7 +624,7 @@ export function TrackerPage({
               disabled={sortKey === "manual"}
               title={
                 sortKey === "manual"
-                  ? "Urutan manual diatur lewat drag and drop"
+                  ? "Manual order is set with drag and drop"
                   : undefined
               }
             >
@@ -633,7 +633,7 @@ export function TrackerPage({
           </div>
 
           {filtered.length === 0 ? (
-            <AdminEmpty>Tidak ada baris yang cocok.</AdminEmpty>
+            <AdminEmpty>No matching rows.</AdminEmpty>
           ) : (
             <div className="sheet-wrap">
               <table className="sheet">
@@ -722,8 +722,8 @@ export function TrackerPage({
                                   setDragId(null);
                                   setDropHint(null);
                                 }}
-                                aria-label={`Geser urutan ${item.title}`}
-                                title="Drag untuk atur urutan"
+                                aria-label={`Reorder ${item.title}`}
+                                title="Drag to reorder"
                               >
                                 ⠿
                               </button>
@@ -794,7 +794,7 @@ export function TrackerPage({
                                     .value as ResearchItem["researchKind"],
                                 })
                               }
-                              aria-label={`Jenis ${item.title}`}
+                              aria-label={`Type of ${item.title}`}
                             >
                               {RESEARCH_KINDS.map((kind) => (
                                 <option key={kind} value={kind}>
@@ -855,7 +855,7 @@ export function TrackerPage({
                                   targetDate: event.target.value,
                                 })
                               }
-                              aria-label={`Terbit atau tenggat ${item.title}`}
+                              aria-label={`Published or due date for ${item.title}`}
                             />
                             <span className="sheet-date">
                               {item.targetDate ? formatDate(item.targetDate) : ""}
@@ -886,7 +886,7 @@ export function TrackerPage({
                                 rel="noreferrer"
                                 className="sheet-link"
                               >
-                                buka ↗
+                                open ↗
                               </a>
                             ) : null}
                           </td>
@@ -907,7 +907,7 @@ export function TrackerPage({
                                 onClick={() => startEdit(item)}
                                 disabled={locked}
                                 aria-label={`Edit ${item.title}`}
-                                title="Edit penelitian"
+                                title="Edit research"
                               >
                                 <PencilIcon />
                               </button>
@@ -917,8 +917,8 @@ export function TrackerPage({
                                 data-open={isOpen}
                                 onClick={() => setOpenId(isOpen ? null : item.id)}
                                 aria-expanded={isOpen}
-                                aria-label={`Dokumen ${item.title}`}
-                                title="Dokumen dan link"
+                                aria-label={`Documents for ${item.title}`}
+                                title="Documents and links"
                               >
                                 <PaperclipIcon />
                                 <span>{linkCount}</span>
@@ -928,8 +928,8 @@ export function TrackerPage({
                                 className="sheet-icon-btn is-danger"
                                 onClick={() => void removeItem(item)}
                                 disabled={locked}
-                                aria-label={`Hapus ${item.title}`}
-                                title="Hapus penelitian"
+                                aria-label={`Delete ${item.title}`}
+                                title="Delete research"
                               >
                                 <TrashIcon />
                               </button>
@@ -942,7 +942,7 @@ export function TrackerPage({
                             <td colSpan={COLUMNS.length}>
                               <div className="sheet-detail">
                                 <div className="sheet-detail-head">
-                                  <h3>Dokumen & link — {item.title}</h3>
+                                  <h3>Documents & links — {item.title}</h3>
                                   <span>{item.id}</span>
                                 </div>
 
@@ -957,7 +957,7 @@ export function TrackerPage({
                                       <span className="tracker-link-kind">
                                         PUBLIK
                                       </span>
-                                      <span>Halaman publik</span>
+                                      <span>Public page</span>
                                       <span aria-hidden="true">↗</span>
                                     </a>
                                   ) : null}
@@ -993,7 +993,7 @@ export function TrackerPage({
                                         className="tracker-link-remove"
                                         onClick={() => void removeAsset(asset)}
                                         disabled={locked}
-                                        aria-label={`Hapus ${asset.label}`}
+                                        aria-label={`Remove ${asset.label}`}
                                       >
                                         ×
                                       </button>
@@ -1001,8 +1001,8 @@ export function TrackerPage({
                                   ))}
                                   {!item.publicUrl && !item.doi && assets.length === 0 ? (
                                     <p className="tracker-muted">
-                                      Belum ada dokumen. Tambahkan URL di bawah
-                                      atau isi kolom Link.
+                                      No documents yet. Add a URL below or fill
+                                      in the Link column.
                                     </p>
                                   ) : null}
                                 </div>
@@ -1014,8 +1014,8 @@ export function TrackerPage({
                                     </p>
                                     <p className="tracker-muted">
                                       {item.detail.trim()
-                                        ? `${item.detail.trim().length} karakter · tampil publik hanya kalau penelitian ini public.`
-                                        : "Belum ada cerita atau detail tambahan. Tulis lewat tombol edit."}
+                                        ? `${item.detail.trim().length} characters · shown publicly only when this research is public.`
+                                        : "No story or extra detail yet. Write one with the edit button."}
                                     </p>
                                   </div>
                                   <button
@@ -1037,7 +1037,7 @@ export function TrackerPage({
                                 >
                                   <input
                                     className="pixel-input admin-input"
-                                    placeholder="Nama dokumen"
+                                    placeholder="Document name"
                                     value={assetDraft.label}
                                     onChange={(event) =>
                                       setAssetDraft((draft) => ({
@@ -1045,7 +1045,7 @@ export function TrackerPage({
                                         label: event.target.value,
                                       }))
                                     }
-                                    aria-label="Nama dokumen"
+                                    aria-label="Document name"
                                   />
                                   <input
                                     className="pixel-input admin-input"
@@ -1058,7 +1058,7 @@ export function TrackerPage({
                                         kind: guessKind(event.target.value),
                                       }))
                                     }
-                                    aria-label="URL dokumen"
+                                    aria-label="Document URL"
                                   />
                                   <select
                                     className="pixel-input admin-input"
@@ -1069,7 +1069,7 @@ export function TrackerPage({
                                         kind: event.target.value as AssetKind,
                                       }))
                                     }
-                                    aria-label="Jenis dokumen"
+                                    aria-label="Document type"
                                   >
                                     {ASSET_KINDS.map((kind) => (
                                       <option key={kind} value={kind}>
@@ -1083,8 +1083,8 @@ export function TrackerPage({
                                     disabled={
                                       locked || !assetDraft.url.trim()
                                     }
-                                    aria-label="Tambah dokumen"
-                                    title="Tambah dokumen"
+                                    aria-label="Add document"
+                                    title="Add document"
                                   >
                                     <PlusIcon size={20} />
                                   </button>
@@ -1105,7 +1105,7 @@ export function TrackerPage({
 
       <Modal
         open={Boolean(editDraft)}
-        title={editDraft ? `Edit: ${editDraft.title || "Penelitian"}` : "Edit penelitian"}
+        title={editDraft ? `Edit: ${editDraft.title || "Research"}` : "Edit research"}
         size="lg"
         onClose={() => {
           if (editSaving) return;
@@ -1132,7 +1132,7 @@ export function TrackerPage({
               onClick={() => void saveEdit()}
               disabled={editSaving || Boolean(busy)}
             >
-              {editSaving ? "MENYIMPAN…" : "SIMPAN"}
+              {editSaving ? "SAVING…" : "SAVE"}
             </button>
           </>
         }
@@ -1151,7 +1151,7 @@ export function TrackerPage({
 
       <Modal
         open={Boolean(pendingDelete)}
-        title="Hapus penelitian?"
+        title="Delete research?"
         onClose={() => {
           if (deleteBusy) return;
           setPendingDelete(null);
@@ -1172,23 +1172,23 @@ export function TrackerPage({
               onClick={() => void confirmRemoveItem()}
               disabled={deleteBusy}
             >
-              {deleteBusy ? "MENGHAPUS…" : "HAPUS"}
+              {deleteBusy ? "DELETING…" : "DELETE"}
             </button>
           </>
         }
       >
         <p>
-          Yakin hapus <strong>{pendingDelete?.title}</strong>?
+          Delete <strong>{pendingDelete?.title}</strong>?
         </p>
         <p className="mt-2 text-[16px] text-muted">
-          Backup otomatis tetap dibuat di Neon, jadi masih bisa dipulihkan lewat
-          halaman Data.
+          An automatic backup is still saved in Neon, so it can be restored from
+          the Data page.
         </p>
       </Modal>
 
       <Modal
         open={Boolean(pendingAssetDelete)}
-        title="Hapus dokumen?"
+        title="Remove document?"
         onClose={() => {
           if (deleteBusy) return;
           setPendingAssetDelete(null);
@@ -1209,17 +1209,17 @@ export function TrackerPage({
               onClick={() => void confirmRemoveAsset()}
               disabled={deleteBusy}
             >
-              {deleteBusy ? "MENGHAPUS…" : "HAPUS"}
+              {deleteBusy ? "DELETING…" : "DELETE"}
             </button>
           </>
         }
       >
         <p>
-          Yakin hapus dokumen{" "}
+          Remove document{" "}
           <strong>{pendingAssetDelete?.label}</strong>?
         </p>
         <p className="mt-2 text-[16px] text-muted">
-          Link dokumen dilepas dari penelitian ini. Backup dibuat otomatis.
+          The document link is detached from this research. A backup is saved automatically.
         </p>
       </Modal>
     </div>

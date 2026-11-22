@@ -7,8 +7,8 @@ import {
   verifyPassword,
 } from "../admin/server/auth";
 
-describe("auth admin online", () => {
-  it("hash password scrypt bisa diverifikasi", () => {
+describe("online admin auth", () => {
+  it("verifies scrypt password hashes", () => {
     const hash = hashPassword("password-yang-cukup-panjang");
     expect(hash.startsWith("scrypt$")).toBe(true);
     expect(verifyPassword("password-yang-cukup-panjang", hash)).toBe(true);
@@ -16,7 +16,7 @@ describe("auth admin online", () => {
     expect(verifyPassword("password-yang-cukup-panjang", "bukan-hash")).toBe(false);
   });
 
-  it("cookie sesi ditandatangani dan ditolak bila diubah", () => {
+  it("signs session cookies and rejects tampered ones", () => {
     const secret = "session-secret";
     const { cookie, csrfToken } = createSessionCookie(secret, true);
     expect(cookie).toContain("HttpOnly");
@@ -29,7 +29,7 @@ describe("auth admin online", () => {
     expect(readSession(secret, `${raw.slice(0, -1)}x`)).toBeNull();
   });
 
-  it("limiter mengunci setelah lima percobaan", () => {
+  it("limiter locks after five attempts", () => {
     const limiter = new LoginLimiter(5, 60_000, 60_000);
     for (let index = 0; index < 5; index += 1) {
       expect(limiter.check("ip").ok).toBe(true);

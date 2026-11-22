@@ -21,8 +21,8 @@ afterEach(async () => {
   await Promise.all(dirs.splice(0).map((dir) => rm(dir, { recursive: true, force: true })));
 });
 
-describe("penulisan atomik dan backup", () => {
-  it("menulis JSON dan tidak meninggalkan file temporer", async () => {
+describe("atomic writes and backups", () => {
+  it("writes JSON without leaving temp files", async () => {
     const dir = await tempDir();
     const file = path.join(dir, "items.json");
     await atomicWriteJson(file, [{ id: "satu" }]);
@@ -33,7 +33,7 @@ describe("penulisan atomik dan backup", () => {
     expect(names).toEqual(["items.json"]);
   });
 
-  it("membuat backup bertimestamp berisi versi sebelum ditulis", async () => {
+  it("creates a timestamped backup of the previous version", async () => {
     const dir = await tempDir();
     const file = path.join(dir, "items.json");
     const backupsDir = path.join(dir, ".backups");
@@ -51,7 +51,7 @@ describe("penulisan atomik dan backup", () => {
     expect(await readdir(backupsDir)).toHaveLength(1);
   });
 
-  it("menyimpan hanya 20 backup terakhir", async () => {
+  it("keeps only the 20 most recent backups", async () => {
     const dir = await tempDir();
     const file = path.join(dir, "items.json");
     const backupsDir = path.join(dir, ".backups");

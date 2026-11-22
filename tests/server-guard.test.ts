@@ -7,8 +7,8 @@ import {
 
 const token = "token-sesi-rahasia";
 
-describe("guard server admin", () => {
-  it("mengenali alamat loopback saja", () => {
+describe("admin server guard", () => {
+  it("recognises loopback addresses only", () => {
     expect(isLoopbackAddress("127.0.0.1")).toBe(true);
     expect(isLoopbackAddress("::1")).toBe(true);
     expect(isLoopbackAddress("::ffff:127.0.0.1")).toBe(true);
@@ -19,7 +19,7 @@ describe("guard server admin", () => {
     expect(normalizeRemoteAddress("::ffff:192.168.1.8")).toBe("192.168.1.8");
   });
 
-  it("menolak request non-localhost dengan 403", () => {
+  it("rejects non-localhost requests with 403", () => {
     expect(authorizeRequest("192.168.1.8", token, token)).toEqual({
       ok: false,
       status: 403,
@@ -28,7 +28,7 @@ describe("guard server admin", () => {
     expect(authorizeRequest("203.0.113.9", token, token).ok).toBe(false);
   });
 
-  it("menolak token salah atau kosong dengan 401", () => {
+  it("rejects wrong or empty tokens with 401", () => {
     expect(authorizeRequest("127.0.0.1", "salah", token)).toMatchObject({
       ok: false,
       status: 401,
@@ -39,7 +39,7 @@ describe("guard server admin", () => {
     });
   });
 
-  it("menerima localhost dengan token benar", () => {
+  it("accepts localhost with the correct token", () => {
     expect(authorizeRequest("::1", token, token)).toEqual({ ok: true });
   });
 });

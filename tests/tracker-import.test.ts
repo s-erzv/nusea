@@ -12,8 +12,8 @@ import { makeItem, makeProfile } from "./fixtures";
 
 const tsv = await readFile(path.join(process.cwd(), "docs/tracker-sheet.tsv"), "utf8");
 
-describe("impor tracker", () => {
-  it("membaca 17 baris dengan 12 kolom", () => {
+describe("tracker import", () => {
+  it("reads 17 rows with 12 columns", () => {
     const rows = parseTsv(tsv);
     expect(rows).toHaveLength(17);
     expect(rows[0]).toMatchObject({
@@ -26,13 +26,13 @@ describe("impor tracker", () => {
     expect(rows.at(-1)?.sheetId).toBe("T17");
   });
 
-  it("memetakan status, verifikasi, dan tanggal", () => {
+  it("maps status, verification and dates", () => {
     expect(normalizeTrackerDate("Sekitar 16 Nov 2026 (rencana submit)")).toBe("2026-11-16");
     expect(normalizeTrackerDate("2026-05-01")).toBe("2026-05-01");
     expect(normalizeTrackerDate("")).toBe("");
   });
 
-  it("menyusun co-author sesuai urutan dan peran sendiri", () => {
+  it("orders co-authors and own role correctly", () => {
     expect(parseCoAuthors("Bu Fitroh (2, menjawab 'Boleh'); Abisena Rais (3, rencana)")).toEqual([
       "Bu Fitroh",
       "Abisena Rais",
@@ -48,7 +48,7 @@ describe("impor tracker", () => {
     ]);
   });
 
-  it("rencana membuat 10 item baru dan memperbarui 7 item", () => {
+  it("plans 10 new items and 7 updates", () => {
     const rows = parseTsv(tsv);
     const existing = [
       makeItem({ id: "platform-governance-sertifikasi", visibility: "public" }),

@@ -10,8 +10,8 @@ import {
   makeProfile,
 } from "./fixtures";
 
-describe("allowlist data publik", () => {
-  it("hanya mengekspor item public dan membuang field privat", () => {
+describe("public data allowlist", () => {
+  it("exports only public items and drops private fields", () => {
     const snapshot = makePrivateSnapshot({
       items: [
         makeItem({ id: "item-public", visibility: "public" }),
@@ -73,7 +73,7 @@ describe("allowlist data publik", () => {
     expect(JSON.stringify(bundle)).not.toContain("item-private");
   });
 
-  it("field yang tidak dipilih tidak ikut terekspor", () => {
+  it("unselected fields are not exported", () => {
     const bundle = buildPublicData(
       makePrivateSnapshot({
         items: [
@@ -100,7 +100,7 @@ describe("allowlist data publik", () => {
     expect(item.submittedAt).toBe("");
   });
 
-  it("aset privat, localPath, itemIds, dan note tidak pernah keluar", () => {
+  it("private assets, localPath, itemIds and notes never leak", () => {
     const snapshot = makePrivateSnapshot({
       items: [
         makeItem({ id: "item-public", visibility: "public" }),
@@ -128,7 +128,7 @@ describe("allowlist data publik", () => {
     expect(JSON.stringify(bundle)).not.toContain("item-private");
   });
 
-  it("hibah dan ide hanya keluar bila public, tanpa catatan edisi", () => {
+  it("grants and ideas are exported only when public, without edition notes", () => {
     const snapshot = makePrivateSnapshot({
       grants: [
         makeGrant({ id: "grant-private", visibility: "private" }),
@@ -151,14 +151,14 @@ describe("allowlist data publik", () => {
     expect(JSON.stringify(bundle)).not.toContain("catatan venue rahasia");
   });
 
-  it("profil publik tidak mengekspor email atau location", () => {
+  it("a public profile does not export email or location", () => {
     const bundle = buildPublicData(makePrivateSnapshot({ profile: makeProfile({ visibility: "public" }) }));
     expect(bundle.profile).not.toBeNull();
     expect(bundle.profile).not.toHaveProperty("email");
     expect(bundle.profile).not.toHaveProperty("location");
   });
 
-  it("profil privat menghasilkan null", () => {
+  it("a private profile yields null", () => {
     const privateProfile = makeProfile({ visibility: "private" });
     expect(toPublicProfile(privateProfile)).toBeNull();
 
@@ -168,7 +168,7 @@ describe("allowlist data publik", () => {
     expect(bundle.profile).toBeNull();
   });
 
-  it("field tak dikenal di objek privat tidak ikut terekspor", () => {
+  it("unknown fields on private objects are not exported", () => {
     const polluted = {
       ...makeItem({ id: "item-polluted" }),
       notes: "rahasia",

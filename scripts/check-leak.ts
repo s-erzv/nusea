@@ -154,7 +154,7 @@ export async function findLeaks(
   try {
     await walk(distDir);
   } catch {
-    return [`Folder build tidak ditemukan: ${distDir}`];
+    return [`Build folder not found: ${distDir}`];
   }
 
   for (const file of files) {
@@ -162,22 +162,22 @@ export async function findLeaks(
     const relative = path.relative(distDir, file);
     for (const id of privateIds) {
       if (id.length >= 4 && content.includes(id)) {
-        findings.push(`${relative}: ID privat "${id}" ditemukan`);
+        findings.push(`${relative}: private ID "${id}" found`);
       }
     }
     for (const url of privateUrls) {
       if (content.includes(url)) {
-        findings.push(`${relative}: URL privat "${url}" ditemukan`);
+        findings.push(`${relative}: private URL "${url}" found`);
       }
     }
     for (const field of FORBIDDEN_FIELD_NAMES) {
       const pattern = new RegExp(`(^|[^A-Za-z0-9_])${field}([^A-Za-z0-9_]|$)`);
       if (pattern.test(content)) {
-        findings.push(`${relative}: field/kata privat "${field}" ditemukan`);
+        findings.push(`${relative}: private field/word "${field}" found`);
       }
     }
     if (content.includes("data/private")) {
-      findings.push(`${relative}: referensi ke data/private ditemukan`);
+      findings.push(`${relative}: reference to data/private found`);
     }
   }
 
@@ -235,10 +235,10 @@ async function main() {
     Object.keys(publicSnapshot).length > 0 ? publicSnapshot : undefined,
   );
   if (findings.length > 0) {
-    console.error("CHECK LEAK GAGAL:");
+    console.error("CHECK LEAK FAILED:");
     findings.slice(0, 40).forEach((finding) => console.error(`- ${finding}`));
     if (findings.length > 40) {
-      console.error(`- dan ${findings.length - 40} temuan lain`);
+      console.error(`- and ${findings.length - 40} more findings`);
     }
     process.exitCode = 1;
     return;

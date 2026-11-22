@@ -18,7 +18,7 @@ afterEach(async () => {
 });
 
 describe("check:leak", () => {
-  it("menemukan ID privat, URL privat, dan nama field privat", async () => {
+  it("finds private IDs, private URLs and private field names", async () => {
     const dist = await tempDist();
     await writeFile(
       path.join(dist, "app.js"),
@@ -36,21 +36,21 @@ describe("check:leak", () => {
       ],
     });
 
-    expect(findings.join("\n")).toContain('ID privat "id-rahasia-123"');
-    expect(findings.join("\n")).toContain("URL privat");
-    expect(findings.join("\n")).toContain('field/kata privat "notes"');
+    expect(findings.join("\n")).toContain('private ID "id-rahasia-123"');
+    expect(findings.join("\n")).toContain("private URL");
+    expect(findings.join("\n")).toContain('private field/word "notes"');
   });
 
-  it("menemukan field internal items (advisors, progressPct)", async () => {
+  it("finds internal item fields (advisors, progressPct)", async () => {
     const dist = await tempDist();
     await writeFile(path.join(dist, "app.js"), 'const x={advisors:[],progressPct:10};', "utf8");
     const findings = await findLeaks(dist, { items: [] });
     for (const field of ["advisors", "progressPct"]) {
-      expect(findings.join("\n")).toContain(`field/kata privat "${field}"`);
+      expect(findings.join("\n")).toContain(`private field/word "${field}"`);
     }
   });
 
-  it("lolos bila dist bersih", async () => {
+  it("passes when dist is clean", async () => {
     const dist = await tempDist();
     await writeFile(path.join(dist, "app.js"), 'console.log("halo")', "utf8");
     await expect(
@@ -60,7 +60,7 @@ describe("check:leak", () => {
     ).resolves.toEqual([]);
   });
 
-  it("CLI exit 1 saat dist disuntik data privat", async () => {
+  it("CLI exits 1 when private data is injected into dist", async () => {
     const privateItems = JSON.parse(
       await readFile(path.join(process.cwd(), "data", "private", "items.json"), "utf8"),
     ) as Array<{ id: string; visibility: string }>;
@@ -86,6 +86,6 @@ describe("check:leak", () => {
     );
 
     expect(result.status).toBe(1);
-    expect(`${result.stdout}${result.stderr}`).toContain("CHECK LEAK GAGAL");
+    expect(`${result.stdout}${result.stderr}`).toContain("CHECK LEAK FAILED");
   }, 30_000);
 });

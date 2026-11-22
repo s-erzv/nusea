@@ -51,7 +51,7 @@ export function Modal({
               type="button"
               className="admin-modal-close"
               onClick={onClose}
-              aria-label="Tutup"
+              aria-label="Close"
             >
               ×
             </button>
