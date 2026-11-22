@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Fuse from "fuse.js";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { AnimatePresence, LayoutGroup, motion } from "motion/react";
+import { ArrowDown, LayoutGrid, List, Shuffle } from "lucide-react";
+import { DraggableMarquee } from "../components/hantui/draggable-marquee";
+import { MagneticButton } from "../components/hantui/magnetic-button";
+import { TextScramble } from "../components/hantui/text-scramble";
+import { TumblingTags } from "../components/hantui/tumbling-tags";
+import { WordRotator } from "../components/hantui/word-rotator";
 import {
   ALL_STATUSES,
   ITEM_TYPES,
@@ -11,9 +18,10 @@ import {
   type ItemType,
   type ResearchStatus,
 } from "../../shared/constants";
-import { assets, items, profile, publishedItems, venues, venueById } from "../data";
+import { assets, items, publishedItems, venues, venueById } from "../data";
 import { EmptyState } from "../components/EmptyState";
-import { PixelAvatar } from "../components/PixelAvatar";
+import { CaseFileDeck } from "../components/CaseFileDeck";
+import { CountUp } from "../components/motion";
 import { QuestCard } from "../components/QuestCard";
 import { SectionHeading } from "../components/SectionHeading";
 import { useDocumentTitle } from "../lib/useDocumentTitle";
@@ -23,6 +31,10 @@ type TypeFilter = ItemType | "all";
 type StatusFilter = ResearchStatus | "all";
 type ViewMode = "card" | "list";
 type SortMode = "recent" | "oldest" | "title" | "published";
+
+const HERO_ROTATE = ["never planned", "didn't plan", "is still learning how"];
+
+const TAG_TONES = ["ember", "sand", "mint", "ink"] as const;
 
 const HERO_PHRASES = [
   "never planned to be a researcher.",
@@ -183,9 +195,13 @@ export function HomePage() {
 
   const researchTags = useMemo(
     () =>
-      [...new Set(items.flatMap((item) => item.keywords))]
+      [...items
+        .flatMap((item) => item.keywords)
         .filter(Boolean)
-        .slice(0, 16),
+        .reduce((counts, tag) => counts.set(tag, (counts.get(tag) ?? 0) + 1), new Map<string, number>())]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 7)
+        .map(([tag]) => tag),
     [],
   );
 
@@ -193,7 +209,7 @@ export function HomePage() {
     () =>
       [...items]
         .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
-        .slice(0, 3),
+        .slice(0, 5),
     [],
   );
 
@@ -231,41 +247,30 @@ export function HomePage() {
                 </span>
               </div>
 
-              <h1 className="mt-6 font-pixel text-[52px] leading-[0.95] sm:text-[84px]">
-                NUSEA<span className="text-orange">.</span>
+              <h1 className="mt-6 flex items-baseline font-pixel text-[52px] leading-[0.95] sm:text-[84px]">
+                <TextScramble text="NUSEA" trigger="hover" duration={700} className="cursor-default" />
+                <span className="text-orange">.</span>
               </h1>
 
               <p className="mt-4 max-w-xl text-[21px] leading-[1.35] sm:text-[25px]">
                 A research lab by someone who{" "}
-                <span className="inline-block whitespace-nowrap bg-yellow px-1 text-[#14213D]">
-                  never planned
-                </span>{" "}
+                <WordRotator
+                  words={HERO_ROTATE}
+                  interval={2600}
+                  className="bg-yellow px-1 align-bottom text-[#14213D]"
+                />{" "}
                 to be a researcher.
               </p>
 
-              <p className="mt-4 max-w-lg text-[16px] leading-snug text-muted">
-                Researching trust, identity, and the weird edges of digital
-                systems — in public.
-              </p>
-
-              <p className="mt-2 max-w-lg font-pixel text-[10px] uppercase leading-4 tracking-[0.06em] text-muted">
-                {profile?.studyProgram || "Information systems"}
-                {profile?.campus
-                  ? ` · ${profile.campus.replace("Universitas Islam Negeri", "UIN")}`
-                  : ""}
-              </p>
-
               <div className="mt-6 flex flex-wrap items-center gap-3">
-                <button type="button" className="pixel-btn" onClick={scrollToResearch}>
+                <MagneticButton variant="primary" onClick={scrollToResearch}>
                   EXPLORE RESEARCH
-                </button>
-                <button
-                  type="button"
-                  className="pixel-btn pixel-btn-ghost"
-                  onClick={openRandomResearch}
-                >
+                  <ArrowDown className="h-4 w-4" aria-hidden="true" />
+                </MagneticButton>
+                <MagneticButton variant="outline" onClick={openRandomResearch}>
+                  <Shuffle className="h-4 w-4" aria-hidden="true" />
                   SURPRISE ME
-                </button>
+                </MagneticButton>
                 <button
                   type="button"
                   className="font-pixel text-[10px] uppercase text-muted underline decoration-2 underline-offset-4 hover:text-orange"
@@ -282,8 +287,13 @@ export function HomePage() {
                   ["DOCS", assets.length],
                   ["VENUES", venues.length],
                 ].map(([label, value]) => (
-                  <div key={label} className="bg-card px-3 py-3">
-                    <dd className="font-pixel text-[22px] leading-6">{value}</dd>
+                  <div
+                    key={label}
+                    className="bg-card px-3 py-3 transition-colors hover:bg-yellow hover:text-[#14213D]"
+                  >
+                    <dd className="font-pixel text-[22px] leading-6">
+                      <CountUp value={Number(value)} />
+                    </dd>
                     <dt className="mt-1 font-pixel text-[8px] uppercase leading-3 text-muted">
                       {label}
                     </dt>
@@ -292,106 +302,64 @@ export function HomePage() {
               </dl>
             </div>
 
-            <div className="relative mx-auto w-full max-w-[460px]">
-              <div
-                aria-hidden="true"
-                className="absolute inset-6 rotate-6 border-[3px] border-line bg-orange"
-              />
-              <div
-                aria-hidden="true"
-                className="absolute inset-10 -rotate-3 border-[3px] border-line bg-yellow"
-              />
+            <div className="relative mx-auto w-full max-w-[420px] pt-14 lg:pt-10">
+              <motion.div
+                initial={{ opacity: 0, y: 24, rotate: -2 }}
+                animate={{ opacity: 1, y: 0, rotate: 0 }}
+                transition={{ type: "spring", stiffness: 160, damping: 18, delay: 0.1 }}
+                className="relative"
+              >
+                <div
+                  aria-hidden="true"
+                  className="absolute -inset-x-2 bottom-16 top-8 rotate-[4deg] border-[3px] border-line bg-orange"
+                />
+                <div
+                  aria-hidden="true"
+                  className="absolute -inset-x-1 bottom-12 top-12 -rotate-[3deg] border-[3px] border-line bg-yellow"
+                />
+                {latestResearch.length > 0 ? (
+                  <div className="relative">
+                    <CaseFileDeck items={latestResearch} status={typed} clock={clock} />
+                  </div>
+                ) : null}
+              </motion.div>
 
-              {latestResearch[0] ? (
-                <button
-                  type="button"
-                  className="relative block w-full -rotate-2 border-[3px] border-line bg-card p-5 text-left shadow-hard-lg transition-transform duration-300 hover:rotate-0"
-                  onClick={() => navigate(`/research/${latestResearch[0]!.id}`)}
-                >
-                  <span className="tape" aria-hidden="true" />
-                  <p className="font-pixel text-[10px] uppercase text-muted">
-                    Case file // latest
-                  </p>
-                  <h2 className="mt-2 text-[21px] leading-snug">
-                    {latestResearch[0].title}
-                  </h2>
-                  <p className="mt-2 font-pixel text-[10px] uppercase text-muted">
-                    {STATUS_LABELS[latestResearch[0].status]} ·{" "}
-                    {ITEM_TYPE_LABELS[latestResearch[0].type]}
-                  </p>
-                  {latestResearch[0].abstract ? (
-                    <p className="mt-3 line-clamp-2 text-[14px] leading-snug text-muted">
-                      {latestResearch[0].abstract}
-                    </p>
-                  ) : null}
-                  <span className="mt-4 inline-block font-pixel text-[11px] text-orange">
-                    OPEN FILE →
-                  </span>
-                </button>
-              ) : null}
-
-              {latestResearch[1] ? (
-                <button
-                  type="button"
-                  className="relative mt-4 ml-auto block w-[88%] rotate-2 border-[3px] border-line bg-paper p-4 text-left shadow-hard transition-transform duration-300 hover:rotate-0"
-                  onClick={() => navigate(`/research/${latestResearch[1]!.id}`)}
-                >
-                  <span className="tape tape-right" aria-hidden="true" />
-                  <p className="font-pixel text-[9px] uppercase text-muted">
-                    Next up
-                  </p>
-                  <h3 className="mt-1 line-clamp-2 text-[16px] leading-snug">
-                    {latestResearch[1].title}
-                  </h3>
-                  <p className="mt-1 font-pixel text-[9px] uppercase text-muted">
-                    {STATUS_LABELS[latestResearch[1].status]}
-                  </p>
-                </button>
-              ) : null}
-
-              <div className="relative mx-auto mt-4 flex w-[92%] -rotate-1 items-center gap-3 border-[3px] border-line bg-[#07152f] p-3 text-left shadow-hard transition-transform duration-300 hover:rotate-0">
-                <div className="w-[86px] shrink-0 border-[3px] border-line bg-card p-1">
-                  <PixelAvatar value={profile?.avatar} />
-                </div>
-                <div className="min-w-0 font-pixel text-[10px] leading-5 text-[#d7ffe9]">
-                  <p className="truncate text-[11px] text-yellow">
-                    {profile?.name || "Nusea"}
-                  </p>
-                  <p className="truncate text-[#8fa3bd]">{profile?.handle || "Nusea"}</p>
-                  <p className="mt-1 truncate text-success">
-                    &gt; {typed}
-                    <span className="blink" aria-hidden="true">
-                      _
-                    </span>
-                  </p>
-                  <p className="text-[#8fa3bd]">
-                    {clock} WIB · {items.length} public
-                  </p>
-                </div>
-              </div>
-
-              <div className="absolute -bottom-4 -left-3 rotate-[-6deg] border-[3px] border-line bg-yellow px-3 py-1 font-pixel text-[9px] text-[#14213D] shadow-hard">
+              <motion.div
+                drag
+                dragSnapToOrigin
+                whileHover={{ rotate: 0, scale: 1.08 }}
+                className="absolute left-0 top-4 rotate-[-6deg] cursor-grab touch-none border-[3px] border-line bg-yellow px-3 py-1 font-pixel text-[9px] text-[#14213D] shadow-hard"
+              >
                 EST. 2026
-              </div>
-              <div className="absolute -right-2 top-0 rotate-6 border-[3px] border-line bg-orange px-2 py-1 font-pixel text-[9px] text-[#14213D] shadow-hard">
-                LIVE
-              </div>
+              </motion.div>
+              <motion.div
+                drag
+                dragSnapToOrigin
+                whileHover={{ rotate: 0, scale: 1.08 }}
+                className="absolute right-0 top-0 flex rotate-6 cursor-grab touch-none items-center gap-1.5 border-[3px] border-line bg-orange px-2 py-1 font-pixel text-[9px] text-[#14213D] shadow-hard"
+              >
+                <span className="h-1.5 w-1.5 animate-ping bg-[#14213D]" /> LIVE
+              </motion.div>
             </div>
           </div>
         </div>
       </section>
 
-      <div className="overflow-hidden border-b-[3px] border-line bg-yellow text-[#14213D]">
-        <div className="marquee-track flex w-max gap-6 py-1.5 font-pixel text-[10px] uppercase">
-          {[...items, ...items].map((item, index) => (
-            <span key={`${item.id}-${index}`}>✦ {item.title}</span>
-          ))}
-          <span>✦ Research in public</span>
-          <span>✦ Never planned to be a researcher</span>
-          <span>✦ Research in public</span>
-          <span>✦ Never planned to be a researcher</span>
-        </div>
-      </div>
+      <DraggableMarquee
+        aria-label="Research titles"
+        speed={45}
+        gap={28}
+        fade={false}
+        className="border-b-[3px] border-line bg-yellow py-1.5 font-pixel text-[10px] uppercase text-[#14213D]"
+      >
+        {items.map((item) => (
+          <Link key={item.id} to={`/research/${item.id}`} className="hover:text-orange">
+            ✦ {item.title}
+          </Link>
+        ))}
+        <span>✦ Research in public</span>
+        <span>✦ Never planned to be a researcher</span>
+      </DraggableMarquee>
 
       <section className="mx-auto max-w-6xl px-4 pt-6">
         <div className="border-[3px] border-line bg-card p-4 shadow-hard">
@@ -407,7 +375,7 @@ export function HomePage() {
           <div className="mt-3 flex flex-wrap gap-2">
             <button
               type="button"
-              className="pixel-chip"
+              className="pixel-chip pixel-chip-press"
               data-active={statusFilter === "all"}
               aria-pressed={statusFilter === "all"}
               onClick={() => {
@@ -422,7 +390,7 @@ export function HomePage() {
               <button
                 key={status}
                 type="button"
-                className="pixel-chip"
+                className="pixel-chip pixel-chip-press"
                 data-active={statusFilter === status}
                 aria-pressed={statusFilter === status}
                 onClick={() => {
@@ -440,25 +408,32 @@ export function HomePage() {
         </div>
 
         {researchTags.length > 0 ? (
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <span className="font-pixel text-[11px] uppercase leading-4 text-muted">
-              Research themes
-            </span>
-            {researchTags.map((tag) => (
-              <button
-                key={tag}
-                type="button"
-                className="pixel-chip"
-                data-active={query === tag}
-                aria-pressed={query === tag}
-                onClick={() => {
-                  setQuery(tag);
-                  scrollToResearch();
-                }}
-              >
-                {tag}
-              </button>
-            ))}
+          <div className="mt-6 border-[3px] border-line bg-card shadow-hard">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b-[3px] border-line px-4 py-2">
+              <p className="font-pixel text-[12px] uppercase leading-4">Research themes</p>
+              <span className="font-pixel text-[10px] uppercase text-muted">
+                {query && researchTags.includes(query) ? (
+                  <button type="button" className="underline hover:text-orange" onClick={() => setQuery("")}>
+                    clear “{query}”
+                  </button>
+                ) : (
+                  "click a block to filter"
+                )}
+              </span>
+            </div>
+            <TumblingTags
+              label="Research themes"
+              blockHeight={46}
+              tags={researchTags.map((tag, index) => ({
+                label: tag,
+                tone: TAG_TONES[index % TAG_TONES.length],
+              }))}
+              selected={query}
+              onSelect={(tag) => {
+                setQuery(tag.label);
+                scrollToResearch();
+              }}
+            />
           </div>
         ) : null}
       </section>
@@ -542,29 +517,35 @@ export function HomePage() {
                 <span className="mb-1 block font-pixel text-[12px] uppercase leading-4">
                   View
                 </span>
-                <div className="flex border-[3px] border-line">
-                  <button
-                    type="button"
-                    className={cn(
-                      "min-h-[46px] px-3 font-pixel text-[12px]",
-                      view === "card" ? "bg-yellow text-[#14213D]" : "bg-card",
-                    )}
-                    aria-pressed={view === "card"}
-                    onClick={() => setView("card")}
-                  >
-                    CARDS
-                  </button>
-                  <button
-                    type="button"
-                    className={cn(
-                      "min-h-[46px] border-l-[3px] border-line px-3 font-pixel text-[12px]",
-                      view === "list" ? "bg-yellow text-[#14213D]" : "bg-card",
-                    )}
-                    aria-pressed={view === "list"}
-                    onClick={() => setView("list")}
-                  >
-                    LIST
-                  </button>
+                <div className="flex border-[3px] border-line bg-card">
+                  {(
+                    [
+                      ["card", "CARDS", LayoutGrid],
+                      ["list", "LIST", List],
+                    ] as const
+                  ).map(([mode, label, Icon], index) => (
+                    <button
+                      key={mode}
+                      type="button"
+                      className={cn(
+                        "relative flex min-h-[46px] items-center gap-1.5 px-3 font-pixel text-[12px]",
+                        index > 0 && "border-l-[3px] border-line",
+                        view === mode && "text-[#14213D]",
+                      )}
+                      aria-pressed={view === mode}
+                      onClick={() => setView(mode)}
+                    >
+                      {view === mode ? (
+                        <motion.span
+                          layoutId="view-toggle"
+                          className="absolute inset-0 bg-yellow"
+                          transition={{ type: "spring", stiffness: 500, damping: 38 }}
+                        />
+                      ) : null}
+                      <Icon className="relative h-3.5 w-3.5" aria-hidden="true" />
+                      <span className="relative">{label}</span>
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
@@ -577,7 +558,7 @@ export function HomePage() {
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
-                className="pixel-chip"
+                className="pixel-chip pixel-chip-press"
                 data-active={typeFilter === "all"}
                 aria-pressed={typeFilter === "all"}
                 onClick={() => setTypeFilter("all")}
@@ -589,7 +570,7 @@ export function HomePage() {
                 <button
                   key={type}
                   type="button"
-                  className="pixel-chip"
+                  className="pixel-chip pixel-chip-press"
                   data-active={typeFilter === type}
                   aria-pressed={typeFilter === type}
                   onClick={() => setTypeFilter(type)}
@@ -635,37 +616,75 @@ export function HomePage() {
               }
             />
           ) : view === "card" ? (
-            <div className="space-y-4">
-              {featured ? (
-                <QuestCard
-                  key={featured.id}
-                  item={featured}
-                  venue={venueById.get(featured.venueId)}
-                  variant="featured"
-                />
-              ) : null}
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {rest.map((item) => (
-                  <QuestCard
-                    key={item.id}
-                    item={item}
-                    venue={venueById.get(item.venueId)}
-                    variant="card"
-                  />
-                ))}
+            <LayoutGroup>
+              <div className="space-y-4">
+                <AnimatePresence initial={false}>
+                  {featured ? (
+                    <motion.div
+                      key={featured.id}
+                      layout
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.97 }}
+                    >
+                      <QuestCard
+                        item={featured}
+                        venue={venueById.get(featured.venueId)}
+                        variant="featured"
+                      />
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
+                <motion.div layout className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  <AnimatePresence mode="popLayout" initial={false}>
+                    {rest.map((item, index) => (
+                      <motion.div
+                        key={item.id}
+                        layout
+                        initial={{ opacity: 0, scale: 0.94, y: 12 }}
+                        whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                        viewport={{ once: true, margin: "-40px" }}
+                        exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.15 } }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 320,
+                          damping: 28,
+                          delay: Math.min(index, 6) * 0.04,
+                        }}
+                        className="h-full"
+                      >
+                        <QuestCard
+                          item={item}
+                          venue={venueById.get(item.venueId)}
+                          variant="card"
+                        />
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </motion.div>
               </div>
-            </div>
+            </LayoutGroup>
           ) : (
-            <div className="grid gap-3">
-              {filtered.map((item) => (
-                <QuestCard
-                  key={item.id}
-                  item={item}
-                  venue={venueById.get(item.venueId)}
-                  variant="list"
-                />
-              ))}
-            </div>
+            <motion.div layout className="grid gap-3">
+              <AnimatePresence mode="popLayout" initial={false}>
+                {filtered.map((item, index) => (
+                  <motion.div
+                    key={item.id}
+                    layout
+                    initial={{ opacity: 0, x: -16 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 16, transition: { duration: 0.15 } }}
+                    transition={{ type: "spring", stiffness: 340, damping: 30, delay: Math.min(index, 8) * 0.03 }}
+                  >
+                    <QuestCard
+                      item={item}
+                      venue={venueById.get(item.venueId)}
+                      variant="list"
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
           )}
         </div>
       </section>

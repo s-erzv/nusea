@@ -1,3 +1,5 @@
+import { motion } from "motion/react";
+
 interface XPBarProps {
   value: number;
   label?: string;
@@ -15,10 +17,17 @@ export function XPBar({ value, label = "Research progress", animate = true }: XP
       aria-valuemax={100}
       aria-valuenow={safe}
     >
-      <div
-        className={animate ? "xp-fill xp-fill-anim" : "xp-fill"}
-        style={{ width: `${safe}%` }}
-      />
+      {animate ? (
+        <motion.div
+          className="xp-fill"
+          initial={{ width: "0%" }}
+          whileInView={{ width: `${safe}%` }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+        />
+      ) : (
+        <div className="xp-fill" style={{ width: `${safe}%` }} />
+      )}
     </div>
   );
 }

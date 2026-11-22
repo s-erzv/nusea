@@ -7,6 +7,8 @@ import {
 import { isPipelineStatus } from "../../shared/status";
 import { hasPublicField, type PublicItem, type PublicVenue } from "../../shared/public-schemas";
 import { cn, excerpt, formatDateShort, statusProgress } from "../lib/format";
+import { ArrowUpRight } from "lucide-react";
+import { trackSpotlight } from "../lib/spotlight";
 import { StatusBadge } from "./StatusBadge";
 import { XPBar } from "./XPBar";
 
@@ -32,7 +34,8 @@ export function QuestCard({ item, venue, variant }: QuestCardProps) {
     return (
       <Link
         to={`/research/${item.id}`}
-        className="pixel-card-lg group grid gap-4 p-5 transition-transform duration-100 hover:-translate-y-0.5 sm:p-6 md:grid-cols-[1.55fr_1fr]"
+        onPointerMove={trackSpotlight}
+        className="spotlight pixel-card-lg group grid gap-4 p-5 transition-transform duration-100 hover:-translate-y-0.5 sm:p-6 md:grid-cols-[1.55fr_1fr]"
         aria-label={`Open research: ${item.title}`}
       >
         <div>
@@ -107,7 +110,11 @@ export function QuestCard({ item, venue, variant }: QuestCardProps) {
             ) : null}
           </dl>
           <span className="inline-flex items-center justify-between border-2 border-line bg-card px-3 py-2 font-pixel text-[12px] transition-colors group-hover:bg-yellow group-hover:text-[#14213D]">
-            READ RESEARCH <span aria-hidden="true">&gt;</span>
+            READ RESEARCH
+            <ArrowUpRight
+              className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+              aria-hidden="true"
+            />
           </span>
         </div>
       </Link>
@@ -118,7 +125,8 @@ export function QuestCard({ item, venue, variant }: QuestCardProps) {
     return (
       <Link
         to={`/research/${item.id}`}
-        className="group block border-[3px] border-line bg-card p-4 shadow-hard transition-transform duration-100 hover:-translate-y-0.5 hover:bg-paper focus-visible:-translate-y-0.5"
+        onPointerMove={trackSpotlight}
+        className="spotlight group block border-[3px] border-line bg-card p-4 shadow-hard transition-transform duration-100 hover:-translate-y-0.5 hover:bg-paper focus-visible:-translate-y-0.5"
         aria-label={`Open research: ${item.title}`}
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -153,7 +161,8 @@ export function QuestCard({ item, venue, variant }: QuestCardProps) {
   return (
     <Link
       to={`/research/${item.id}`}
-      className="quest-card group flex h-full flex-col border-[3px] border-line bg-card p-5 shadow-hard transition-transform duration-100 hover:-translate-y-1 hover:shadow-hard-lg"
+      onPointerMove={trackSpotlight}
+      className="spotlight quest-card group flex h-full flex-col border-[3px] border-line bg-card p-5 shadow-hard transition-transform duration-100 hover:-translate-x-0.5 hover:-translate-y-1 hover:shadow-hard-lg active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm"
       aria-label={`Open research: ${item.title}`}
     >
       <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
@@ -216,8 +225,12 @@ export function QuestCard({ item, venue, variant }: QuestCardProps) {
           ) : (
             <span />
           )}
-          <span className={cn("font-pixel text-[12px] text-orange")}>
-            OPEN &gt;
+          <span className={cn("inline-flex items-center gap-1 font-pixel text-[12px] text-orange")}>
+            OPEN
+            <ArrowUpRight
+              className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+              aria-hidden="true"
+            />
           </span>
         </div>
       </div>
